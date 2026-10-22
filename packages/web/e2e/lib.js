@@ -77,16 +77,29 @@ export async function launchBrowser({ full = false } = {}) {
   if (!found) throw new Error(full
     ? "Aucun navigateur complet trouvé (Chrome, Edge, Chromium). Indiquez CHROME_PATH."
     : "Aucun navigateur trouvé (Chrome, Edge, Chromium). Indiquez CHROME_PATH, ou installez-en un.");
-  const dir = mkdtempSync(join(tmpdir(), "oe-e2e-"));
-  const args = [found.shell ? "--headless" : "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--no-first-run", "--no-default-browser-check", "--remote-debugging-port=0", `--user-data-dir=${dir}`, "about:blank"];
-  const proc = spawn(found.path, args, { stdio: "ignore" });
-  let wsUrl = null;
-  for (let i = 0; i < 100 && !wsUrl; i++) {
-    const f = join(dir, "DevToolsActivePort");
-    if (existsSync(f)) { const [port, path] = readFileSync(f, "utf8").trim().split("\n"); wsUrl = `ws://127.0.0.1:${port}${path}`; }
-    else await wait(150);
+  // Le démarrage à froid d'un navigateur peut être très lent sur une machine chargée (la CI,
+  // juste après la construction de la pile Docker) : on laisse jusqu'à 60 s, trois essais, et
+  // on garde ce que le navigateur a écrit sur sa sortie d'erreur pour comprendre un échec.
+  let proc, dir, wsUrl = null, journal = "", sorti = null;
+  for (let essai = 1; essai <= 3 && !wsUrl; essai++) {
+    dir = mkdtempSync(join(tmpdir(), "oe-e2e-"));
+    const args = [found.shell ? "--headless" : "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--no-first-run", "--no-default-browser-check", "--remote-debugging-port=0", `--user-data-dir=${dir}`, "about:blank"];
+    journal = ""; sorti = null;
+    proc = spawn(found.path, args, { stdio: ["ignore", "ignore", "pipe"] });
+    proc.stderr.on("data", (d) => { journal = (journal + d).slice(-1500); });
+    proc.on("exit", (code, signal) => { sorti = signal ?? code; });
+    for (let i = 0; i < 400 && !wsUrl && sorti === null; i++) {
+      const f = join(dir, "DevToolsActivePort");
+      if (existsSync(f)) { const [port, path] = readFileSync(f, "utf8").trim().split("\n"); wsUrl = `ws://127.0.0.1:${port}${path}`; }
+      else await wait(150);
+    }
+    if (!wsUrl) proc.kill();
   }
-  if (!wsUrl) { proc.kill(); throw new Error("Le navigateur n'a pas ouvert son port de pilotage (" + found.path + ")."); }
+  if (!wsUrl) {
+    throw new Error("Le navigateur n'a pas ouvert son port de pilotage (" + found.path + ")."
+      + (sorti !== null ? " Il s'est arrêté (" + sorti + ")." : " Il ne répond pas.")
+      + (journal.trim() ? "\nSortie d'erreur du navigateur :\n" + journal.trim() : ""));
+  }
 
   const ws = new WebSocket(wsUrl);
   await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = () => reject(new Error("connexion CDP refusée")); });
