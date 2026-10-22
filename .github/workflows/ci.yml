@@ -5,6 +5,8 @@
 #   serveur       le serveur contre une vraie base Postgres et un faux serveur d'e-mails
 #   pile          la pile Docker complète, puis les parcours navigateur qui en ont besoin
 #                 (compte, amis, salles, carrière commune à deux, e-mails)
+#   deploiement   sur main seulement, une fois les trois autres au vert : met le serveur
+#                 à jour par SSH en lançant deploy/deploy.sh
 name: CI
 
 on:
@@ -92,3 +94,30 @@ jobs:
       - name: Journaux en cas d'échec
         if: failure()
         run: docker compose -f compose.yaml -f compose.test.yaml logs --no-color --tail=200
+
+  deploiement:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verification, serveur, pile]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploiement
+      cancel-in-progress: false
+    steps:
+      - name: Se connecter au serveur et le mettre à jour
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # La clé n'autorise qu'un seul programme côté serveur (deploy/deploy.sh) :
+          # la commande donnée ici est ignorée.
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
+            -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" deploy
