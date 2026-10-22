@@ -94,5 +94,5 @@ jobs:
           # La clé n'autorise qu'un seul programme côté serveur (deploy/deploy.sh) :
           # la commande donnée ici est ignorée.
           ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
-            -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
             "$DEPLOY_USER@$DEPLOY_HOST" deploy
