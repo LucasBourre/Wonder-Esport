@@ -59,6 +59,7 @@ import { TRANSLATABLE_FLATS, TRANSLATABLE_STRUCTURES, hasWords, visitFlat, visit
     "⚔️ Duels par pseudo": "⚔️ Duels by username",
     "👥 Amis": "👥 Friends",
     "Code source": "Source code",
+    "Open Eleven sur X": "Open Eleven on X",
     "Code source sur GitHub": "Source code on GitHub",
     "Confidentialité": "Privacy",
     "Mon compte": "My account",
