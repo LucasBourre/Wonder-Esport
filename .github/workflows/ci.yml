@@ -80,13 +80,17 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST_KEY: ${{ secrets.DEPLOY_HOST_KEY }}
         run: |
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # Clé du serveur (ssh-ed25519 AAAA…) : on ne garde que le type et la clé, et la ligne
+          # known_hosts est composée ici avec le même hôte et le même port que la connexion.
+          cle="$(printf '%s' "$DEPLOY_HOST_KEY" | tr -d '\r' | awk 'NR==1 { print $1 " " $2 }')"
+          if [ "${DEPLOY_PORT:-22}" = 22 ]; then hote="$DEPLOY_HOST"; else hote="[$DEPLOY_HOST]:$DEPLOY_PORT"; fi
+          printf '%s %s\n' "$hote" "$cle" > ~/.ssh/known_hosts
           # La clé n'autorise qu'un seul programme côté serveur (deploy/deploy.sh) :
           # la commande donnée ici est ignorée.
           ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
