@@ -310,12 +310,15 @@ import { Engine } from "@open-eleven/engine";
         ? '<span class="lb-sub">' + (s.level ? '<span class="level-tag level-' + esc(s.level) + '">' + esc(E.divShort(s.level, s.countryId)) + "</span> " : "") +
           esc(s.club) + (cc ? " " + flagHtml(cc) : "") + (s.age != null ? " · " + esc(s.age) + " ans" : "") + "</span>"
         : "";
+      // live_stats est écrit par chaque membre, sans contrôle : ce ne sont des nombres
+      // que pour un client honnête, d'où l'échappement de chaque valeur.
+      const n = (v) => (v == null ? "?" : esc(v));
       const seasonPart = s.seasonGoals != null
-        ? s.seasonGoals + " ⚽ " + (s.seasonAssists || 0) + " 🅰️" + (s.seasonRating != null ? " · " + s.seasonRating : "")
+        ? n(s.seasonGoals) + " ⚽ " + n(s.seasonAssists || 0) + " 🅰️" + (s.seasonRating != null ? " · " + n(s.seasonRating) : "")
         : "?";
-      const careerPart = (s.totalGoals != null ? s.totalGoals : "?") + " ⚽ " + (s.totalAssists != null ? s.totalAssists : "?") +
-        " 🅰️ · " + (s.totalMatches != null ? s.totalMatches : "?") + " " + esc(T("matchs")) +
-        (s.ovr != null ? " · " + s.ovr + " OVR" : "");
+      const careerPart = n(s.totalGoals) + " ⚽ " + n(s.totalAssists) +
+        " 🅰️ · " + n(s.totalMatches) + " " + esc(T("matchs")) +
+        (s.ovr != null ? " · " + n(s.ovr) + " OVR" : "");
       const statLine = '<span class="lb-sub">' + esc(T("Saison")) + " : " + seasonPart + " — " + esc(T("Carrière")) + " : " + careerPart + "</span>";
       return '<li class="lb-row" style="flex-direction:column;align-items:flex-start;gap:4px">' +
         '<span class="lb-name">' + rank + "👤 " + esc(m.pseudo) + statusTag + "</span>" + clubLine + statLine + "</li>";

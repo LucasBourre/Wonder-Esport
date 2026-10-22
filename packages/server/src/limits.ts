@@ -55,4 +55,6 @@ export const limits = {
   mailPerAccount: new Window(5, minutes(60)),
   /** E-mails demandés depuis une adresse IP. */
   mailPerIp: new Window(30, minutes(60)),
+  /** Compteurs publics (carrières lancées, défis terminés…) incrémentés depuis une adresse. */
+  stats: new Window(60, minutes(10)),
 };

@@ -7,6 +7,11 @@
 {$SITE_ADDRESS::80} {
 	encode zstd gzip
 
+	# Le jeu ne s'affiche jamais dans le cadre d'un autre site (clic piégé), et un
+	# navigateur passé une fois en HTTPS n'accepte plus le HTTP (ignoré en HTTP simple).
+	header X-Frame-Options "DENY"
+	header Strict-Transport-Security "max-age=31536000"
+
 	handle /api/* {
 		reverse_proxy server:3000
 	}

@@ -38,12 +38,15 @@ function general(req: FastifyRequest): void {
 
 async function openSession(reply: FastifyReply, userId: string, recovery = false): Promise<void> {
   const token = newToken();
+  // Une session « mot de passe oublié » permet d'en changer sans donner l'ancien :
+  // elle ne vit que le temps de le faire.
+  const hours = recovery ? 1 : config.sessionDays * 24;
   await pool.query(
-    "insert into sessions (token_hash, user_id, recovery, expires_at) values ($1, $2, $3, now() + make_interval(days => $4))",
-    [sha256(token), userId, recovery, config.sessionDays],
+    "insert into sessions (token_hash, user_id, recovery, expires_at) values ($1, $2, $3, now() + make_interval(hours => $4))",
+    [sha256(token), userId, recovery, hours],
   );
   reply.setCookie(COOKIE, token, {
-    path: "/", httpOnly: true, sameSite: "lax", secure: config.secureCookie, maxAge: config.sessionDays * 86400,
+    path: "/", httpOnly: true, sameSite: "lax", secure: config.secureCookie, maxAge: hours * 3600,
   });
 }
 

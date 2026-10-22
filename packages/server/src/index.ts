@@ -17,7 +17,10 @@ import { registerScores } from "./scores";
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? "info" },
   bodyLimit: 8 * 1024 * 1024, // une sauvegarde complète (Panthéon compris) pèse quelques Mo
-  trustProxy: true, // derrière Caddy : l'adresse du joueur est dans X-Forwarded-For
+  // Derrière Caddy, l'adresse du joueur est dans X-Forwarded-For. On ne croit cet en-tête
+  // que venant d'un proxy local (Caddy sur le réseau Docker, Vite en développement) :
+  // sinon n'importe qui choisirait son adresse et contournerait les limites de débit.
+  trustProxy: "loopback, uniquelocal",
 });
 
 await app.register(cookie);

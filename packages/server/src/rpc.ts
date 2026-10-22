@@ -9,6 +9,7 @@
 import type { FastifyInstance } from "fastify";
 import { currentUser } from "./auth";
 import { withUser, type Db } from "./db";
+import { limits } from "./limits";
 import { notifyRoomsOf } from "./live";
 import { ProcedureError, procedures } from "./procedures";
 
@@ -62,6 +63,11 @@ const SQL_FUNCTIONS: Record<string, SqlFunction> = {
 
 const MAX_JSON_ARG_BYTES = 256 * 1024;
 
+// Tailles de liste demandées sans compte : bornées, sinon un seul appel lirait
+// toute la table (et le coût de la requête avec).
+const MAX_LIST = 100;
+const listArgs = new Set(["lim", "n"]);
+
 /**
  * Une écriture à la fois par salle.
  *
@@ -94,6 +100,11 @@ async function callSql(db: Db, name: string, def: SqlFunction, args: Record<stri
       if (Buffer.byteLength(json) > MAX_JSON_ARG_BYTES) throw new ProcedureError("Argument trop volumineux : " + arg, 413);
       values.push(json);
       parts.push(arg + " => $" + values.length + "::jsonb");
+    } else if (listArgs.has(arg)) {
+      const n = Number(args[arg]);
+      if (!Number.isInteger(n) || n < 1) throw new ProcedureError("Argument invalide : " + arg);
+      values.push(Math.min(n, MAX_LIST));
+      parts.push(arg + " => $" + values.length);
     } else {
       values.push(args[arg]);
       parts.push(arg + " => $" + values.length);
@@ -120,6 +131,9 @@ export function registerRpc(app: FastifyInstance): void {
     const body = req.body ?? {};
     if (typeof body !== "object" || Array.isArray(body)) return reply.code(400).send({ error: { message: "Arguments invalides" } });
     const args = body as Record<string, unknown>;
+
+    // Les compteurs publics s'incrémentent sans compte : bornés par adresse.
+    if (name === "bump_stat" && !limits.stats.hit(req.ip)) return reply.code(429).send({ error: { message: "rate limit" } });
 
     const user = await currentUser(req);
     if ((sql ?? proc)!.auth && !user) return reply.code(401).send({ error: { message: "Non authentifié" } });
