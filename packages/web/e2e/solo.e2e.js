@@ -32,9 +32,9 @@ export async function run({ browser, baseUrl, report }) {
     }
     report.check("des bilans de saison s'affichent", seen.recaps >= 3, "bilans : " + seen.recaps);
     report.check("des événements à choix s'affichent", seen.events >= 3, "événements : " + seen.events);
-    // Un espoir peut rester en réserve jusqu'à 20 ans : on exige seulement de commencer chez les
-    // jeunes et de ne jamais voir un effectif qui n'existe pas.
-    report.check("la carrière commence en équipe de jeunes, avec des effectifs valides", seen.squads.has("youth") && [...seen.squads].every((q) => ["youth", "reserve", "first"].includes(q)), [...seen.squads].join(","));
+    // Un prodige démarre chez les pros d'emblée, un espoir peut rester en réserve jusqu'à 20 ans :
+    // on exige seulement de ne jamais voir un effectif qui n'existe pas.
+    report.check("les effectifs rencontrés existent (jeunes, réserve ou équipe première)", seen.squads.size > 0 && [...seen.squads].every((q) => ["youth", "reserve", "first"].includes(q)), [...seen.squads].join(","));
     if (lang === "en") {
       const stats = await page.js("JSON.stringify(window.I18N.dataStats())");
       report.check("aucun texte du jeu sans traduction anglaise", JSON.parse(stats).missing === 0, stats);
