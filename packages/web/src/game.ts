@@ -3443,7 +3443,7 @@ import { Engine } from "@open-eleven/engine";
         const seFlag = seCountry ? flagHtml(seCountry) : "";
         return `<div class="season-row">
           <span class="season-age">${se.age}</span>
-          <span class="season-club">${se.level ? `<span class="level-tag level-${se.level}">${esc(seCountryId ? E.divShort(se.level, seCountryId) : LEVELS[se.level].short)}</span>` : ""}${seFlag ? `${seFlag} ` : ""}${esc(se.clubName)}${moveArrow}${se.onLoan ? ` <span class="loan-tag">Prêt</span>` : ""}${se.squad ? ` <span class="loan-tag">${se.squad === "youth" ? "U17" : T("Réserve")}</span>` : ""}</span>
+          <span class="season-club">${se.level ? `<span class="level-tag level-${se.level}">${esc(seCountryId ? E.divShort(se.level, seCountryId) : LEVELS[se.level].short)}</span>` : ""}${seFlag ? `${seFlag} ` : ""}<span class="season-club-name">${esc(se.clubName)}</span>${moveArrow}${se.onLoan ? ` <span class="loan-tag">Prêt</span>` : ""}${se.squad ? ` <span class="loan-tag">${se.squad === "youth" ? "U17" : T("Réserve")}</span>` : ""}</span>
           <span class="season-pos" title="${esc(T("Classement du club en championnat"))}">${se.leaguePos ? ordinal(se.leaguePos) : "–"}</span>
           <span class="season-stats">${sst.matches} m · ${perf}${pd} · ${se.rating.toFixed(1)}</span>
           <span class="season-icons">${icons}</span>

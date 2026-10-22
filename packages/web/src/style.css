@@ -2288,3 +2288,8 @@ body { color: var(--text-0); }
   .season-stats { order: 5; width: 100%; padding-left: 30px; font-size: 0.7rem; }
   .season-head .season-stats { display: none; }
 }
+/* Seul le nom du club se raccourcit : divisions, drapeau et badges (Prêt, U17,
+   Réserve, montée) restent toujours visibles. */
+.season-club { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.season-club > * { flex-shrink: 0; }
+.season-club > .season-club-name { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
