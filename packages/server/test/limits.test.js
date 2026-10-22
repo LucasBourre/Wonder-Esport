@@ -77,6 +77,6 @@ test("changement de mot de passe : deviner l'actuel est limité comme une connex
   const email = await account("lim-pass", ip);
   const c = client(ip);
   assert.equal((await c.post("/api/auth/login", { email, password: "bon-mot-de-passe" })).status, 200);
-  for (let i = 0; i < 8; i++) assert.equal((await c.post("/api/auth/password", { current: "faux-" + i, password: "nouveau-mot-2" })).status, 400);
-  assert.equal((await c.post("/api/auth/password", { current: "bon-mot-de-passe", password: "nouveau-mot-2" })).status, 429);
+  for (let i = 0; i < 8; i++) assert.equal((await c.post("/api/auth/password", { current: "faux-" + i, password: "nouveau-mot-de-passe-2" })).status, 400);
+  assert.equal((await c.post("/api/auth/password", { current: "bon-mot-de-passe", password: "nouveau-mot-de-passe-2" })).status, 429);
 });

@@ -44,7 +44,7 @@ function client() {
 async function player(name) {
   const c = client();
   const email = name + "-" + tag + "@exemple.test";
-  const up = await c.post("/api/auth/signup", { email, password: "motdepasse-" + name });
+  const up = await c.post("/api/auth/signup", { email, password: "mot-de-passe-long-" + name });
   assert.equal(up.status, 200, JSON.stringify(up.json));
   c.id = up.json.session.user.id;
   c.email = email;
@@ -68,12 +68,12 @@ test("compte : inscription, session, déconnexion, connexion", { skip }, async (
   assert.equal((await c.get("/api/auth/session")).json.session, null);
   assert.equal((await c.post("/api/auth/signup", { email: "pas-un-email", password: "motdepasse" })).status, 400);
   assert.equal((await c.post("/api/auth/signup", { email, password: "court" })).status, 400);
-  const up = await c.post("/api/auth/signup", { email, password: "motdepasse1" });
+  const up = await c.post("/api/auth/signup", { email, password: "mot-de-passe-seize" });
   assert.equal(up.json.session.user.email, email);
   assert.match(c.cookie, /^oe_session=/);
   assert.equal((await c.get("/api/auth/session")).json.session.user.id, up.json.session.user.id);
   // Même adresse, casse différente : refusée.
-  const dup = await client().post("/api/auth/signup", { email: email.toUpperCase(), password: "motdepasse1" });
+  const dup = await client().post("/api/auth/signup", { email: email.toUpperCase(), password: "mot-de-passe-seize" });
   assert.equal(dup.status, 409);
   assert.match(dup.json.error.message, /already registered/);
 
@@ -82,15 +82,15 @@ test("compte : inscription, session, déconnexion, connexion", { skip }, async (
   const bad = await c.post("/api/auth/login", { email, password: "mauvais-mot" });
   assert.equal(bad.status, 400);
   assert.match(bad.json.error.message, /Invalid login credentials/);
-  assert.equal((await c.post("/api/auth/login", { email, password: "motdepasse1" })).status, 200);
+  assert.equal((await c.post("/api/auth/login", { email, password: "mot-de-passe-seize" })).status, 200);
 
   // Changement de mot de passe : l'ancien est exigé, puis ne marche plus.
-  assert.equal((await c.post("/api/auth/password", { current: "faux", password: "nouveau-mot-2" })).status, 400);
-  assert.equal((await c.post("/api/auth/password", { current: "motdepasse1", password: "nouveau-mot-2" })).status, 200);
+  assert.equal((await c.post("/api/auth/password", { current: "faux", password: "nouveau-mot-de-passe-2" })).status, 400);
+  assert.equal((await c.post("/api/auth/password", { current: "mot-de-passe-seize", password: "nouveau-mot-de-passe-2" })).status, 200);
   assert.ok((await c.get("/api/auth/session")).json.session, "la session survit au changement");
   const d = client();
-  assert.equal((await d.post("/api/auth/login", { email, password: "motdepasse1" })).status, 400);
-  assert.equal((await d.post("/api/auth/login", { email, password: "nouveau-mot-2" })).status, 200);
+  assert.equal((await d.post("/api/auth/login", { email, password: "mot-de-passe-seize" })).status, 400);
+  assert.equal((await d.post("/api/auth/login", { email, password: "nouveau-mot-de-passe-2" })).status, 200);
 });
 
 test("une écriture venue d'un autre site est refusée", { skip }, async () => {

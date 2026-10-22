@@ -17,7 +17,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
     await wait(1500);
     page.email = `${name}-${tag}@exemple.test`;
     page.pseudo = `${name}${tag}`.slice(0, 20);
-    report.check(`${name} : compte créé`, await signUp(page, { email: page.email, password: `motdepasse-${name}`, mailpit }));
+    report.check(`${name} : compte créé`, await signUp(page, { email: page.email, password: `mot-de-passe-long-${name}`, mailpit }));
     const set = await page.rpc("profile_set_pseudo", { pseudo: page.pseudo });
     if (set.error) throw new Error("pseudo : " + set.error.message);
     page.id = await page.js("window.OpenElevenAccount.getSession().user.id");

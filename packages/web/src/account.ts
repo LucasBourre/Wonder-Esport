@@ -191,7 +191,7 @@ import { api } from "./api";
           const a = box.querySelector("#acc-newpass").value;
           const b = box.querySelector("#acc-newpass2").value;
           if (!cur) return msg("Renseigne ton mot de passe actuel.", "err");
-          if (a.length < 8) return msg("Nouveau mot de passe : 8 caractères minimum.", "err");
+          if (a.length < 16) return msg("Nouveau mot de passe : 16 caractères minimum.", "err");
           if (a !== b) return msg("Les deux mots de passe ne correspondent pas.", "err");
           msg(T("Enregistrement…"));
           const { error } = await api.auth.updatePassword(a, cur);
@@ -265,7 +265,7 @@ import { api } from "./api";
       };
       box.querySelector("#acc-signup").onclick = async () => {
         if (!looksLikeEmail(email())) return msg("Adresse e-mail invalide.", "err");
-        if (pass().length < 8) return msg("Mot de passe : 8 caractères minimum.", "err");
+        if (pass().length < 16) return msg("Mot de passe : 16 caractères minimum.", "err");
         msg("Création…");
         const { data, error } = await api.auth.signUp(email(), pass());
         if (error) return msg(traduire(error.message), "err");
@@ -298,7 +298,7 @@ import { api } from "./api";
     box.querySelector(".acc-x").onclick = () => { recoveryMode = false; close(); renderModal(); };
     box.querySelector("#acc-np-save").onclick = async () => {
       const a = box.querySelector("#acc-np").value, b = box.querySelector("#acc-np2").value;
-      if (a.length < 8) return msg("Mot de passe : 8 caractères minimum.", "err");
+      if (a.length < 16) return msg("Mot de passe : 16 caractères minimum.", "err");
       if (a !== b) return msg("Les deux mots de passe ne correspondent pas.", "err");
       msg(T("Enregistrement…"));
       const { error } = await api.auth.updatePassword(a);

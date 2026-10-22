@@ -110,7 +110,7 @@ export function registerAuth(app: FastifyInstance): void {
     const { email, password } = credentials(req);
     if (!looksLikeEmail(email)) throw new AuthError("Adresse e-mail invalide.");
     if (!limits.signups.hit(req.ip)) throw new AuthError("rate limit", 429);
-    if (password.length < 8 || password.length > 200) throw new AuthError("Mot de passe : 8 caractères minimum.");
+    if (password.length < 16 || password.length > 200) throw new AuthError("Mot de passe : 16 caractères minimum.");
     const hash = await bcrypt.hash(password, HASH_COST);
     let userId: string;
     try {
@@ -202,7 +202,7 @@ export function registerAuth(app: FastifyInstance): void {
     if (!user.recovery && limits.loginFailures.blocked(failKey)) throw new AuthError("rate limit", 429);
     const body = (req.body ?? {}) as Record<string, unknown>;
     const password = String(body.password ?? "");
-    if (password.length < 8 || password.length > 200) throw new AuthError("Mot de passe : 8 caractères minimum.");
+    if (password.length < 16 || password.length > 200) throw new AuthError("Mot de passe : 16 caractères minimum.");
     if (!user.recovery) {
       const { rows } = await pool.query("select password_hash from users where id = $1", [user.id]);
       if (!(await bcrypt.compare(String(body.current ?? ""), rows[0].password_hash))) {

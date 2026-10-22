@@ -37,7 +37,7 @@ function client() {
 }
 async function player(name) {
   const c = client();
-  const up = await c.post("/api/auth/signup", { email: name + "-" + tag + "@exemple.test", password: "motdepasse-" + name });
+  const up = await c.post("/api/auth/signup", { email: name + "-" + tag + "@exemple.test", password: "mot-de-passe-long-" + name });
   assert.equal(up.status, 200, JSON.stringify(up.json));
   c.id = up.json.session.user.id;
   const set = await c.rpc("profile_set_pseudo", { pseudo: (name + tag).slice(0, 24) });

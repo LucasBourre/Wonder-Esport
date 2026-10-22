@@ -50,11 +50,11 @@ async function waitForMail(email, count = 1) {
 test("inscription : le compte n'ouvre qu'après le lien de confirmation", { skip }, async () => {
   const c = client();
   const email = "confirme-" + tag + "@exemple.test";
-  const up = await c.post("/api/auth/signup", { email, password: "motdepasse1" });
+  const up = await c.post("/api/auth/signup", { email, password: "mot-de-passe-seize" });
   assert.equal(up.status, 200, JSON.stringify(up.json));
   assert.equal(up.json.session, null, "pas de session avant confirmation");
   assert.equal((await c.get("/api/auth/session")).json.session, null);
-  const early = await c.post("/api/auth/login", { email, password: "motdepasse1" });
+  const early = await c.post("/api/auth/login", { email, password: "mot-de-passe-seize" });
   assert.match(early.json.error.message, /Email not confirmed/);
 
   const [mail] = await waitForMail(email);
@@ -76,7 +76,7 @@ test("inscription : le compte n'ouvre qu'après le lien de confirmation", { skip
   assert.equal(ok.location, ORIGIN + "/#confirmed");
   assert.equal((await c.get("/api/auth/session")).json.session.user.email, email, "le lien connecte");
   assert.match((await client().get(fresh)).location, /#confirm=expired$/, "un lien ne sert qu'une fois");
-  assert.equal((await client().post("/api/auth/login", { email, password: "motdepasse1" })).status, 200);
+  assert.equal((await client().post("/api/auth/login", { email, password: "mot-de-passe-seize" })).status, 200);
 
   // Compte déjà confirmé : « renvoyer » ne renvoie rien, sans le dire.
   assert.equal((await c.post("/api/auth/resend", { email })).status, 200);
@@ -87,7 +87,7 @@ test("inscription : le compte n'ouvre qu'après le lien de confirmation", { skip
 test("mot de passe oublié : le lien permet d'en choisir un nouveau, une seule fois", { skip }, async () => {
   const email = "oubli-" + tag + "@exemple.test";
   const owner = client();
-  await owner.post("/api/auth/signup", { email, password: "ancien-mot-1" });
+  await owner.post("/api/auth/signup", { email, password: "ancien-mot-de-passe-1" });
   const confirm = (await waitForMail(email))[0].Text.match(/\/api\/auth\/confirm\?token=[\w-]+/)[0];
   await owner.get(confirm);
   assert.ok((await owner.get("/api/auth/session")).json.session);
@@ -110,20 +110,20 @@ test("mot de passe oublié : le lien permet d'en choisir un nouveau, une seule f
   assert.equal(rec.json.session.recovery, true);
   assert.equal((await client().post("/api/auth/recover", { token })).status, 400, "un lien ne sert qu'une fois");
   // Session de récupération : l'ancien mot de passe n'est pas demandé.
-  const changed = await c.post("/api/auth/password", { password: "nouveau-mot-2" });
+  const changed = await c.post("/api/auth/password", { password: "nouveau-mot-de-passe-2" });
   assert.equal(changed.status, 200, JSON.stringify(changed.json));
   assert.equal(changed.json.session.recovery, false);
   // …mais une fois le mot de passe choisi, la session redevient ordinaire.
-  assert.equal((await c.post("/api/auth/password", { password: "encore-un-3" })).status, 400);
+  assert.equal((await c.post("/api/auth/password", { password: "encore-un-mot-de-passe-3" })).status, 400);
 
   assert.equal((await owner.get("/api/auth/session")).json.session, null, "les autres appareils sont déconnectés");
-  assert.equal((await client().post("/api/auth/login", { email, password: "ancien-mot-1" })).status, 400);
-  assert.equal((await client().post("/api/auth/login", { email, password: "nouveau-mot-2" })).status, 200);
+  assert.equal((await client().post("/api/auth/login", { email, password: "ancien-mot-de-passe-1" })).status, 400);
+  assert.equal((await client().post("/api/auth/login", { email, password: "nouveau-mot-de-passe-2" })).status, 200);
 });
 
 test("mot de passe oublié : au plus 5 e-mails par adresse et par heure, sans rien révéler", { skip }, async () => {
   const email = "plafond-" + tag + "@exemple.test";
-  assert.equal((await client().post("/api/auth/signup", { email, password: "motdepasse1" })).status, 200);
+  assert.equal((await client().post("/api/auth/signup", { email, password: "mot-de-passe-seize" })).status, 200);
   // Huit demandes, depuis huit adresses différentes (le plafond visé est celui du destinataire).
   const statuses = [];
   for (let i = 0; i < 8; i++) statuses.push((await client().post("/api/auth/forgot", { email })).status);

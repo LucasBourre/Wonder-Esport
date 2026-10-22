@@ -15,7 +15,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   alice.pseudo = `alice${tag}`.slice(0, 20);
 
   report.check("le bouton Compte est visible", await alice.js("getComputedStyle(document.getElementById('btn-account')).display !== 'none'"));
-  report.check("inscription → connecté", await signUp(alice, { email: alice.email, password: "motdepasse-alice", mailpit }), await alice.js(`(${BOX} || { textContent: '' }).textContent`));
+  report.check("inscription → connecté", await signUp(alice, { email: alice.email, password: "mot-de-passe-long-alice", mailpit }), await alice.js(`(${BOX} || { textContent: '' }).textContent`));
   if (mailpit) { await alice.js("document.getElementById('btn-account').click()"); await wait(500); }
   await alice.js(`${BOX}.querySelector('#acc-pseudo').value = '${alice.pseudo}'; ${BOX}.querySelector('#acc-savepseudo').click()`);
   report.check("pseudo enregistré", await alice.until(`/enregistré/.test((document.querySelector('.acc-overlay.on .acc-msg') || {}).textContent || '')`), await msg(alice));
@@ -38,7 +38,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   await alice.js("localStorage.removeItem('destinDeChampion_progress'); localStorage.removeItem('openEleven_current'); localStorage.removeItem('destinDeChampion_pantheon')");
   await alice.js(`${BOX}.querySelector('#acc-email').value = '${alice.email}'; ${BOX}.querySelector('#acc-pass').value = 'mauvais'; ${BOX}.querySelector('#acc-login').click()`);
   report.check("mauvais mot de passe refusé", await alice.until(`/incorrect/.test((document.querySelector('.acc-overlay.on .acc-msg') || {}).textContent || '')`), await msg(alice));
-  await alice.js(`${BOX}.querySelector('#acc-pass').value = 'motdepasse-alice'; ${BOX}.querySelector('#acc-login').click()`);
+  await alice.js(`${BOX}.querySelector('#acc-pass').value = 'mot-de-passe-long-alice'; ${BOX}.querySelector('#acc-login').click()`);
   report.check("reconnexion → sauvegarde restaurée", await alice.until("(JSON.parse(localStorage.getItem('destinDeChampion_progress') || '{}')).xp === 1234", 9000));
   await wait(1500);
 
@@ -54,7 +54,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   await wait(1500);
   bruno.email = `bruno-${tag}@exemple.test`;
   bruno.pseudo = `bruno${tag}`.slice(0, 20);
-  report.check("second joueur inscrit", await signUp(bruno, { email: bruno.email, password: "motdepasse-bruno", mailpit }));
+  report.check("second joueur inscrit", await signUp(bruno, { email: bruno.email, password: "mot-de-passe-long-bruno", mailpit }));
   if (mailpit) { await bruno.js("document.getElementById('btn-account').click()"); await wait(500); }
   await bruno.js(`${BOX}.querySelector('#acc-pseudo').value = '${bruno.pseudo}'; ${BOX}.querySelector('#acc-savepseudo').click()`);
   await bruno.until(`/enregistré/.test((document.querySelector('.acc-overlay.on .acc-msg') || {}).textContent || '')`);
