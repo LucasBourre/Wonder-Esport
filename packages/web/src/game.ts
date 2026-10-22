@@ -3,7 +3,7 @@
    Toute la logique de jeu vit dans le moteur (@open-eleven/engine).
    ============================================================ */
 import { ARCHETYPES, AWARDS, BADGES, BADGE_CATS, BRAND, CLUBS, COMPETITIONS, CONTINENTAL_BALLON, CONTINENTAL_CUPS, CONTINENTAL_CUPS2, CONTINENTAL_CUPS3, CONTINENTAL_SUPERCUP, COUNTRIES, DAILY_QUESTS, ENGINE_TEXT, ENTOURAGES, LEGEND_QUESTS, LEVELS, LIFESTYLES, NAME_POOLS, NATIONALITIES, NATIONAL_CUPS, NATIONS_LEAGUE, ORIGINS, PERKS, PERK_SLOTS, POSITIONS, ROLES, SCORE_PERCENTILES, STORIES, STREAK_MILESTONES, TRAITS, TRAJECTORIES, WEEKLY_CHALLENGES, WORLD_NEWS, YOUTH_U17_CUPS } from "@open-eleven/content";
-import { ARAB_CUP, ARAB_NATION_IDS, REGIONAL_GAMES } from "@open-eleven/content";
+import { ARAB_CUP, ARAB_NATION_IDS, CHANGELOG, REGIONAL_GAMES } from "@open-eleven/content";
 import { Engine } from "@open-eleven/engine";
 
 (function () {
@@ -3148,11 +3148,10 @@ import { Engine } from "@open-eleven/engine";
   // laissaient une trace : une demi-finale de Coupe du Monde disparaissait avec
   // la saison. Le moteur archive désormais chaque tournoi disputé, on n'affiche
   // ici que le meilleur de chacun.
-  function natRunsHtml(s) {
-    const runs = (E.bestNatRuns && E.bestNatRuns(s)) || [];
-    if (!runs.length) return "";
+  // Nom affiché de chaque compétition de sélection (le continent décide de la coupe et des Jeux).
+  function natCompNames(s) {
     const contId = (E.countryOf(s.nationality.homeCountryId) || {}).continent;
-    const nom = {
+    return {
       wc: "🏆 " + T("Coupe du Monde"),
       cont: ((NATIONAL_CUPS[contId] || {}).icon || "🌍") + " " + ((NATIONAL_CUPS[contId] || {}).name || T("Championnat continental")),
       natl: (NATIONS_LEAGUE.icon || "🛡️") + " " + NATIONS_LEAGUE.name,
@@ -3160,6 +3159,51 @@ import { Engine } from "@open-eleven/engine";
       olympic: "🥇 " + T("Jeux Olympiques"),
       games: ((REGIONAL_GAMES[contId] || {}).icon || "🏅") + " " + ((REGIONAL_GAMES[contId] || {}).name || T("Jeux régionaux")),
     };
+  }
+
+  // Classement du club en championnat : « 1ᵉʳ, 2ᵉ… » en français, « 1st, 2nd… » en anglais.
+  function ordinal(n) {
+    if (window.I18N && window.I18N.lang === "en") {
+      const t = n % 100, u = n % 10;
+      return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th");
+    }
+    return n === 1 ? "1ᵉʳ" : n + "ᵉ";
+  }
+
+  // Sélection, saison par saison : matchs, buts et passes en A, sélections de jeunes,
+  // et tournois joués cette année-là. Vide pour qui n'a jamais été appelé.
+  // Les sauvegardes d'avant cet historique n'ont que les tournois (natRuns).
+  function natHistoryHtml(s) {
+    const nom = natCompNames(s);
+    const rows = (s.seasons || [])
+      .map((se) => {
+        const runs = E.natRunsOfYear ? E.natRunsOfYear(s, se.year) : [];
+        if (!se.nat && !se.youthNat && !runs.length) return "";
+        const parts = [];
+        if (se.nat) parts.push('<span class="nat-line"><strong>' + T("Équipe A") + "</strong> · " + T("{m} m · {b} b · {p} pd", { m: se.nat.caps, b: se.nat.goals, p: se.nat.assists }) + "</span>");
+        if (se.youthNat) parts.push('<span class="nat-line"><strong>' + T("Jeunes") + "</strong> · " + T("{m} m · {b} b", { m: se.youthNat.caps, b: se.youthNat.goals }) + "</span>");
+        for (const r of runs) parts.push('<span class="nat-line nat-comp">' + T("{comp} : {stage}", { comp: nom[r.comp] || esc(r.comp), stage: esc(r.label) }) + "</span>");
+        return '<div class="nat-row"><span class="season-age">' + se.age + '</span><span class="nat-year">' + se.year + '</span><span class="nat-detail">' + parts.join("") + "</span></div>";
+      })
+      .filter(Boolean);
+    if (!rows.length) return "";
+    const tot = (s.seasons || []).reduce((acc, se) => {
+      if (se.nat) { acc.m += se.nat.caps; acc.b += se.nat.goals; acc.p += se.nat.assists; }
+      return acc;
+    }, { m: 0, b: 0, p: 0 });
+    // Ancienne sauvegarde (pas de chiffres par saison) : on retombe sur les totaux du joueur.
+    const total = tot.m
+      ? '<div class="nat-total">' + T("Total en A : {m} sélections · {b} buts · {p} passes décisives", { m: tot.m, b: tot.b, p: tot.p }) + "</div>"
+      : s.natTeam && s.natTeam.caps
+        ? '<div class="nat-total">' + T("Total en A : {m} sélections · {b} buts", { m: s.natTeam.caps, b: s.natTeam.goals }) + "</div>"
+        : "";
+    return total + rows.join("");
+  }
+
+  function natRunsHtml(s) {
+    const runs = (E.bestNatRuns && E.bestNatRuns(s)) || [];
+    if (!runs.length) return "";
+    const nom = natCompNames(s);
     return runs
       .map((r) => {
         // Un parcours au sommet mérite d'être mis en avant comme un trophée.
@@ -3344,6 +3388,12 @@ import { Engine } from "@open-eleven/engine";
       natBloc.style.display = natRuns ? "" : "none";
       natLabel.style.display = natRuns ? "" : "none";
     }
+    // Historique en sélection, replié comme le détail des saisons.
+    const natHistory = natHistoryHtml(G);
+    $("final-nat-history").innerHTML = natHistory;
+    $("final-nat-history").style.display = "none";
+    $("nat-history-toggle").style.display = natHistory ? "" : "none";
+    $("nat-history-toggle").textContent = T("🌍 Voir la sélection saison par saison");
 
     $("final-traits").innerHTML = G.traits.length
       ? G.traits.map((id) => { const tr = TRAITS[id]; return `<span class="trait-chip">${tr.icon} ${esc(tr.name)}</span>`; }).join("")
@@ -3359,7 +3409,17 @@ import { Engine } from "@open-eleven/engine";
     // Historique saison par saison : division affichée chaque année,
     // avec montées (⬆) et descentes (⬇) visibles d'un coup d'œil.
     let prevSeason = null;
-    $("final-seasons").innerHTML = G.seasons
+    // Abréviations du tableau : b(uts)/p(asses) d(écisives) en français, g(oals)/a(ssists) en anglais.
+    const ab = window.I18N && window.I18N.lang === "en" ? { b: "g", pd: "a" } : { b: "b", pd: "pd" };
+    // En-tête : sans lui, on ne devine pas que « 3ᵉ » est le classement du club.
+    const seasonsHead = `<div class="season-row season-head">
+          <span class="season-age">${T("Âge")}</span>
+          <span class="season-club">${T("Club")}</span>
+          <span class="season-pos">${T("Clt")}</span>
+          <span class="season-stats">${T("Matchs · buts · passes · note")}</span>
+          <span class="season-icons"></span>
+        </div>`;
+    $("final-seasons").innerHTML = seasonsHead + G.seasons
       .map((se) => {
         // Un titre de division inférieure (D2/D3/Rég.) n'est pas poussé dans
         // se.trophies (pour ne pas peser sur le Ballon d'Or) : on ajoute quand
@@ -3368,8 +3428,8 @@ import { Engine } from "@open-eleven/engine";
         const icons = champIcon + (se.trophies || []).map((tr) => { const c = trophyInfo(tr, se.countryId); return c ? c.icon : ""; }).join("");
         // Saison en U17/réserve : chiffres de cette équipe, étiquetés.
         const sst = se.squad && se.dev ? se.dev : se;
-        const perf = isGk ? `${sst.cleanSheets || 0} cs` : `${sst.goals} b`;
-        const pd = ` · ${sst.assists || 0} pd`;
+        const perf = isGk ? `${sst.cleanSheets || 0} cs` : `${sst.goals} ${ab.b}`;
+        const pd = ` · ${sst.assists || 0} ${ab.pd}`;
         let moveArrow = "";
         if (prevSeason && prevSeason.clubName === se.clubName && se.level && prevSeason.level && se.level !== prevSeason.level) {
           moveArrow = LEVELS[se.level].rank > LEVELS[prevSeason.level].rank
@@ -3384,6 +3444,7 @@ import { Engine } from "@open-eleven/engine";
         return `<div class="season-row">
           <span class="season-age">${se.age}</span>
           <span class="season-club">${se.level ? `<span class="level-tag level-${se.level}">${esc(seCountryId ? E.divShort(se.level, seCountryId) : LEVELS[se.level].short)}</span>` : ""}${seFlag ? `${seFlag} ` : ""}${esc(se.clubName)}${moveArrow}${se.onLoan ? ` <span class="loan-tag">Prêt</span>` : ""}${se.squad ? ` <span class="loan-tag">${se.squad === "youth" ? "U17" : T("Réserve")}</span>` : ""}</span>
+          <span class="season-pos" title="${esc(T("Classement du club en championnat"))}">${se.leaguePos ? ordinal(se.leaguePos) : "–"}</span>
           <span class="season-stats">${sst.matches} m · ${perf}${pd} · ${se.rating.toFixed(1)}</span>
           <span class="season-icons">${icons}</span>
         </div>`;
@@ -3639,6 +3700,49 @@ import { Engine } from "@open-eleven/engine";
     showScreen(id);
   }
 
+  // --- Nouveautés (notes de mise à jour) et version ---------------------------
+  // La version affichée est celle du moteur, vérifiée par le serveur pour les scores :
+  // un seul numéro pour tout le monde. La pastille « Nouveau » tient jusqu'à ce que le
+  // joueur ait ouvert les notes de la version en cours (mémorisé dans son navigateur).
+  const NEWS_SEEN_KEY = "openEleven_newsSeen";
+  const NEWS_KINDS = { new: "✨ Nouveautés", balance: "⚖️ Équilibrage", fix: "🐛 Corrections" };
+  const newsDate = (iso) => {
+    const lang = window.I18N ? window.I18N.lang : "fr";
+    return new Date(iso + "T12:00:00Z").toLocaleDateString(lang === "en" ? "en-GB" : "fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  };
+  function readNewsSeen() { try { return localStorage.getItem(NEWS_SEEN_KEY); } catch (_) { return null; } }
+
+  function refreshNewsBadge() {
+    const latest = CHANGELOG[0];
+    const dot = $("news-dot");
+    if (dot) dot.hidden = !latest || readNewsSeen() === latest.version;
+    const line = $("version-line");
+    if (line) line.textContent = "v" + E.ENGINE_VERSION + (latest ? " · " + new Date(latest.date + "T12:00:00Z").toLocaleDateString("fr-FR") : "");
+  }
+
+  function renderNewsScreen() {
+    const list = $("news-list");
+    list.innerHTML = "";
+    CHANGELOG.forEach((entry, i) => {
+      const card = document.createElement("article");
+      card.className = "news-entry" + (i === 0 ? " latest" : "");
+      const groups = Object.keys(NEWS_KINDS)
+        .map((kind) => {
+          const lines = entry.items.filter((it) => it.kind === kind);
+          if (!lines.length) return "";
+          return '<p class="news-kind">' + T(NEWS_KINDS[kind]) + "</p><ul>" + lines.map((it) => "<li>" + esc(it.text) + "</li>").join("") + "</ul>";
+        })
+        .join("");
+      card.innerHTML =
+        '<header class="news-head"><span class="news-version">v' + esc(entry.version) + "</span>" +
+        '<span class="news-date">' + esc(newsDate(entry.date)) + "</span></header>" +
+        '<h3 class="news-title">' + esc(entry.title) + "</h3>" + groups;
+      list.appendChild(card);
+    });
+    try { localStorage.setItem(NEWS_SEEN_KEY, CHANGELOG[0] ? CHANGELOG[0].version : ""); } catch (_) { /* navigation privée */ }
+    refreshNewsBadge();
+  }
+
   // Retour depuis un écran annexe : vers le jeu si l'on en venait, sinon accueil.
   function goBackFromSecondary() {
     const to = backTarget || "screen-home";
@@ -3700,6 +3804,7 @@ import { Engine } from "@open-eleven/engine";
     renderDuelPanel();
     renderStoryPanel();
     refreshHomeButtons();
+    refreshNewsBadge();
     const progress = loadProgress();
     $("home-meta").textContent = progress.careersPlayed > 0
       ? T(progress.careersPlayed > 1 ? "{n} carrières vécues · record : {best} pts" : "{n} carrière vécue · record : {best} pts", { n: progress.careersPlayed, best: progress.bestScore })
@@ -3778,10 +3883,18 @@ import { Engine } from "@open-eleven/engine";
       el.style.display = hidden ? "" : "none";
       $("seasons-toggle").textContent = hidden ? "📅 Masquer le détail des saisons" : "📅 Voir la carrière saison par saison";
     });
+    $("nat-history-toggle").addEventListener("click", () => {
+      const el = $("final-nat-history");
+      const hidden = el.style.display === "none";
+      el.style.display = hidden ? "" : "none";
+      $("nat-history-toggle").textContent = hidden ? T("🌍 Masquer la sélection saison par saison") : T("🌍 Voir la sélection saison par saison");
+    });
     $("btn-badges").addEventListener("click", () => { track("open_badges"); renderBadgeScreen(); showScreen("screen-badges"); });
     $("btn-badges-back").addEventListener("click", goBackFromSecondary);
     $("btn-pantheon").addEventListener("click", () => { track("open_pantheon"); renderPantheonScreen(); showScreen("screen-pantheon"); });
     $("btn-pantheon-back").addEventListener("click", goBackFromSecondary);
+    $("btn-news").addEventListener("click", () => { track("open_news"); renderNewsScreen(); showScreen("screen-news"); });
+    $("btn-news-back").addEventListener("click", goBackFromSecondary);
     $("btn-shop").addEventListener("click", () => { track("open_shop"); renderShopScreen(); showScreen("screen-shop"); });
     $("btn-shop-back").addEventListener("click", goBackFromSecondary);
     $("duel-panel").addEventListener("click", () => startDuelCreate());

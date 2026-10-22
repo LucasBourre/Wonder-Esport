@@ -77,6 +77,10 @@ export interface SeasonRecord {
   /** Saison jouée en U17 ou en réserve : chiffres de cette équipe dans `dev`. */
   squad?: SquadId;
   dev?: DevStats;
+  /** Sélection A cette saison (tournois compris) — absent si le joueur n'a pas été appelé. */
+  nat?: { caps: number; goals: number; assists: number };
+  /** Sélections de jeunes cette saison (U17 à U23, Jeux compris) — absent sinon. */
+  youthNat?: { caps: number; goals: number };
 }
 
 export interface DevStats { matches: number; goals: number; assists: number; cleanSheets: number; }

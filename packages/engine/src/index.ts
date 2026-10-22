@@ -12,7 +12,7 @@ import { renderText } from "./text";
 import { applyFx } from "./effects";
 import { eventEligible, pickEvent, optionEligible, resolveOption, netImpact, toneOf } from "./events";
 import { keyMomentFor, keyMomentSuccess, playKeyMoment } from "./moments";
-import { isWorldCupYear, bestNatRuns, playWorldCup, resolveWcFinal, isContinentalYear, playContinental, isNationsLeagueYear, playNationsLeague, isOlympicYear, playOlympics, isArabCupYear, playArabCup, regionalGamesOf, playRegionalGames } from "./international";
+import { isWorldCupYear, bestNatRuns, natRunsOfYear,playWorldCup, resolveWcFinal, isContinentalYear, playContinental, isNationsLeagueYear, playNationsLeague, isOlympicYear, playOlympics, isArabCupYear, playArabCup, regionalGamesOf, playRegionalGames } from "./international";
 import { playingTimeFactor, roleForClub, roleOf } from "./role";
 import { setSeasonObjective, objectiveMet } from "./objectives";
 import { headlineFor } from "./press";
@@ -40,6 +40,7 @@ export const Engine = {
   eventEligible, pickEvent, optionEligible, resolveOption, netImpact, toneOf,
   keyMomentFor, keyMomentSuccess, playKeyMoment, isWorldCupYear,
   bestNatRuns, // meilleur parcours par compétition de sélection (fiche finale)
+  natRunsOfYear, // tournois de sélection d'une année (historique saison par saison)
   playWorldCup, resolveWcFinal, isContinentalYear, playContinental, isNationsLeagueYear, playNationsLeague, isOlympicYear, playOlympics, isArabCupYear, playArabCup, regionalGamesOf, playRegionalGames, playingTimeFactor, setSeasonObjective,
   objectiveMet, headlineFor, grantAward, rollSeasonAwards, rollBallon, rollContinentalBallon,
   roleForClub, roleOf, squadOf, dualNatOf, dualPartnersOf, natForms,

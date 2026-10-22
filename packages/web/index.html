@@ -88,6 +88,8 @@
           <button class="btn-link" id="btn-badges">🏅 Badges</button>
           <button class="btn-link" id="btn-pantheon">🏛️ Panthéon</button>
         </div>
+        <!-- Notes de mise à jour : la pastille reste tant que la dernière version n'a pas été lue. -->
+        <button class="news-link" id="btn-news">📜 Nouveautés <span class="news-dot" id="news-dot" hidden>Nouveau</span></button>
       </div>
       <div class="home-cards">
         <div class="daily-panel" id="daily-panel"></div>
@@ -112,6 +114,7 @@
       <span>Code source</span>
     </a>
     <a class="privacy-link" href="privacy.html" target="_blank" rel="noopener">Confidentialité</a>
+    <p class="version-line" id="version-line"></p>
   </section>
 
   <!-- ============ ÉCRAN BADGES ============ -->
@@ -120,6 +123,14 @@
     <p class="screen-sub" id="badge-meta">Vos exploits à travers toutes vos carrières.</p>
     <div class="badge-grid" id="badge-grid"></div>
     <button class="btn btn-secondary screen-back" id="btn-badges-back">← Retour</button>
+  </section>
+
+  <!-- ============ ÉCRAN NOUVEAUTÉS ============ -->
+  <section id="screen-news" class="screen">
+    <h2 class="screen-title">Nouveautés</h2>
+    <p class="screen-sub">Ce qui a changé dans le jeu, version après version.</p>
+    <div class="news-list" id="news-list"></div>
+    <button class="btn btn-secondary screen-back" id="btn-news-back">← Retour</button>
   </section>
 
   <!-- ============ ÉCRAN QUÊTES ============ -->
@@ -358,6 +369,8 @@
            n'a jamais été international. -->
       <p class="pc-section-label" id="final-natruns-label">Parcours en sélection</p>
       <div class="pc-trophies" id="final-natruns"></div>
+      <button class="btn-link seasons-toggle" id="nat-history-toggle" style="display:none">🌍 Voir la sélection saison par saison</button>
+      <div class="pc-seasons" id="final-nat-history" style="display:none"></div>
 
       <p class="pc-section-label">Parcours</p>
       <div class="pc-path" id="final-path"></div>

@@ -1,0 +1,136 @@
+// Notes de mise à jour, affichées aux joueurs (écran « Nouveautés » de l'accueil).
+//
+// Une entrée par version du moteur (ENGINE_VERSION), la plus récente EN PREMIER. Le
+// numéro de la première entrée est celui que l'accueil affiche, et un test vérifie qu'il
+// suit ENGINE_VERSION : avancer la version sans écrire sa note fait échouer « npm test ».
+//
+// Écrites pour les joueurs, pas pour les développeurs : ce qui change dans LEUR partie.
+// Les titres et les lignes passent par la traduction comme le reste du contenu.
+
+export type ChangeKind = "new" | "balance" | "fix";
+
+export interface ChangelogEntry {
+  version: string;
+  /** AAAA-MM-JJ */
+  date: string;
+  title: string;
+  items: { kind: ChangeKind; text: string }[];
+}
+
+export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "10.83",
+    date: "2026-10-23",
+    title: "Nouveau site et nouvelles compétitions",
+    items: [
+      { kind: "new", text: "Le jeu a désormais son propre serveur : comptes, sauvegardes, amis, duels et salles ne dépendent plus d'un service extérieur. Vos comptes et vos parties ont été repris." },
+      { kind: "new", text: "Nouvelles compétitions : la Coupe arabe, et les Jeux régionaux en U23 (Jeux asiatiques, africains, panaméricains et du Pacifique)." },
+      { kind: "new", text: "Cette page de nouveautés, et la version du jeu affichée sur l'accueil." },
+      { kind: "new", text: "Fiche finale : le classement du club à chaque saison, et la sélection saison par saison (matchs, buts, passes décisives, tournois joués)." },
+      { kind: "balance", text: "Offres de transfert plus variées : davantage de pays proposés, et moins de clubs africains pour un joueur qui n'est pas africain." },
+      { kind: "balance", text: "Votre entourage pèse sur le mercato : la famille limite les offres, un agent ambitieux en apporte davantage." },
+      { kind: "fix", text: "Salles : un joueur ne peut plus prendre une saison d'avance sur les autres." },
+      { kind: "fix", text: "En anglais, les étapes de la Coupe du Monde ne restent plus en français." },
+      { kind: "fix", text: "Sécurité renforcée : 16 caractères minimum pour tout nouveau mot de passe, et plusieurs protections ajoutées." },
+    ],
+  },
+  {
+    version: "10.81",
+    date: "2026-10-07",
+    title: "Palmarès et noms de pays",
+    items: [
+      { kind: "balance", text: "Le palier « Icône mondiale » devient plus rare : il est réservé aux plus grandes carrières." },
+      { kind: "new", text: "Le palmarès s'adapte au continent de votre club." },
+      { kind: "fix", text: "Les noms de pays prennent leur article : « en France », « au Brésil », « aux Pays-Bas »…" },
+    ],
+  },
+  {
+    version: "10.80",
+    date: "2026-10-06",
+    title: "Double nationalité",
+    items: [
+      { kind: "new", text: "Un binational jamais appelé en sélection a une seconde chance de choisir son autre pays." },
+      { kind: "fix", text: "Les derniers ajouts sont traduits en anglais, sponsors et coupes U17 compris." },
+    ],
+  },
+  {
+    version: "10.79",
+    date: "2026-10-06",
+    title: "U17, réserve et match pour la 3ᵉ place",
+    items: [
+      { kind: "new", text: "Les débuts passent par les U17 et la réserve avant l'équipe première." },
+      { kind: "new", text: "Les tournois se jouent avec un match pour la 3ᵉ place." },
+      { kind: "balance", text: "Le niveau des vétérans est plafonné." },
+    ],
+  },
+  {
+    version: "10.77",
+    date: "2026-10-03",
+    title: "Centres de formation",
+    items: [
+      { kind: "new", text: "Plus de choix de centres de formation au départ, dont une offre venue de l'étranger." },
+      { kind: "fix", text: "Hors d'Europe, le bilan de saison affiche le bon nom des coupes continentales." },
+    ],
+  },
+  {
+    version: "10.76",
+    date: "2026-10-03",
+    title: "Sponsors par paliers",
+    items: [
+      { kind: "new", text: "Les sponsors arrivent par paliers de réputation, à la place du simple renouvellement de contrat." },
+    ],
+  },
+  {
+    version: "10.75",
+    date: "2026-08-24",
+    title: "Sponsors et événements",
+    items: [
+      { kind: "new", text: "Offres de sponsors plus variées, et sept nouveaux événements." },
+    ],
+  },
+  {
+    version: "10.73",
+    date: "2026-08-24",
+    title: "Pyramide des divisions",
+    items: [
+      { kind: "balance", text: "La D3 est réservée aux grands championnats, et la pyramide des petites nations est simplifiée." },
+    ],
+  },
+  {
+    version: "10.72",
+    date: "2026-08-24",
+    title: "Mercato",
+    items: [
+      { kind: "new", text: "Offres de transfert plus variées, et huit nouveaux événements." },
+      { kind: "fix", text: "Le niveau des clubs déjà croisés s'affiche correctement." },
+    ],
+  },
+  {
+    version: "10.70",
+    date: "2026-08-24",
+    title: "Contrats et confiance",
+    items: [
+      { kind: "new", text: "Les contrats de sponsoring restent actifs au fil de votre carrière." },
+      { kind: "new", text: "La confiance de l'entraîneur et de la direction met désormais la pression." },
+    ],
+  },
+  {
+    version: "10.69",
+    date: "2026-08-16",
+    title: "Salles multijoueur",
+    items: [
+      { kind: "new", text: "Carrière commune : jusqu'à 4 amis vivent la même carrière dans le même club, et votent ensemble les transferts." },
+      { kind: "new", text: "Onglet Salle en jeu, comparatif des statistiques entre membres, et trophées de club partagés." },
+      { kind: "new", text: "Amis et Duels réunis dans un seul panneau." },
+      { kind: "new", text: "Un palier D4 pour l'Angleterre, distinct du football régional." },
+    ],
+  },
+  {
+    version: "10.68",
+    date: "2026-08-13",
+    title: "Supercoupe continentale",
+    items: [
+      { kind: "new", text: "Nouvelle Supercoupe continentale, pour les vainqueurs de C1 ou de C2." },
+    ],
+  },
+];

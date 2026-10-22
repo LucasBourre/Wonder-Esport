@@ -180,6 +180,20 @@ export function bestNatRuns(s: CareerState) {
   return ordre.filter((c) => par[c]).map((c) => par[c]);
 }
 
+/** Tournois de sélection joués une année donnée, avec le stade atteint (historique saison par saison). */
+export function natRunsOfYear(s: CareerState, year: number) {
+  const ordre = ["wc", "cont", "natl", "arab", "olympic", "games"];
+  return (s.natRuns || [])
+    .filter((r) => r.year === year)
+    .map((r) => {
+      const stage = natStages(r.comp).find((x) => x.id === r.stage);
+      const label = r.third === "won" ? ENGINE_TEXT.thirdPlaceLabel : r.third === "lost" ? ENGINE_TEXT.fourthPlaceLabel : stage ? stage.label : "";
+      return { comp: r.comp, label };
+    })
+    .filter((r) => r.label)
+    .sort((a, b) => ordre.indexOf(a.comp) - ordre.indexOf(b.comp));
+}
+
 export function playContinental(s: CareerState, report: SeasonReport) {
   const continent = continentOf(s.nationality.homeCountryId) ?? "";
   const cup = NATIONAL_CUPS[continent];

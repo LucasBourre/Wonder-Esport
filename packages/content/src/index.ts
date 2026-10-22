@@ -2,6 +2,7 @@
 
 export * from "./balance";
 export * from "./brand";
+export * from "./changelog";
 export * from "./clubs";
 export * from "./competitions";
 export * from "./countries";

@@ -71,3 +71,21 @@ test("un événement programmé par un autre existe bien", () => {
   }
   assert.deepEqual(unknown, []);
 });
+
+test("notes de mise à jour : la version du jeu a la sienne, et l'ordre va de la plus récente à la plus ancienne", () => {
+  const { loadEngine } = require("../../engine/test/load-engine");
+  const version = loadEngine().ENGINE_VERSION;
+  const log = C.CHANGELOG;
+  assert.equal(log[0].version, version, "ENGINE_VERSION est passé à " + version + " : écrire sa note en tête de packages/content/src/changelog.ts");
+  const num = (v) => v.split(".").map(Number);
+  const newer = (a, b) => { const [x, y] = [num(a), num(b)]; return x[0] !== y[0] ? x[0] > y[0] : x[1] > y[1]; };
+  for (let i = 1; i < log.length; i++) {
+    assert.ok(newer(log[i - 1].version, log[i].version), "ordre : " + log[i - 1].version + " avant " + log[i].version);
+    assert.ok(log[i - 1].date >= log[i].date, "dates : " + log[i - 1].version + " ne peut pas être plus ancienne que " + log[i].version);
+  }
+  for (const e of log) {
+    assert.match(e.date, /^\d{4}-\d{2}-\d{2}$/, "date de " + e.version);
+    assert.ok(e.title && e.items.length, "titre et lignes de " + e.version);
+    for (const it of e.items) assert.ok(["new", "balance", "fix"].includes(it.kind), "catégorie inconnue dans " + e.version + " : " + it.kind);
+  }
+});

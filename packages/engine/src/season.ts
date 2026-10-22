@@ -329,6 +329,8 @@ export function playSeason(s: CareerState) {
     s.history.push({ age: s.age, text: tx(s, "goldenBoot"), impact: 12 });
   }
 
+  // Sélections de jeunes de la saison = écart des totaux (U17 à U23, Jeux compris).
+  const youthBefore = s.youth ? { caps: s.youth.caps, goals: s.youth.goals } : { caps: 0, goals: 0 };
   youthSelections(s, report);
 
   // Mode Histoire : la finale mondiale scénarisée impose la sélection cette
@@ -372,6 +374,10 @@ export function playSeason(s: CareerState) {
     else if (isContinentalYear(s.year)) { report.cont = playContinental(s, report); report.caps += report.cont.games; report.natGoals += report.cont.goals; noteCompScorer(s, report, "cont", report.cont.goals); }
     else if (nlYear) { report.natl = playNationsLeague(s, report); report.caps += report.natl.games; report.natGoals += report.natl.goals; noteCompScorer(s, report, "natl", report.natl.goals); }
     else if (arabYear) { report.arab = playArabCup(s, report); report.caps += report.arab.games; report.natGoals += report.arab.goals; noteCompScorer(s, report, "arab", report.arab.goals); }
+    // Passes décisives en sélection, pour l'historique : déduites des matchs et du
+    // niveau de la saison, SANS tirage — aucune carrière ne change de déroulé.
+    report.natAssists = Math.max(0, Math.round(report.caps * s.position.assistRate * perf * 0.9));
+    s.natTeam.assists = (s.natTeam.assists || 0) + report.natAssists;
   }
 
   // Jeux Olympiques (années %4==3, sans tournoi A) : tournoi U23, ouvert aux
@@ -467,6 +473,11 @@ export function playSeason(s: CareerState) {
   // ne consomme pas de hasard et ne change donc rien au déroulé de carrière.
   const mv = Math.round(marketValue(s) * 10) / 10;
   s.seasons.push({ age: s.age, year: s.year, clubName: s.club.name, countryId: s.club.countryId, level: lvl, matches, goals: report.goals, assists: report.assists, cleanSheets: report.cleanSheets, rating: report.rating, trophies: report.trophies, divisionTitle: !!report.divisionTitle, onLoan: !!s.loan, leaguePos: report.leaguePos, mv });
+  // Historique en sélection : seulement les saisons où le joueur a été appelé.
+  const seasonRec = s.seasons[s.seasons.length - 1];
+  if (report.caps) seasonRec.nat = { caps: report.caps, goals: report.natGoals || 0, assists: report.natAssists || 0 };
+  const youthCaps = s.youth ? s.youth.caps - youthBefore.caps : 0;
+  if (youthCaps > 0) seasonRec.youthNat = { caps: youthCaps, goals: s.youth.goals - youthBefore.goals };
 
   // Relations
   if (rating >= 7.4) s.coachRel = clamp(s.coachRel + 4, 5, 100);

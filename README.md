@@ -112,6 +112,8 @@ npm run dev:server                          # le serveur, sur http://localhost:3
 
 Les tests rejouent 240 carrières de référence et vérifient qu'elles restent identiques à l'octet près : une refonte interne ne doit rien y changer. Un changement de règle voulu se fait en avançant `ENGINE_VERSION` (`packages/engine/src/version.ts`), puis en régénérant la référence avec `node packages/engine/scripts/make-golden.js`.
 
+Chaque version a sa note, écrite pour les joueurs et affichée dans l'écran « 📜 Nouveautés » de l'accueil : une entrée en tête de [`packages/content/src/changelog.ts`](packages/content/src/changelog.ts), au numéro de `ENGINE_VERSION`. `npm test` échoue tant qu'elle manque.
+
 **Traduction anglaise.** Le pack `packages/web/public/i18n-data.js` associe chaque texte français du contenu à sa traduction. Modifier ou ajouter un texte du contenu fait échouer `npm test` tant qu'il n'est pas traduit ; l'outil `node packages/web/scripts/i18n.js` dit quoi (`--missing` sort un JSON à remplir, `--add` le fusionne, `--prune` retire les entrées devenues inutiles).
 
 **Pile complète sous Docker, avec un faux serveur d'e-mails** (pour les parcours de compte) :

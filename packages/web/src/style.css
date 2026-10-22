@@ -2237,3 +2237,54 @@ body { color: var(--text-0); }
 .pantheon-see { margin: 8px 0 0; font-size: 0.74rem; font-weight: 600; color: var(--green-ink); opacity: 0.75; }
 .pantheon-empty { text-align: center; color: var(--on-green-soft); font-style: italic; margin-top: 40px; }
 /* (l'alignement du Retour est géré par .screen-back — en haut à gauche) */
+
+/* ---------- Nouveautés (notes de mise à jour) ---------- */
+.news-link {
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 10px; padding: 6px 14px;
+  background: transparent; border: 1px solid var(--on-green-faint); border-radius: 999px;
+  color: var(--on-green); font-family: var(--font); font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease;
+}
+.news-link:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--on-green); }
+.news-dot {
+  background: var(--gold-bright); color: var(--green-ink);
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 2px 7px; border-radius: 999px;
+}
+.news-dot[hidden] { display: none; }
+.version-line { text-align: center; color: var(--on-green-faint); font-size: 0.7rem; margin: 6px 0 0; }
+.news-list { width: 100%; max-width: 640px; margin: 0 auto 20px; display: flex; flex-direction: column; gap: 14px; }
+.news-entry {
+  background: var(--card-bg); color: var(--green-ink);
+  border-radius: 16px; padding: 16px 18px; box-shadow: 0 4px 12px var(--shadow);
+  border: 2px solid transparent;
+}
+.news-entry.latest { border-color: var(--gold-bright); }
+.news-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.news-version { font-weight: 800; color: var(--green); }
+.news-date { font-size: 0.78rem; opacity: 0.7; }
+.news-title { margin: 4px 0 8px; font-size: 1.05rem; }
+.news-kind { margin: 10px 0 4px; font-size: 0.8rem; font-weight: 800; color: var(--accent-soft); }
+.news-entry ul { margin: 0; padding-left: 20px; }
+.news-entry li { font-size: 0.88rem; line-height: 1.45; margin: 3px 0; }
+
+/* ---------- Saisons : classement du club, et sélection saison par saison ---------- */
+.season-pos { width: 30px; text-align: center; font-weight: 700; color: var(--gold-soft); white-space: nowrap; }
+.season-head { font-weight: 700; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.64rem; border-bottom-style: solid; }
+.season-head .season-club, .season-head .season-stats { color: var(--text-1); }
+.nat-total { font-size: 0.78rem; font-weight: 700; color: var(--text-0); padding: 2px 0 6px; border-bottom: 1px solid var(--line); }
+.nat-row { display: flex; align-items: flex-start; gap: 8px; font-size: 0.74rem; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.nat-row:last-child { border-bottom: none; }
+.nat-year { width: 36px; color: var(--text-1); }
+.nat-detail { flex: 1; display: flex; flex-direction: column; gap: 2px; color: var(--text-0); }
+.nat-line strong { color: var(--gold-soft); }
+.nat-comp { color: var(--text-1); }
+/* Sur téléphone, les chiffres passent sous le club : le nom reste lisible. */
+@media (max-width: 520px) {
+  .season-row { flex-wrap: wrap; row-gap: 0; }
+  .season-club { flex: 1 1 0; min-width: 0; }
+  .season-stats { order: 5; width: 100%; padding-left: 30px; font-size: 0.7rem; }
+  .season-head .season-stats { display: none; }
+}
