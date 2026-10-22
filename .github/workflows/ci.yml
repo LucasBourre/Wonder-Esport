@@ -1,12 +1,11 @@
 # Intégration continue : à chaque envoi sur main et à chaque demande de fusion, tout est rejoué.
 #
-#   verification  types, tests unitaires, audit de traduction, assemblage, parcours navigateur
-#                 sans serveur (solo, tournois, hors-ligne)
+#   verification  types, tests unitaires, audit de traduction, assemblage
 #   serveur       le serveur contre une vraie base Postgres et un faux serveur d'e-mails
-#   pile          la pile Docker complète, puis les parcours navigateur qui en ont besoin
-#                 (compte, amis, salles, carrière commune à deux, e-mails)
-#   deploiement   sur main seulement, une fois les trois autres au vert : met le serveur
+#   deploiement   sur main seulement, une fois les deux autres au vert : met le serveur
 #                 à jour par SSH en lançant deploy/deploy.sh
+#
+# Les parcours navigateur (npm run test:e2e) ne tournent qu'en local.
 name: CI
 
 on:
@@ -35,8 +34,6 @@ jobs:
         run: npm test
       - name: Assemblage
         run: npm run build
-      - name: Parcours navigateur (version assemblée)
-        run: npm run test:e2e
 
   serveur:
     runs-on: ubuntu-latest
@@ -69,35 +66,9 @@ jobs:
           MAILPIT_URL: http://localhost:8025
           SMTP_URL: smtp://localhost:1025
 
-  pile:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      POSTGRES_PASSWORD: ci-essai-123
-      PUBLIC_URL: http://localhost:8080
-      HTTP_PORT: "8080"
-      HTTPS_PORT: "8443"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - name: Construire et démarrer la pile (base, serveur, Caddy, faux serveur d'e-mails)
-        run: docker compose -f compose.yaml -f compose.test.yaml up -d --build --wait
-      - name: Parcours navigateur sur la pile
-        run: npm run test:e2e
-        env:
-          E2E_URL: http://localhost:8080
-          E2E_MAILPIT: http://localhost:8025
-      - name: Journaux en cas d'échec
-        if: failure()
-        run: docker compose -f compose.yaml -f compose.test.yaml logs --no-color --tail=200
-
   deploiement:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [verification, serveur, pile]
+    needs: [verification, serveur]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
