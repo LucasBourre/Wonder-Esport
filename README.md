@@ -9,8 +9,7 @@ Chaque choix compte, et personne ne connaît son destin à l'avance.
 
 ![License](https://img.shields.io/badge/Licence-GPL%20v3-blue)
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8)
-![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E)
-![Dependencies](https://img.shields.io/badge/d%C3%A9pendances-0-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6)
 
 </div>
 
@@ -38,7 +37,8 @@ En club comme en sélection, tout se joue :
 - 🎖️ **Championnat** et **Coupe Nationale** (la gagner, même en D2, ouvre les portes des compétitions continentales)
 - 👑 **Coupe des Champions** sur les cinq continents, plus des paliers secondaires selon la profondeur de chacun : **Trophée** (Europe, Asie, Afrique, Amérique) et **Bouclier** (Europe, Asie)
 - 🏆 **Coupe du Monde**
-- 🌍 Le championnat continental de votre nation : **Euro**, **Coupe d'Amérique**, **Coupe d'Afrique des Nations**, **Coupe d'Asie**, **Coupe d'Océanie** — plus la **Ligue des Sélections** européenne, disputée entre deux grands tournois
+- 🌍 Le championnat continental de votre nation : **Euro**, **Coupe d'Amérique**, **Coupe d'Afrique des Nations**, **Coupe d'Asie**, **Coupe d'Océanie** — plus la **Ligue des Sélections** européenne, disputée entre deux grands tournois, et son pendant pour les 22 nations arabes : la **Coupe arabe**
+- 🥇 Les **Jeux Olympiques** (tournoi U23, médailles or, argent et bronze) et leurs équivalents continentaux : **Jeux asiatiques**, **Jeux africains**, **Jeux panaméricains** et **Jeux du Pacifique**, proposés à ceux que le grand tournoi de l'année n'a pas retenus
 - ⭐ Le **Ballon d'Or**, pour les plus grands, et son pendant continental — **Asie, Afrique, Océanie** — pour des talents parfois moins sous les projecteurs (les deux sont cumulables sur une même carrière)
 - 👟 Le **Soulier d'Or**, pour les serial buteurs
 
@@ -54,7 +54,7 @@ En club comme en sélection, tout se joue :
 ## ✨ Et de quoi revenir chaque jour
 
 - 🛒 Une **boutique** de jetons et d'avantages de départ
-- 🏅 **43 badges** à débloquer
+- 🏅 **45 badges** à débloquer
 - ⭐ Un **système de niveau et d'expérience**, gagné à chaque carrière, avec son propre classement mondial
 - 🎯 Des **quêtes** du jour, de la semaine et légendaires
 - 🔥 Des **séries** à entretenir
@@ -65,7 +65,65 @@ En club comme en sélection, tout se joue :
 
 Le jeu est jouable en ligne, directement ici : **[openeleven.laugh.yt](https://openeleven.laugh.yt)**.
 
-Vous pouvez aussi le lancer en local : ouvrez simplement le fichier **`index.html`** dans votre navigateur et le jeu démarre immédiatement, sans rien avoir à installer.
+## 🐳 L'héberger soi-même
+
+Tout le jeu tient dans trois conteneurs : la base de données (PostgreSQL), le serveur du jeu, et [Caddy](https://caddyserver.com) devant, qui sert les pages et s'occupe du HTTPS. Il suffit de [Docker](https://docs.docker.com/get-docker/).
+
+```
+cp .env.example .env            # puis renseigner .env (mot de passe de la base, adresse du site)
+docker compose up -d --build
+```
+
+Le jeu répond alors sur l'adresse indiquée dans `.env` (par défaut http://localhost). Le fichier [`.env.example`](.env.example) décrit chaque réglage : avec un nom de domaine dans `SITE_ADDRESS`, le certificat HTTPS est obtenu et renouvelé tout seul ; avec `SMTP_URL`, les inscriptions sont confirmées par e-mail et le mot de passe oublié fonctionne.
+
+Les données vivent dans le volume Docker `db-data`. Pour une sauvegarde : `docker compose exec db pg_dump -U openeleven openeleven > sauvegarde.sql`.
+
+## 🛠️ Développement
+
+Il faut [Node.js](https://nodejs.org) 22 ou plus récent. Le dépôt est découpé en paquets, chacun avec un rôle unique :
+
+| Paquet | Rôle |
+|--------|------|
+| [`packages/content`](packages/content/src) | Le **contenu** : clubs, nations, événements, textes, équilibrage. Des données pures, aucune logique. |
+| [`packages/engine`](packages/engine/src) | Le **moteur** : toutes les règles du jeu, déterministes, sans aucun accès au navigateur. |
+| [`packages/web`](packages/web) | L'**interface** : pages, styles et écrans, assemblés par [Vite](https://vite.dev). |
+| [`packages/server`](packages/server) | Le **serveur** : comptes, sauvegardes, amis, duels, salles, et les classements — il rejoue chaque carrière avec le même moteur pour vérifier les scores. |
+
+```
+npm install
+npm run dev                                 # l'interface, sur http://localhost:5173
+```
+
+Le jeu en solo fonctionne ainsi, sans rien d'autre. Pour le compte, les classements et les salles, il faut aussi la base et le serveur :
+
+```
+docker compose -f compose.dev.yaml up -d    # la base seule, sur localhost:5432
+npm run dev:server                          # le serveur, sur http://localhost:3000
+```
+
+### Contrôles
+
+| Commande | Ce qu'elle vérifie |
+|----------|--------------------|
+| `npm run check` | Types (moteur, contenu et serveur en `strict`), tests unitaires, assemblage. C'est ce que fait le CI à chaque envoi. |
+| `npm test` | Moteur, contenu et traduction (voir plus bas). Aucune dépendance externe. |
+| `npm run test:server` | Le serveur, de vraies requêtes sur de vrais serveurs et une vraie base. Demande `DATABASE_URL` ; avec `MAILPIT_URL` et `SMTP_URL`, il teste aussi les e-mails. |
+| `npm run test:e2e` | Un vrai navigateur joue le jeu (solo, tournois, hors-ligne). Avec `E2E_URL` (une pile lancée), aussi le compte, les amis, les salles et la carrière à deux. |
+
+Les tests rejouent 240 carrières de référence et vérifient qu'elles restent identiques à l'octet près : une refonte interne ne doit rien y changer. Un changement de règle voulu se fait en avançant `ENGINE_VERSION` (`packages/engine/src/version.ts`), puis en régénérant la référence avec `node packages/engine/scripts/make-golden.js`.
+
+**Traduction anglaise.** Le pack `packages/web/public/i18n-data.js` associe chaque texte français du contenu à sa traduction. Modifier ou ajouter un texte du contenu fait échouer `npm test` tant qu'il n'est pas traduit ; l'outil `node packages/web/scripts/i18n.js` dit quoi (`--missing` sort un JSON à remplir, `--add` le fusionne, `--prune` retire les entrées devenues inutiles).
+
+**Pile complète sous Docker, avec un faux serveur d'e-mails** (pour les parcours de compte) :
+
+```
+docker compose -f compose.yaml -f compose.test.yaml up -d --build
+E2E_URL=http://localhost:8080 E2E_MAILPIT=http://localhost:8025 npm run test:e2e
+```
+
+Le navigateur des tests se trouve tout seul (Chrome, Edge, Chromium) ; `CHROME_PATH` force un chemin. Les e-mails reçus se consultent à la main sur http://localhost:8025.
+
+Le schéma de la base est dans [`packages/server/migrations`](packages/server/migrations) : le serveur applique au démarrage les fichiers qui ne l'ont pas encore été. On ne modifie jamais un fichier déjà appliqué, on en ajoute un.
 
 ## 📄 Licence
 

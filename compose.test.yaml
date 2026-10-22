@@ -1,0 +1,23 @@
+# Pile de TEST : la pile normale + Mailpit, un faux serveur d'e-mails qui garde tout ce
+# qu'on lui envoie et l'expose par une petite API. Le serveur du jeu y envoie ses e-mails
+# (confirmation d'inscription, mot de passe oublié) comme à un vrai fournisseur.
+#
+#   docker compose -f compose.yaml -f compose.test.yaml up -d --build
+#   E2E_URL=http://localhost:8080 E2E_MAILPIT=http://localhost:8025 npm run test:e2e
+#
+# La boîte de réception se consulte aussi à la main sur http://localhost:8025.
+# À NE PAS utiliser en production : aucun e-mail n'atteint un vrai destinataire.
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  server:
+    depends_on:
+      mailpit:
+        condition: service_started
+    environment:
+      SMTP_URL: smtp://mailpit:1025
+      MAIL_FROM: "Open Eleven <no-reply@exemple.test>"

@@ -1,0 +1,25 @@
+{
+  "name": "open-eleven",
+  "private": true,
+  "description": "Open Eleven — jeu de carrière de footballeur.",
+  "license": "GPL-3.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @open-eleven/web",
+    "dev:server": "npm run dev -w @open-eleven/server",
+    "build": "npm run build -w @open-eleven/web && npm run build -w @open-eleven/server",
+    "preview": "npm run preview -w @open-eleven/web",
+    "typecheck": "tsc -p packages/content && tsc -p packages/engine && tsc -p packages/web && tsc -p packages/server",
+    "test": "node --test \"packages/*/test/*.test.js\"",
+    "check": "npm run typecheck && npm test && npm run build",
+    "test:e2e": "node packages/web/e2e/run.js",
+    "test:server": "node packages/server/scripts/integration.js",
+    "sauvegarde:supabase": "node packages/server/scripts/export-supabase.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  }
+}

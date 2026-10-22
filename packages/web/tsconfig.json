@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    // Le code de l'interface vient de JavaScript : il est typé progressivement. Le contenu et le
+    // moteur qu'il appelle, eux, sont en `strict` complet — c'est là que les fautes se rattrapent.
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "include": ["src"]
+}

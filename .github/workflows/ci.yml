@@ -1,0 +1,94 @@
+# Intégration continue : à chaque envoi sur main et à chaque demande de fusion, tout est rejoué.
+#
+#   verification  types, tests unitaires, audit de traduction, assemblage, parcours navigateur
+#                 sans serveur (solo, tournois, hors-ligne)
+#   serveur       le serveur contre une vraie base Postgres et un faux serveur d'e-mails
+#   pile          la pile Docker complète, puis les parcours navigateur qui en ont besoin
+#                 (compte, amis, salles, carrière commune à deux, e-mails)
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Types
+        run: npm run typecheck
+      - name: Tests (moteur, contenu, traduction)
+        run: npm test
+      - name: Assemblage
+        run: npm run build
+      - name: Parcours navigateur (version assemblée)
+        run: npm run test:e2e
+
+  serveur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: openeleven
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d openeleven"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+      mailpit:
+        image: axllent/mailpit:latest
+        ports: ["1025:1025", "8025:8025"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @open-eleven/server
+      - name: Tests du serveur
+        run: npm run test:server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/openeleven
+          MAILPIT_URL: http://localhost:8025
+          SMTP_URL: smtp://localhost:1025
+
+  pile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      POSTGRES_PASSWORD: ci-essai-123
+      PUBLIC_URL: http://localhost:8080
+      HTTP_PORT: "8080"
+      HTTPS_PORT: "8443"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Construire et démarrer la pile (base, serveur, Caddy, faux serveur d'e-mails)
+        run: docker compose -f compose.yaml -f compose.test.yaml up -d --build --wait
+      - name: Parcours navigateur sur la pile
+        run: npm run test:e2e
+        env:
+          E2E_URL: http://localhost:8080
+          E2E_MAILPIT: http://localhost:8025
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: docker compose -f compose.yaml -f compose.test.yaml logs --no-color --tail=200

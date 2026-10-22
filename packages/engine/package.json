@@ -1,0 +1,11 @@
+{
+  "name": "@open-eleven/engine",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Moteur de jeu : logique pure et déterministe, aucun accès au DOM. Tourne à l'identique dans le navigateur et sur le serveur.",
+  "license": "GPL-3.0",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@open-eleven/content": "*"
+  }
+}

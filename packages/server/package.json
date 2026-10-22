@@ -1,0 +1,30 @@
+{
+  "name": "@open-eleven/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Serveur du jeu : comptes, sauvegardes, classements vérifiés, amis, duels et salles.",
+  "license": "GPL-3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "node scripts/build.js",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.0",
+    "@fastify/websocket": "^11.0.0",
+    "@open-eleven/content": "*",
+    "@open-eleven/engine": "*",
+    "bcryptjs": "^3.0.0",
+    "fastify": "^5.0.0",
+    "nodemailer": "^10.0.16",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.11.0",
+    "@types/ws": "^8.5.0",
+    "tsx": "^4.19.0"
+  }
+}

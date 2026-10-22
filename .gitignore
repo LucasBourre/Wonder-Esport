@@ -1,1 +1,4 @@
-supabase/.temp/linked-project.json
+node_modules/
+dist/
+.env
+sauvegardes/

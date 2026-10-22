@@ -1,0 +1,8 @@
+{
+  "name": "@open-eleven/content",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Contenu du jeu : clubs, nations, événements, textes, équilibrage. Données pures, aucune logique.",
+  "license": "GPL-3.0",
+  "exports": "./src/index.ts"
+}

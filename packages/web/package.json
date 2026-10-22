@@ -1,0 +1,20 @@
+{
+  "name": "@open-eleven/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Interface du jeu : pages, styles et écrans, assemblés par Vite.",
+  "license": "GPL-3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@open-eleven/content": "*",
+    "@open-eleven/engine": "*"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
