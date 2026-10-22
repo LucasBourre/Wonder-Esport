@@ -33,6 +33,9 @@ const target = new pg.Client({ connectionString: targetUrl });
 await source.connect();
 await target.connect();
 
+// Les compteurs globaux grimpent dès qu'on joue : s'il en existe déjà sur le serveur, on additionne.
+const ON_CONFLICT = { stats_totaux: " on conflict (nom) do update set valeur = stats_totaux.valeur + excluded.valeur, maj = greatest(stats_totaux.maj, excluded.maj)" };
+
 async function insertRows(table, columns, jsonColumns, rows) {
   for (let i = 0; i < rows.length; i += BATCH) {
     const chunk = rows.slice(i, i + BATCH);
@@ -42,7 +45,7 @@ async function insertRows(table, columns, jsonColumns, rows) {
       values.push(jsonColumns.has(c) && row[c] !== null ? JSON.stringify(row[c]) : row[c]);
       return "$" + values.length + (jsonColumns.has(c) ? "::jsonb" : "");
     }).join(", ") + ")");
-    await target.query("insert into " + table + " (" + columns.join(", ") + ") values " + tuples.join(", "), values);
+    await target.query("insert into " + table + " (" + columns.join(", ") + ") values " + tuples.join(", ") + (ON_CONFLICT[table] ?? ""), values);
   }
 }
 
@@ -66,8 +69,12 @@ try {
   for (const table of TABLES) {
     const cols = (await target.query(
       "select column_name, data_type from information_schema.columns where table_schema = 'public' and table_name = $1 order by ordinal_position", [table])).rows;
-    const columns = cols.map((c) => c.column_name);
-    const jsonColumns = new Set(cols.filter((c) => c.data_type === "jsonb").map((c) => c.column_name));
+    // Une colonne ajoutée depuis (migration 002…) n'existe pas dans la source : elle garde sa valeur par défaut.
+    const inSource = new Set((await source.query(
+      "select column_name from information_schema.columns where table_schema = 'public' and table_name = $1", [table])).rows.map((c) => c.column_name));
+    if (!inSource.size) { console.log(table.padEnd(16), "absente de la source, ignorée"); continue; }
+    const columns = cols.map((c) => c.column_name).filter((c) => inSource.has(c));
+    const jsonColumns = new Set(cols.filter((c) => c.data_type === "jsonb" && inSource.has(c.column_name)).map((c) => c.column_name));
     let rows;
     try {
       rows = (await source.query("select " + columns.join(", ") + " from public." + table)).rows;
