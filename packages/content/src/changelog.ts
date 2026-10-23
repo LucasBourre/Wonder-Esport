@@ -19,6 +19,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "10.85",
+    date: "2026-10-24",
+    title: "Classement du championnat",
+    items: [
+      { kind: "fix", text: "Un club ne peut plus finir premier de son championnat sans être sacré champion : la première place est désormais réservée au titre." },
+    ],
+  },
+  {
     version: "10.84",
     date: "2026-10-23",
     title: "Neuf nouveaux événements",

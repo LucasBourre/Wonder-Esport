@@ -272,7 +272,8 @@ export function playSeason(s: CareerState) {
       // décidés par un tirage sur lequel le joueur n'avait aucune prise. On réutilise
       // l'écart à la note de référence (même 6.6 que teamBoost) pour décaler le rang.
       const [lo, hi] = lvl === "elite" ? [2, 7] : lvl === "d1" ? [2, 12] : [4, 14];
-      report.leaguePos = clamp(randInt(lo, hi) - Math.round((rating - 6.6) * 2.4), 1, hi + 2);
+      // Jamais 1er ici : la première place est celle du champion, décidée plus haut.
+      report.leaguePos = clamp(randInt(lo, hi) - Math.round((rating - 6.6) * 2.4), 2, hi + 2);
     }
   }
 

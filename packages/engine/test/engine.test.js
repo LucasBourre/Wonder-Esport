@@ -184,3 +184,16 @@ test("salle : deux joueurs du même club vivent exactement la même saison de cl
   }
   assert.ok(pos.size >= 4, "classements trop uniformes : " + [...pos]);
 });
+
+test("la première place du championnat est réservée au champion", () => {
+  const bad = [];
+  for (let i = 0; i < 400; i++) {
+    const choices = Array.from({ length: 400 }, (_, k) => ((i * 7 + k * 3 + (k % 5) * i) % 5) - 1);
+    const s = E.replayDuel(70001 + i * 97, choices);
+    for (const se of s.seasons) {
+      const champion = (se.trophies || []).includes("league") || se.divisionTitle;
+      if (se.leaguePos === 1 && !champion) bad.push(se.year + " " + se.clubName);
+    }
+  }
+  assert.deepEqual(bad.slice(0, 5), [], bad.length + " saison(s) finie(s) 1re sans titre");
+});

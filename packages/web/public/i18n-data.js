@@ -4139,5 +4139,7 @@ window.I18N_DATA = { en: {
  "Réseaux : une vidéo de vous devient un mème mondial, et un faux compte à votre nom arnaque vos supporters.": "Social media: a video of you becomes a global meme, and a fake account in your name scams your fans.",
  "Rivalité : votre rival vous provoque avant un derby, puis vous dispute la même place en sélection.": "Rivalry: your rival taunts you before a derby, then fights you for the same spot in the national team.",
  "Records : la légende du club qui détient le record de buts n'apprécie pas de vous voir approcher.": "Records: the club legend who holds the scoring record does not like seeing you close in.",
- "Retraite : un dernier défi dans votre pays natal, et un ancien coéquipier devenu entraîneur qui veut vous dans son staff.": "Retirement: one last challenge in your home country, and a former teammate turned coach who wants you on his staff."
+ "Retraite : un dernier défi dans votre pays natal, et un ancien coéquipier devenu entraîneur qui veut vous dans son staff.": "Retirement: one last challenge in your home country, and a former teammate turned coach who wants you on his staff.",
+ "Classement du championnat": "League standings",
+ "Un club ne peut plus finir premier de son championnat sans être sacré champion : la première place est désormais réservée au titre.": "A club can no longer finish first in its league without being crowned champion: first place is now reserved for the title."
 } };

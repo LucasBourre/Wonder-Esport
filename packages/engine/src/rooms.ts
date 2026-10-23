@@ -114,7 +114,7 @@ export function roomClubSeason(s: CareerState, lvl: LevelId, isTopFlight: boolea
   else if (relegDirect) leaguePos = lvl === "d1" ? at(16, 18) : at(17, 19);
   else {
     const [lo, hi] = lvl === "elite" ? [2, 7] : lvl === "d1" ? [2, 12] : [4, 14];
-    leaguePos = clamp(at(lo, hi) - Math.round((rating - 6.6) * 2.4), 1, hi + 2);
+    leaguePos = clamp(at(lo, hi) - Math.round((rating - 6.6) * 2.4), 2, hi + 2); // 1er = champion seulement
   }
   return { title, playoff, playoffWin, relegDirect, relegPlayoff, relegWin, cupFinal, cupWin, contTier, contFinal, contWin, leaguePos };
 }
