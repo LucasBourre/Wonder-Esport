@@ -19,6 +19,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "10.84",
+    date: "2026-10-23",
+    title: "Neuf nouveaux événements",
+    items: [
+      { kind: "new", text: "Physique : un régime extrême avant un grand tournoi, et une cabine de cryothérapie qui divise le vestiaire." },
+      { kind: "new", text: "Réseaux : une vidéo de vous devient un mème mondial, et un faux compte à votre nom arnaque vos supporters." },
+      { kind: "new", text: "Rivalité : votre rival vous provoque avant un derby, puis vous dispute la même place en sélection." },
+      { kind: "new", text: "Records : la légende du club qui détient le record de buts n'apprécie pas de vous voir approcher." },
+      { kind: "new", text: "Retraite : un dernier défi dans votre pays natal, et un ancien coéquipier devenu entraîneur qui veut vous dans son staff." },
+    ],
+  },
+  {
     version: "10.83",
     date: "2026-10-23",
     title: "Nouveau site et nouvelles compétitions",

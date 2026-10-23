@@ -4768,6 +4768,177 @@ export const EVENTS: GameEvent[] = [
       ] },
     ],
   },
+  // --- Ajouts 10.84 : physique, réseaux, rivalité, records, retraite ----------------
+  {
+    id: "ev_extreme_diet", cat: "Physique", icon: "🥗", w: 9,
+    cond: { aMin: 21, aMax: 33, nat: true },
+    text: "À quelques semaines du grand rendez-vous avec {nat}, un préparateur réputé vous propose un régime extrême : sec, strict, millimétré. « Vous arriverez affûté comme jamais. »",
+    options: [
+      { label: "Suivre le régime à la lettre", hint: "Radical", outcomes: [
+        { weight: 45, text: "Plus léger, plus vif : vous démarrez la compétition dans la forme de votre vie.", fx: { p: 4, form: 10, mor: 4 } },
+        { weight: 35, text: "Le corps proteste : fatigue, crampes, sommeil haché. Vous arrivez vidé.", fx: { form: -8, mor: -5 } },
+        { weight: 20, text: "Une déchirure musculaire en pleine préparation : le régime a tout fragilisé.", fx: { p: -3, inj: 6, mor: -7 } },
+      ] },
+      { label: "Prendre ce qui est sain, laisser l'excès", outcomes: [
+        { weight: 70, text: "Quelques ajustements intelligents, sans rien casser : vous arrivez prêt.", fx: { p: 2, form: 4, dis: 3 } },
+        { weight: 30, text: "Le préparateur vous trouve « pas assez sérieux » et le fait savoir.", fx: { form: 2, mor: -2, rep: -1 } },
+      ] },
+      { label: "Refuser, et garder vos habitudes", outcomes: [
+        { weight: 60, text: "Vous connaissez votre corps mieux que quiconque. Rien ne change, et c'est très bien.", fx: { mor: 3 } },
+        { weight: 40, text: "Les autres arrivent affûtés, vous un peu lourd : le staff le remarque.", fx: { form: -4, coach: -3 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_cryo_divide", cat: "Physique", icon: "🧊", w: 12,
+    cond: { aMin: 22, aMax: 36, levels: ["d1", "elite"] },
+    text: "Le club installe une cabine de cryothérapie à −110 °C, présentée comme miraculeuse. Le vestiaire se coupe en deux : les convaincus, et ceux qui y voient une lubie coûteuse.",
+    options: [
+      { label: "Y passer tous les jours, et le dire", outcomes: [
+        { weight: 50, text: "Récupération éclair : vous enchaînez les matchs sans fatigue apparente.", fx: { p: 3, form: 6, coach: 3 } },
+        { weight: 30, text: "Les sceptiques vous prennent pour le chouchou du préparateur.", fx: { form: 3, team: -5 } },
+        { weight: 20, text: "Une engelure bête, le jour d'un gros match : la blague fait le tour du club.", fx: { inj: 2, mor: -4, rep: -2 } },
+      ] },
+      { label: "Rester avec les sceptiques", outcomes: [
+        { weight: 55, text: "Bain froid, sommeil et étirements : la vieille école tient la route, et le groupe vous suit.", fx: { team: 4, mor: 2 } },
+        { weight: 45, text: "Le staff y voit de la mauvaise volonté.", fx: { coach: -4, form: -2 } },
+      ] },
+      { label: "Jouer les médiateurs", hint: "Leader", outcomes: [
+        { weight: 60, text: "Chacun son protocole, et tout le monde se parle : vous apaisez la querelle.", fx: { team: 6, c: 3, coach: 2 } },
+        { weight: 40, text: "En voulant contenter tout le monde, vous n'en convainquez aucun.", fx: { team: -2, mor: -2 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_meme_viral", cat: "Réseaux", icon: "😂", w: 9,
+    cond: { aMin: 18, aMax: 34, minRep: 30 },
+    text: "Une vidéo de vous, détournée et remontée, fait le tour du monde : votre grimace après une occasion ratée est devenue LE mème du moment. Des millions de partages en deux jours.",
+    options: [
+      { label: "En rire, et le reprendre à votre compte", hint: "Showman", outcomes: [
+        { weight: 55, text: "Vous rejouez la grimace après votre but suivant : Internet vous adore.", fx: { rep: 7, mor: 6, money: 0.3 } },
+        { weight: 30, text: "Les marques s'arrachent votre image ; un contrat publicitaire tombe.", fx: { rep: 4, money: 0.8, mor: 4 } },
+        { weight: 15, text: "Le coach goûte peu le cirque : « on joue au football ici ».", fx: { rep: 3, coach: -5 } },
+      ] },
+      { label: "Ignorer, et parler sur le terrain", outcomes: [
+        { weight: 60, text: "Le buzz retombe aussi vite qu'il est venu. Vous, vous êtes resté concentré.", fx: { m: 2, form: 3 } },
+        { weight: 40, text: "Votre silence est pris pour de la vexation ; le mème redouble.", fx: { mor: -4, rep: -1 } },
+      ] },
+      { label: "Demander le retrait de la vidéo", outcomes: [
+        { weight: 40, text: "Les plateformes la retirent. Une partie du public vous trouve susceptible.", fx: { rep: -3, mor: 2 } },
+        { weight: 60, text: "Effet inverse garanti : la vidéo est partout, avec votre demande en prime.", fx: { rep: -4, mor: -5 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_fake_account", cat: "Réseaux", icon: "🎭", w: 8,
+    cond: { aMin: 19, aMax: 36, minRep: 40 },
+    text: "Un faux compte à votre nom, photo et ton compris, promet des maillots dédicacés contre paiement. Des dizaines de supporters ont payé… et n'ont rien reçu.",
+    options: [
+      { label: "Rembourser les victimes de votre poche", outcomes: [
+        { weight: 70, text: "Le geste fait la une : des supporters reconnaissants, une image grandie.", fx: { money: -0.4, rep: 6, mor: 4 } },
+        { weight: 30, text: "Les fausses victimes affluent : la note grimpe, mais votre image est sauve.", fx: { money: -0.8, rep: 4 } },
+      ] },
+      { label: "Porter plainte et alerter publiquement", outcomes: [
+        { weight: 60, text: "Le compte tombe en quelques jours, l'escroc est identifié. Affaire réglée.", fx: { rep: 3, mor: 3 } },
+        { weight: 40, text: "L'enquête traîne ; d'autres faux comptes apparaissent entre-temps.", fx: { mor: -4, rep: -1 } },
+      ] },
+      { label: "Laisser votre agent gérer en silence", outcomes: [
+        { weight: 50, text: "C'est réglé discrètement. Personne n'en parle plus.", fx: { mor: 1 } },
+        { weight: 50, text: "« Il s'en fiche de ses supporters » : le reproche colle.", fx: { rep: -5, mor: -3 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_rival_derby_taunt", cat: "Rivalité", icon: "🎙️", w: 10,
+    cond: { aMin: 20, aMax: 34, minRep: 35 },
+    text: "Veille de derby. En conférence de presse, {rival} vous vise nommément : « Lui ? Il disparaît dans les grands matchs. » La phrase tourne en boucle.",
+    options: [
+      { label: "Répondre sur le terrain, sans un mot", outcomes: [
+        { weight: 50, text: "Un but, un regard vers la tribune, et le silence. La meilleure des réponses.", fx: { rep: 6, mor: 8, form: 4 } },
+        { weight: 50, text: "Le derby se joue sans vous : discret, presque absent. La phrase vous colle.", fx: { rep: -3, mor: -5 } },
+      ] },
+      { label: "Rendre la pique au micro", hint: "Provocateur", outcomes: [
+        { weight: 45, text: "La réplique est brillante, les réseaux s'enflamment : vous gagnez la bataille des mots.", fx: { rep: 5, mor: 5, dis: -2 } },
+        { weight: 35, text: "Le ton monte, le match dégénère : un carton rouge pour vous.", fx: { dis: -6, coach: -4, mor: -4, ban: 2 } },
+        { weight: 20, text: "La fédération ouvre une procédure pour propos déplacés.", fx: { rep: -3, money: -0.2, coach: -3 } },
+      ] },
+      { label: "Désamorcer avec humour", outcomes: [
+        { weight: 65, text: "« Il me suit de près, au moins. » Le public rit, la tension retombe à votre avantage.", fx: { rep: 4, c: 2, mor: 4 } },
+        { weight: 35, text: "La blague tombe à plat, mais vous avez évité le piège.", fx: { mor: 1 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_rival_nat_spot", cat: "Rivalité", icon: "⚖️", w: 9,
+    cond: { aMin: 21, aMax: 33, nat: true },
+    text: "En sélection avec {nat}, le sélectionneur hésite entre vous et {rival} pour la même place. Il vous convoque : « Convainquez-moi. »",
+    options: [
+      { label: "Tout donner à l'entraînement", outcomes: [
+        { weight: 55, text: "Vous êtes partout, et c'est vous qui démarrez. {rival} devra patienter.", fx: { form: 6, mor: 6, rep: 3 } },
+        { weight: 45, text: "Vous forcez, vous vous crispez : la place revient à {rival}.", fx: { mor: -6, form: -3 } },
+      ] },
+      { label: "Proposer de jouer ensemble", hint: "Collectif", outcomes: [
+        { weight: 50, text: "Le sélectionneur essaie le duo : complémentaires, vous impressionnez tout le monde.", fx: { rep: 4, c: 3, team: 5 } },
+        { weight: 50, text: "« On ne fait pas une équipe pour faire plaisir. » L'idée tombe à l'eau.", fx: { mor: -2 } },
+      ] },
+      { label: "Laisser parler vos statistiques", outcomes: [
+        { weight: 50, text: "Les chiffres sont têtus : la place est à vous.", fx: { mor: 4, rep: 2 } },
+        { weight: 50, text: "Le sélectionneur veut du caractère, pas des chiffres. Banc.", fx: { mor: -4, coach: -2 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_record_veteran", cat: "Records", icon: "👴", w: 14,
+    cond: { aMin: 24, aMax: 37, minClubSeasons: 3, pos: ["att", "mil"] },
+    text: "Vous n'êtes plus qu'à quelques buts du record historique de {club}. Son détenteur, une légende du club, lâche dans la presse : « Les chiffres d'aujourd'hui ne valent pas ceux de mon époque. »",
+    options: [
+      { label: "Aller le voir pour en parler", outcomes: [
+        { weight: 55, text: "Autour d'un café, la glace fond. Il vous remettra lui-même le ballon du record.", fx: { mor: 8, rep: 5, c: 2 } },
+        { weight: 45, text: "Il vous reçoit froidement. Vous partez avec plus de doutes qu'en arrivant.", fx: { mor: -4 } },
+      ] },
+      { label: "Laisser vos buts répondre", outcomes: [
+        { weight: 50, text: "Le record tombe sous les yeux de la légende, qui finit par applaudir.", fx: { rep: 9, mor: 9, m: 2 } },
+        { weight: 50, text: "La pression vous paralyse : le compteur se bloque juste avant la ligne.", fx: { mor: -6, form: -4 } },
+      ] },
+      { label: "Lui répondre publiquement", hint: "Risqué", outcomes: [
+        { weight: 40, text: "« Les records sont faits pour tomber. » Les supporters adorent.", fx: { rep: 4, mor: 4 } },
+        { weight: 60, text: "Les anciens du club prennent parti pour la légende : vous passez pour un ingrat.", fx: { rep: -5, team: -4, mor: -3 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_hometown_last", cat: "Retraite", icon: "🏡", w: 10,
+    cond: { aMin: 33, aMax: 39, abroad: true },
+    text: "Un club de votre pays natal vous appelle pour un dernier défi : finir là où tout a commencé, devant les vôtres. Le niveau est plus modeste, le salaire aussi.",
+    options: [
+      { label: "Rentrer au pays pour une dernière aventure", outcomes: [
+        { weight: 55, text: "Le stade est plein pour votre retour : vous redevenez le gamin du coin.", fx: { mor: 12, rep: 3, transfer: { home: true, d: -1, direct: true } } },
+        { weight: 45, text: "Le retour est plus rude que prévu, mais chaque match a un goût particulier.", fx: { mor: 6, form: -3, transfer: { home: true, d: -1, direct: true } } },
+      ] },
+      { label: "Rester où vous êtes, au plus haut niveau", outcomes: [
+        { weight: 60, text: "Vous voulez finir au sommet. Le pays attendra, ou pas.", fx: { mor: 2, m: 2 } },
+        { weight: 40, text: "Le regret s'invite les soirs de match au pays.", fx: { mor: -5 } },
+      ] },
+    ],
+  },
+  {
+    id: "ev_staff_offer", cat: "Retraite", icon: "📋", w: 9,
+    cond: { aMin: 34, aMax: 41 },
+    text: "Votre ancien coéquipier, devenu entraîneur, vous appelle : il veut vous dans son staff dès la saison prochaine. « Ton regard sur le jeu, c'est exactement ce qui me manque. »",
+    options: [
+      { label: "Accepter, et raccrocher les crampons", outcomes: [
+        { weight: 65, text: "Une page se tourne : vous passez du terrain au banc, à ses côtés.", fx: { mor: 8, rep: 3, flag: "coach_diploma", retire: true } },
+        { weight: 35, text: "Le pas est dur à franchir, mais l'aventure promet. Dernière saison sur le terrain.", fx: { mor: 4, flag: "coach_diploma", retire: true } },
+      ] },
+      { label: "Lui demander encore une saison sur le terrain", outcomes: [
+        { weight: 60, text: "« Je t'attendrai. » Vous jouez libéré, avec un avenir déjà tracé.", fx: { mor: 6, form: 4 } },
+        { weight: 40, text: "Il ne peut pas attendre : le poste part à un autre.", fx: { mor: -4 } },
+      ] },
+      { label: "Décliner : le banc, très peu pour vous", outcomes: [
+        { weight: 100, text: "Vous ne vous voyez pas entraîner. Le terrain, rien que le terrain.", fx: { mor: 2 } },
+      ] },
+    ],
+  },
 ];
 
 /* ============================================================

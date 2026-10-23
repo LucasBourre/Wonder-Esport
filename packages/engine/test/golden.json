@@ -1,208 +1,208 @@
 {
- "engineVersion": "10.83",
+ "engineVersion": "10.84",
  "cases": [
   {
    "mode": "daily",
    "key": "2027-02-06",
-   "print": "ff95166588c112e2e150e419",
-   "score": 119,
-   "seasons": 25
+   "print": "948d01d6fc2ce90cd651885e",
+   "score": 127,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2028-03-11",
-   "print": "f7e171d23534218171ca35de",
-   "score": 151,
-   "seasons": 34
+   "print": "dfc2e90184de59e3eed80665",
+   "score": 152,
+   "seasons": 35
   },
   {
    "mode": "duel",
    "key": 24757,
-   "print": "94b54ee198b47c22627f7172",
-   "score": 139,
+   "print": "3d0798044cb77ad579999805",
+   "score": 152,
    "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2030-05-21",
-   "print": "169066233a147e9245590911",
-   "score": 148,
-   "seasons": 22
+   "print": "520d68d9e5cc6c2cd7e74c0a",
+   "score": 136,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-06-26",
-   "print": "85998b0071d5124af19f701f",
-   "score": 113,
-   "seasons": 22
+   "print": "e8fd81741fcfa30507e9579e",
+   "score": 115,
+   "seasons": 29
   },
   {
    "mode": "duel",
    "key": 48514,
-   "print": "88cce5dbd3837edbd8236f62",
-   "score": 146,
+   "print": "817be37d01f9f627deee99d6",
+   "score": 160,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2027-08-08",
-   "print": "8d1e916424931d7a9ea8424f",
-   "score": 126,
-   "seasons": 35
+   "print": "ad441659f54ad78c8bf52690",
+   "score": 106,
+   "seasons": 20
   },
   {
    "mode": "daily",
    "key": "2028-09-13",
-   "print": "781bd443c9d7f4f3b10da1d5",
-   "score": 129,
-   "seasons": 29
+   "print": "dc583201d0a1b4d9a1ff31ad",
+   "score": 112,
+   "seasons": 22
   },
   {
    "mode": "duel",
    "key": 72271,
-   "print": "f1899c4ed4f0259bf84f067e",
-   "score": 172,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-23",
-   "print": "cdfb0bc036f14a081e2a2b92",
-   "score": 115,
+   "print": "436db313518ee0eddf21f431",
+   "score": 182,
    "seasons": 27
   },
   {
    "mode": "daily",
+   "key": "2030-11-23",
+   "print": "c07408fd643d7798f73fa666",
+   "score": 94,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
    "key": "2031-12-28",
-   "print": "916e2cac8be36308d0007507",
-   "score": 226,
-   "seasons": 26
+   "print": "018bc8285d1bb40e95b97771",
+   "score": 200,
+   "seasons": 24
   },
   {
    "mode": "duel",
    "key": 96028,
-   "print": "73bfd506226ac48042cdc0ca",
-   "score": 143,
+   "print": "da1923eafd99f34d1527616e",
+   "score": 178,
    "seasons": 34
   },
   {
    "mode": "daily",
    "key": "2027-02-10",
-   "print": "2af157f844c550acbe8e6fca",
-   "score": 129,
-   "seasons": 25
+   "print": "dba291b0af8b1089576335a6",
+   "score": 142,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2028-03-15",
-   "print": "7b38ccaa261da45d33c0df3b",
-   "score": 192,
-   "seasons": 24
+   "print": "8e8abe81c7112e919595f9a0",
+   "score": 256,
+   "seasons": 27
   },
   {
    "mode": "duel",
    "key": 119785,
-   "print": "c0b1d2c9536dda18700532f1",
-   "score": 331,
+   "print": "611e6d34fc78f6e47e4815e9",
+   "score": 211,
    "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2030-05-25",
-   "print": "db270fa3550f33d298beeb2d",
-   "score": 164,
-   "seasons": 21
+   "print": "d304bc34a6c407999a2e0d27",
+   "score": 166,
+   "seasons": 27
   },
   {
    "mode": "daily",
    "key": "2031-06-02",
-   "print": "66f7c3ac62ba41d83ae8a75a",
-   "score": 132,
+   "print": "0ce11e84e7ddd5106acea514",
+   "score": 153,
    "seasons": 35
   },
   {
    "mode": "duel",
    "key": 143542,
-   "print": "3fb58c5496f3b38be2a634a4",
-   "score": 144,
-   "seasons": 22
+   "print": "638c57bc8ecbd271ddf30ca9",
+   "score": 148,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2027-08-12",
-   "print": "761cd2be02f90befafa14edd",
-   "score": 127,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-17",
-   "print": "871bcec8ff8b355540b2caff",
-   "score": 103,
-   "seasons": 24
-  },
-  {
-   "mode": "duel",
-   "key": 167299,
-   "print": "5bff66aaf2aeb414b2de7789",
-   "score": 119,
-   "seasons": 22
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-27",
-   "print": "2d745f1572add264f4df165c",
-   "score": 214,
-   "seasons": 35
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-04",
-   "print": "fce40bfe6839f50d2397d8dc",
-   "score": 235,
-   "seasons": 24
-  },
-  {
-   "mode": "duel",
-   "key": 191056,
-   "print": "340d2ac3525957e6c029819f",
-   "score": 233,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-14",
-   "print": "628ae821b23fdde1f38fbc75",
-   "score": 141,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-19",
-   "print": "b7999c248306d625aa6d8582",
-   "score": 204,
-   "seasons": 23
-  },
-  {
-   "mode": "duel",
-   "key": 214813,
-   "print": "d9c96aceb40fea77798e425e",
-   "score": 130,
-   "seasons": 28
-  },
-  {
-   "mode": "daily",
-   "key": "2030-05-01",
-   "print": "65597360cfb620b822f0d4d7",
-   "score": 236,
+   "print": "8fd3dd6edac8ec39c305c8af",
+   "score": 171,
    "seasons": 26
   },
   {
    "mode": "daily",
-   "key": "2031-06-06",
-   "print": "928463afdf8b69404ce169fd",
+   "key": "2028-09-17",
+   "print": "91adf9e276b2623265be6f4a",
+   "score": 138,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 167299,
+   "print": "6cd9e44b0f35e833321573ed",
    "score": 122,
    "seasons": 20
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-27",
+   "print": "3bfedc5d8b00b6ed93dc38c2",
+   "score": 172,
+   "seasons": 32
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-04",
+   "print": "a501f7b0bd840387bd2b1502",
+   "score": 157,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 191056,
+   "print": "ac6fa1ae1d35c160ba97abca",
+   "score": 225,
+   "seasons": 25
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-14",
+   "print": "27dd4466dfe7519fe9785956",
+   "score": 145,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2028-03-19",
+   "print": "55703ee79e4a3758c0f2c53a",
+   "score": 194,
+   "seasons": 21
+  },
+  {
+   "mode": "duel",
+   "key": 214813,
+   "print": "3711bf30383985759f2c976d",
+   "score": 164,
+   "seasons": 33
+  },
+  {
+   "mode": "daily",
+   "key": "2030-05-01",
+   "print": "cf131c9ab340f5f6dac2e52d",
+   "score": 222,
+   "seasons": 25
+  },
+  {
+   "mode": "daily",
+   "key": "2031-06-06",
+   "print": "789d402327492f6afc7ceb5e",
+   "score": 144,
+   "seasons": 26
   },
   {
    "mode": "duel",
@@ -214,1416 +214,1416 @@
   {
    "mode": "daily",
    "key": "2027-08-16",
-   "print": "6286c5a9c3ec969dcfb2997d",
-   "score": 197,
-   "seasons": 24
+   "print": "5dc61d55544964cec771651a",
+   "score": 163,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2028-09-21",
-   "print": "ed25564047fc945cf14a19b5",
-   "score": 116,
-   "seasons": 16
+   "print": "25efb8f9f2179d72fd674ca6",
+   "score": 164,
+   "seasons": 33
   },
   {
    "mode": "duel",
    "key": 262327,
-   "print": "10c8509b5101850e8a14155a",
-   "score": 176,
-   "seasons": 26
+   "print": "7a9e6f46d80cf8e922625dc7",
+   "score": 214,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2030-11-03",
-   "print": "0b1aeac75535e3760a3aa0c9",
-   "score": 179,
-   "seasons": 23
+   "print": "8ea539738cdbe7047a38660e",
+   "score": 169,
+   "seasons": 20
   },
   {
    "mode": "daily",
    "key": "2031-12-08",
-   "print": "073997e0dc154cc39a7188c2",
-   "score": 133,
+   "print": "4f7eca8638587e56ae868830",
+   "score": 158,
    "seasons": 25
   },
   {
    "mode": "duel",
    "key": 286084,
-   "print": "cf92881f4ca892e3665cefba",
-   "score": 121,
-   "seasons": 22
+   "print": "fc93b5c9dcc49c16f80cb468",
+   "score": 135,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2027-02-18",
-   "print": "491d9405c89efcd55a3c156e",
+   "print": "e4995079f8120203825bc660",
    "score": 128,
-   "seasons": 31
+   "seasons": 30
   },
   {
    "mode": "daily",
    "key": "2028-03-23",
-   "print": "fc5e179aba0b7d3736173bcf",
-   "score": 134,
-   "seasons": 20
-  },
-  {
-   "mode": "duel",
-   "key": 309841,
-   "print": "50bb67cff7c622784d9b0dc3",
-   "score": 109,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2030-05-05",
-   "print": "5e06c1aa9bf3317e91ff39ca",
-   "score": 142,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2031-06-10",
-   "print": "c5d3f851c8416ce120b50df4",
+   "print": "40f3d2fba63cbd03111cc265",
    "score": 149,
    "seasons": 23
   },
   {
    "mode": "duel",
+   "key": 309841,
+   "print": "644546d245ad9f6c8fccf7b9",
+   "score": 130,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2030-05-05",
+   "print": "167ed644bda77e0c669e6d56",
+   "score": 171,
+   "seasons": 19
+  },
+  {
+   "mode": "daily",
+   "key": "2031-06-10",
+   "print": "0f03e17d742b2e25e01acfba",
+   "score": 148,
+   "seasons": 23
+  },
+  {
+   "mode": "duel",
    "key": 333598,
-   "print": "8c550c58ac1d4f409358ff5c",
-   "score": 131,
+   "print": "b1a80a766f2a6a86f77f249e",
+   "score": 129,
    "seasons": 35
   },
   {
    "mode": "daily",
    "key": "2027-08-20",
-   "print": "b2226b8eda8890678b35ac5a",
-   "score": 109,
-   "seasons": 23
+   "print": "12396f792f36d263972eb131",
+   "score": 117,
+   "seasons": 28
   },
   {
    "mode": "daily",
    "key": "2028-09-25",
-   "print": "86d73f694b9b367aae355986",
-   "score": 150,
-   "seasons": 20
+   "print": "90cca9b72b2943fa5a2280d0",
+   "score": 99,
+   "seasons": 25
   },
   {
    "mode": "duel",
    "key": 357355,
-   "print": "f854a005a9f5592f51aed5e9",
-   "score": 179,
-   "seasons": 26
+   "print": "7e7d90ba53723b5c67944a56",
+   "score": 170,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-11-07",
-   "print": "07ed53e5ae6c4c254784c458",
-   "score": 133,
-   "seasons": 26
+   "print": "dc016d3b07f31cf82874309b",
+   "score": 156,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-12-12",
-   "print": "c5101824fc68be6b36cedfd3",
-   "score": 182,
+   "print": "b479f828a48cbb39037dc3dc",
+   "score": 198,
    "seasons": 31
   },
   {
    "mode": "duel",
    "key": 381112,
-   "print": "3dd956a39471c7fd98cae902",
-   "score": 154,
+   "print": "fa9c96ab6d51bf0d3b7e798d",
+   "score": 140,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2027-02-22",
-   "print": "90a35bef5907046a68836317",
-   "score": 116,
-   "seasons": 21
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-27",
-   "print": "202e3ea1e23ff7720f3d7c2b",
-   "score": 281,
-   "seasons": 25
-  },
-  {
-   "mode": "duel",
-   "key": 404869,
-   "print": "5693893399491332df9f8919",
-   "score": 140,
+   "print": "29c2f68a2efe6e052ba67140",
+   "score": 113,
    "seasons": 23
   },
   {
    "mode": "daily",
+   "key": "2028-03-27",
+   "print": "af35fe4bf2699a9f11dcac5e",
+   "score": 252,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 404869,
+   "print": "07ee237480ba4cc877274be1",
+   "score": 142,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
    "key": "2030-05-09",
-   "print": "bb389278bb6390aa6f98ad19",
-   "score": 157,
-   "seasons": 33
+   "print": "652a8b623519d2f2ceb9bd25",
+   "score": 159,
+   "seasons": 34
   },
   {
    "mode": "daily",
    "key": "2031-06-14",
-   "print": "ac69daee682992f169eecee7",
-   "score": 205,
+   "print": "30954f459f07ae7a5970334c",
+   "score": 238,
    "seasons": 22
   },
   {
    "mode": "duel",
    "key": 428626,
-   "print": "ee1f01ffa2feaa1297e1a6bf",
-   "score": 171,
+   "print": "87e62d041399f4f03b69c816",
+   "score": 139,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2027-08-24",
-   "print": "d0ff2d635bfa67101d1fc4b7",
-   "score": 147,
-   "seasons": 31
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-01",
-   "print": "00cb9557a69ad9a8160274b7",
-   "score": 93,
-   "seasons": 13
-  },
-  {
-   "mode": "duel",
-   "key": 452383,
-   "print": "57ee6f9701e84820a67e9c54",
-   "score": 200,
-   "seasons": 31
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-11",
-   "print": "8fe346da99c4857665a5e139",
-   "score": 167,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-16",
-   "print": "395467f67ad91c967dfcc37f",
-   "score": 228,
-   "seasons": 28
-  },
-  {
-   "mode": "duel",
-   "key": 476140,
-   "print": "7602eeb1f34705b1715bd078",
-   "score": 158,
+   "print": "678fc1b4bb5e1d65bdc0df1c",
+   "score": 128,
    "seasons": 22
   },
   {
    "mode": "daily",
-   "key": "2027-02-26",
-   "print": "4a0d87b0ab5b36f82fc09e28",
-   "score": 143,
+   "key": "2028-09-01",
+   "print": "bc103c26a9f5e3603bbe07f5",
+   "score": 117,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 452383,
+   "print": "7dbdf165869e573b9ade36ab",
+   "score": 189,
+   "seasons": 21
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-11",
+   "print": "975b693aede393a280bdfb3a",
+   "score": 196,
+   "seasons": 21
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-16",
+   "print": "2be6c6fa9da7ff0bcfa6c9f0",
+   "score": 183,
    "seasons": 24
+  },
+  {
+   "mode": "duel",
+   "key": 476140,
+   "print": "4f8819146e2bd2cdee957523",
+   "score": 163,
+   "seasons": 21
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-26",
+   "print": "e4dc86dc596ad755502f3b66",
+   "score": 161,
+   "seasons": 28
   },
   {
    "mode": "daily",
    "key": "2028-03-03",
-   "print": "1ce6f03f32e06ea84246453f",
-   "score": 144,
-   "seasons": 34
+   "print": "2ed5807e2cc7b9d18b9b590c",
+   "score": 163,
+   "seasons": 32
   },
   {
    "mode": "duel",
    "key": 499897,
-   "print": "b938c25ab508792738f4b06c",
-   "score": 159,
-   "seasons": 20
+   "print": "9e24f96aac02714f50a1e93a",
+   "score": 184,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2030-05-13",
-   "print": "4e0fb213f5b290fdbab1648a",
-   "score": 118,
-   "seasons": 28
+   "print": "5069bfd7ffdef8251f986077",
+   "score": 131,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2031-06-18",
-   "print": "aaa41aac4549e7b9ba0d1236",
-   "score": 140,
-   "seasons": 24
+   "print": "2612c8cac95072c9187ace84",
+   "score": 150,
+   "seasons": 27
   },
   {
    "mode": "duel",
    "key": 523654,
-   "print": "8c81053fc230b1b394ace3af",
+   "print": "31ada30e10221b69f6d2eca4",
    "score": 96,
-   "seasons": 28
+   "seasons": 27
   },
   {
    "mode": "daily",
    "key": "2027-08-28",
-   "print": "ee8761c2cdb288cacfbdfe61",
-   "score": 161,
-   "seasons": 24
+   "print": "2e30ec0beb164c3ca4019ea6",
+   "score": 158,
+   "seasons": 35
   },
   {
    "mode": "daily",
    "key": "2028-09-05",
-   "print": "749b8c875f817d2385cc581a",
-   "score": 261,
-   "seasons": 23
+   "print": "2b357a1cd091e9dff1c9443b",
+   "score": 236,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 547411,
-   "print": "e493b5d6ed4c2814b513c6de",
-   "score": 210,
-   "seasons": 19
+   "print": "3edbf92df6fdcd9b682b88f1",
+   "score": 240,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2030-11-15",
-   "print": "be5ad17ab91eddb0f13f40c2",
-   "score": 130,
+   "print": "0da936b1bc6f137adb7bc65b",
+   "score": 139,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-12-20",
-   "print": "70fe9e748be493166a5421a6",
-   "score": 156,
-   "seasons": 22
+   "print": "2f9841b3c5627b2c16f80cea",
+   "score": 141,
+   "seasons": 25
   },
   {
    "mode": "duel",
    "key": 571168,
-   "print": "41aa0ed755bcb02342b01cd2",
-   "score": 169,
-   "seasons": 33
+   "print": "6121db314c45c3e5e4af3016",
+   "score": 173,
+   "seasons": 31
   },
   {
    "mode": "daily",
    "key": "2027-02-02",
-   "print": "55af9fa778467069e8cb9342",
-   "score": 193,
-   "seasons": 24
+   "print": "1b326998a4804d62af09af86",
+   "score": 159,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2028-03-07",
-   "print": "b0b6c04e23012862402212c5",
-   "score": 268,
-   "seasons": 24
+   "print": "2b1d71ac2bb40fa06f6cdf16",
+   "score": 186,
+   "seasons": 23
   },
   {
    "mode": "duel",
    "key": 594925,
-   "print": "bb9772dfa9ba13638bd1d1a8",
-   "score": 95,
+   "print": "db707459e67df47e4f77b81e",
+   "score": 134,
    "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-05-17",
-   "print": "5840dd6b2cb006fec148a777",
-   "score": 162,
-   "seasons": 26
+   "print": "09126ad801f2178b396194e9",
+   "score": 172,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-06-22",
-   "print": "6b0ec5818a795aaaf586e55c",
-   "score": 321,
+   "print": "b5c43c95ad03aea8b4f3c584",
+   "score": 249,
    "seasons": 34
   },
   {
    "mode": "duel",
    "key": 618682,
-   "print": "7c569d795c70ab357131e728",
-   "score": 158,
-   "seasons": 23
+   "print": "69734195d3aae0469f7aa261",
+   "score": 197,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2027-08-04",
-   "print": "28dc83e3abd77b32725b0956",
-   "score": 157,
-   "seasons": 24
+   "print": "35fc96bec09be52f166fdff5",
+   "score": 162,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2028-09-09",
-   "print": "0449094e5de3d318d60df56a",
-   "score": 126,
-   "seasons": 22
-  },
-  {
-   "mode": "duel",
-   "key": 642439,
-   "print": "dde86d7a710e087f97b484b5",
-   "score": 136,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-19",
-   "print": "b9aba1e093733fae079b7b42",
-   "score": 147,
-   "seasons": 31
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-24",
-   "print": "60011cfbdeb6b869626aabdc",
-   "score": 152,
+   "print": "b82710d9e2c6d41f89c98468",
+   "score": 134,
    "seasons": 23
   },
   {
    "mode": "duel",
-   "key": 666196,
-   "print": "3c839f0786045183af23e37d",
-   "score": 142,
+   "key": 642439,
+   "print": "b788b7f4968ea9f735a545f0",
+   "score": 137,
    "seasons": 21
   },
   {
    "mode": "daily",
+   "key": "2030-11-19",
+   "print": "69cff082de0d3f7ff96cd11b",
+   "score": 156,
+   "seasons": 32
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-24",
+   "print": "aab3217f5f8cc608628bb878",
+   "score": 171,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 666196,
+   "print": "10b36555426fc725fcb86309",
+   "score": 151,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
    "key": "2027-02-06",
-   "print": "4d43a94ac47318089e4fdf7e",
-   "score": 97,
+   "print": "65274d4fd228fb99f892f96e",
+   "score": 95,
    "seasons": 20
   },
   {
    "mode": "daily",
    "key": "2028-03-11",
-   "print": "b5195127b794e7cf0f31393c",
+   "print": "ef89e9213c6a8f078cba66a9",
    "score": 94,
    "seasons": 24
   },
   {
    "mode": "duel",
    "key": 689953,
-   "print": "e723dd0f11ef78cc6772e271",
-   "score": 163,
-   "seasons": 34
+   "print": "f4e0210fa3f648792478c598",
+   "score": 174,
+   "seasons": 32
   },
   {
    "mode": "daily",
    "key": "2030-05-21",
-   "print": "8a634cbbfa6ea0e832273f8c",
-   "score": 153,
+   "print": "49712bc59e752faa1ea47254",
+   "score": 144,
    "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2031-06-26",
-   "print": "35409514d6f99470a692ec84",
-   "score": 123,
-   "seasons": 27
+   "print": "98c92f8a74a226d260b905ed",
+   "score": 124,
+   "seasons": 25
   },
   {
    "mode": "duel",
    "key": 713710,
-   "print": "8fc9c125f3fbe5ee04687401",
-   "score": 263,
-   "seasons": 24
+   "print": "1768836a54667e40c185643e",
+   "score": 235,
+   "seasons": 20
   },
   {
    "mode": "daily",
    "key": "2027-08-08",
-   "print": "48bff39cab880cff1af1a936",
-   "score": 110,
+   "print": "ddf72ceead4b69adde6a85a9",
+   "score": 109,
    "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2028-09-13",
-   "print": "5bf5dbdf47dcc19ffaa59db7",
-   "score": 125,
-   "seasons": 34
+   "print": "b5be358477932dade61c7f81",
+   "score": 135,
+   "seasons": 31
   },
   {
    "mode": "duel",
    "key": 737467,
-   "print": "1aa3ccd545af5c1028624cb6",
-   "score": 192,
-   "seasons": 22
+   "print": "32ebde5560db18dc5d5759a0",
+   "score": 157,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2030-11-23",
-   "print": "47325a61562da3b5aa1e3347",
-   "score": 122,
-   "seasons": 25
+   "print": "04aedf5156b226d3afed3ba7",
+   "score": 123,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2031-12-28",
-   "print": "13a97372bc3f6e82409c558f",
-   "score": 201,
-   "seasons": 28
-  },
-  {
-   "mode": "duel",
-   "key": 761224,
-   "print": "a5ad21caa1e42a5e5d34aa9f",
-   "score": 156,
-   "seasons": 28
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-10",
-   "print": "10bec078466a6beaaae808a3",
-   "score": 111,
-   "seasons": 20
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-15",
-   "print": "f43c0a18a496d1649493cc72",
-   "score": 196,
+   "print": "b91b66a6994979d053d0c59b",
+   "score": 205,
    "seasons": 23
   },
   {
    "mode": "duel",
-   "key": 784981,
-   "print": "6841c3aea5a5312737ddc38a",
-   "score": 128,
+   "key": 761224,
+   "print": "07eedfd96640ef204dfd4a6e",
+   "score": 134,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-10",
+   "print": "6f0e452af4370324e87b0618",
+   "score": 150,
+   "seasons": 26
+  },
+  {
+   "mode": "daily",
+   "key": "2028-03-15",
+   "print": "209c0b00bd2808972f121335",
+   "score": 171,
    "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 784981,
+   "print": "950cb0fc35e55c8d7b0acdb8",
+   "score": 120,
+   "seasons": 26
   },
   {
    "mode": "daily",
    "key": "2030-05-25",
-   "print": "f434dc672cbb1f974c616f05",
-   "score": 202,
+   "print": "3522ff1b4bfc738a64930360",
+   "score": 174,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-06-02",
-   "print": "ecda0e7a198af5481ef73d3b",
-   "score": 127,
-   "seasons": 23
+   "print": "2a7b4a40f03849a262ecef85",
+   "score": 119,
+   "seasons": 24
   },
   {
    "mode": "duel",
    "key": 808738,
-   "print": "b08f137b4485c94f5eae9bdb",
-   "score": 139,
-   "seasons": 35
+   "print": "4ca8a24c11492f38645237f4",
+   "score": 146,
+   "seasons": 32
   },
   {
    "mode": "daily",
    "key": "2027-08-12",
-   "print": "415a0a1230bf01c7cc2d9ebb",
-   "score": 117,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-17",
-   "print": "76916e6a9bb90befa85ae472",
-   "score": 179,
-   "seasons": 21
-  },
-  {
-   "mode": "duel",
-   "key": 832495,
-   "print": "85aaf97f31b523771d840330",
-   "score": 123,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-27",
-   "print": "26e415ce864df2891b3ee48f",
-   "score": 159,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-04",
-   "print": "02d7574c231d375ddddf3b69",
-   "score": 133,
-   "seasons": 30
-  },
-  {
-   "mode": "duel",
-   "key": 856252,
-   "print": "55d52de663bcb8918af11434",
-   "score": 139,
-   "seasons": 30
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-14",
-   "print": "1982e946c0e50c357f462ca0",
-   "score": 117,
+   "print": "dc200812050830283305c204",
+   "score": 121,
    "seasons": 24
   },
   {
    "mode": "daily",
+   "key": "2028-09-17",
+   "print": "418cccf0f91c1920744b1310",
+   "score": 132,
+   "seasons": 23
+  },
+  {
+   "mode": "duel",
+   "key": 832495,
+   "print": "7142f4bde6ceacdd1adaded6",
+   "score": 134,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-27",
+   "print": "22a511b91819d7315e0f96f4",
+   "score": 143,
+   "seasons": 27
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-04",
+   "print": "e2ed35cb5acc014af8f043a9",
+   "score": 120,
+   "seasons": 34
+  },
+  {
+   "mode": "duel",
+   "key": 856252,
+   "print": "591682a4c2189b2197d46249",
+   "score": 118,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-14",
+   "print": "c4ccad5f15cad92b461dc3c3",
+   "score": 129,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
    "key": "2028-03-19",
-   "print": "d89ba3dc9fe795e5ae4d736a",
-   "score": 177,
-   "seasons": 22
+   "print": "778ca2d81da85b29c81798ae",
+   "score": 175,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 880009,
-   "print": "e0db56792103eb88c450217b",
-   "score": 158,
-   "seasons": 21
+   "print": "c027beaf62cc0f52b89bdd64",
+   "score": 132,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2030-05-01",
-   "print": "79353359ac7ed2cfa0b628fe",
-   "score": 172,
-   "seasons": 33
+   "print": "d42b0b86dc6c5bdc055ba857",
+   "score": 162,
+   "seasons": 35
   },
   {
    "mode": "daily",
    "key": "2031-06-06",
-   "print": "e25670b7fc0450d4dbe41299",
-   "score": 199,
-   "seasons": 26
+   "print": "788b8b1ea04c9c6d74dae95f",
+   "score": 184,
+   "seasons": 24
   },
   {
    "mode": "duel",
    "key": 903766,
-   "print": "7519abcb8a0fff2771da0b01",
-   "score": 227,
-   "seasons": 28
+   "print": "77e72d52ae55b44f79aaa32f",
+   "score": 163,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2027-08-16",
-   "print": "7968058e77e5638ba1571cee",
-   "score": 164,
+   "print": "9513a14cee88fefcb7c43d68",
+   "score": 151,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2028-09-21",
-   "print": "77ab103dc53d7107213d24a2",
-   "score": 151,
-   "seasons": 25
+   "print": "200bcbe5c266cc1b0c196bc5",
+   "score": 138,
+   "seasons": 27
   },
   {
    "mode": "duel",
    "key": 927523,
-   "print": "bd77ae95cc3ec6076d235029",
+   "print": "4778ab1bcfe64e99bae777e3",
    "score": 114,
-   "seasons": 24
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-11-03",
-   "print": "b769211bc11316a11893aa02",
-   "score": 198,
-   "seasons": 28
+   "print": "a2e5b6d3462df0c5342cff28",
+   "score": 144,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2031-12-08",
-   "print": "e911737ee8fc1692c2e88feb",
-   "score": 129,
-   "seasons": 24
+   "print": "a81338b4d4a0670493415b6e",
+   "score": 140,
+   "seasons": 26
   },
   {
    "mode": "duel",
    "key": 951280,
-   "print": "94d66c35a019aa44319b2a18",
-   "score": 131,
-   "seasons": 23
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-18",
-   "print": "16f99cf5f61429f5f8a0dbbe",
-   "score": 132,
+   "print": "dba0a9e8c75ef845c22f1f49",
+   "score": 139,
    "seasons": 24
   },
   {
    "mode": "daily",
+   "key": "2027-02-18",
+   "print": "3a530be7c5b21fa7a6e6d3af",
+   "score": 112,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
    "key": "2028-03-23",
-   "print": "e92fa7f78c3b769ea062629e",
-   "score": 108,
-   "seasons": 30
+   "print": "6e512130c4c533303a463d88",
+   "score": 107,
+   "seasons": 31
   },
   {
    "mode": "duel",
    "key": 975037,
-   "print": "9ba7d840720990207eb8d0bd",
-   "score": 123,
+   "print": "346b894abb4525b38c67f527",
+   "score": 104,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2030-05-05",
-   "print": "2fd72f8e6b468295784d6202",
-   "score": 183,
+   "print": "5240b0ed5fd0d7cfc2620719",
+   "score": 186,
    "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2031-06-10",
-   "print": "61813ca7fe7ab949972b06a3",
-   "score": 150,
-   "seasons": 24
+   "print": "21b9f616d6f5c6ee525fa7e1",
+   "score": 160,
+   "seasons": 26
   },
   {
    "mode": "duel",
    "key": 998794,
-   "print": "8cf15109b62deb6719bdf3b5",
-   "score": 172,
-   "seasons": 24
+   "print": "47287235c2e090d2e88ed864",
+   "score": 152,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2027-08-20",
-   "print": "bcabb2576c7cdfe62650abee",
-   "score": 138,
-   "seasons": 30
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-25",
-   "print": "952ce7237f93694270956c3e",
-   "score": 141,
-   "seasons": 27
-  },
-  {
-   "mode": "duel",
-   "key": 1022551,
-   "print": "34be2341a7323b5a669e5df6",
-   "score": 134,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-07",
-   "print": "b73b37292c815e5599aadd34",
-   "score": 132,
-   "seasons": 29
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-12",
-   "print": "63bee6c4e9cafc4c617ca227",
-   "score": 154,
-   "seasons": 23
-  },
-  {
-   "mode": "duel",
-   "key": 1046308,
-   "print": "82dcdb7dce776c84e926fb4d",
-   "score": 176,
-   "seasons": 28
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-22",
-   "print": "795e9c4e91a2d57826019b6f",
-   "score": 115,
-   "seasons": 22
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-27",
-   "print": "85d6985f440725594efd483c",
-   "score": 302,
-   "seasons": 23
-  },
-  {
-   "mode": "duel",
-   "key": 1070065,
-   "print": "63b2c99639664dd8b5054144",
-   "score": 131,
+   "print": "b3c52a69fbf27b00bed61d8e",
+   "score": 123,
    "seasons": 19
   },
   {
    "mode": "daily",
-   "key": "2030-05-09",
-   "print": "2e1d61063575e45ba2c9eacf",
-   "score": 135,
-   "seasons": 22
-  },
-  {
-   "mode": "daily",
-   "key": "2031-06-14",
-   "print": "a0b5b0b0ee20a99d2d9ee4fd",
-   "score": 215,
-   "seasons": 35
-  },
-  {
-   "mode": "duel",
-   "key": 1093822,
-   "print": "c25d35f6d24d1779285fd83a",
-   "score": 177,
-   "seasons": 20
-  },
-  {
-   "mode": "daily",
-   "key": "2027-08-24",
-   "print": "b2ec23a79d1539f995d060df",
-   "score": 109,
-   "seasons": 22
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-01",
-   "print": "bb5ad52259b5617aeeb41bec",
-   "score": 107,
-   "seasons": 21
-  },
-  {
-   "mode": "duel",
-   "key": 1117579,
-   "print": "6db5b773cddc392cbdc000d5",
-   "score": 116,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-11",
-   "print": "6252ac9749aba73de058bf34",
-   "score": 196,
-   "seasons": 35
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-16",
-   "print": "10e9d6a4de4b3bc4ab401502",
-   "score": 163,
-   "seasons": 22
-  },
-  {
-   "mode": "duel",
-   "key": 1141336,
-   "print": "84426e8308f6555b31e6a26c",
-   "score": 227,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-26",
-   "print": "802026a0a9900211d73d7b34",
-   "score": 149,
-   "seasons": 27
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-03",
-   "print": "02e6b9a9aaddc737b60e8efc",
-   "score": 138,
-   "seasons": 26
-  },
-  {
-   "mode": "duel",
-   "key": 1165093,
-   "print": "eeabdb4ef439ace100032b73",
-   "score": 134,
-   "seasons": 31
-  },
-  {
-   "mode": "daily",
-   "key": "2030-05-13",
-   "print": "03f612a77afb7b45455da487",
-   "score": 109,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2031-06-18",
-   "print": "04441c5b2791eacf4fcc355e",
-   "score": 164,
-   "seasons": 25
-  },
-  {
-   "mode": "duel",
-   "key": 1188850,
-   "print": "dcf6ff33e18f0717f5023fdb",
-   "score": 100,
-   "seasons": 25
-  },
-  {
-   "mode": "daily",
-   "key": "2027-08-28",
-   "print": "a4ac88a03fc37367ca5f559a",
-   "score": 185,
-   "seasons": 26
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-05",
-   "print": "b925bd02249dced469abebb7",
-   "score": 214,
-   "seasons": 31
-  },
-  {
-   "mode": "duel",
-   "key": 1212607,
-   "print": "cdaf5020a4051b9106ef44d4",
+   "key": "2028-09-25",
+   "print": "dd75399884b368897b9c3107",
    "score": 156,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 1022551,
+   "print": "9d3a063339bc524f1e4e71d0",
+   "score": 131,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-07",
+   "print": "fce22c57d6f62f5504274f9f",
+   "score": 140,
+   "seasons": 26
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-12",
+   "print": "7bf251e195030c8ffd5c7832",
+   "score": 167,
+   "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 1046308,
+   "print": "60fd31c64fceaadabe25ce13",
+   "score": 209,
+   "seasons": 35
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-22",
+   "print": "b448332dea8d23449b75593a",
+   "score": 111,
    "seasons": 23
   },
   {
    "mode": "daily",
-   "key": "2030-11-15",
-   "print": "f93c7e53038160600995e2db",
-   "score": 181,
+   "key": "2028-03-27",
+   "print": "eb55e0c90652e608ce0e9491",
+   "score": 257,
+   "seasons": 21
+  },
+  {
+   "mode": "duel",
+   "key": 1070065,
+   "print": "93d2cc16dd2ae45837c5b08e",
+   "score": 99,
+   "seasons": 21
+  },
+  {
+   "mode": "daily",
+   "key": "2030-05-09",
+   "print": "c0b52653c8d81dcc34a85691",
+   "score": 152,
+   "seasons": 25
+  },
+  {
+   "mode": "daily",
+   "key": "2031-06-14",
+   "print": "803c39c525ae9f0f9d308e85",
+   "score": 226,
+   "seasons": 32
+  },
+  {
+   "mode": "duel",
+   "key": 1093822,
+   "print": "7b22b659159267d7ec1201c2",
+   "score": 157,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2027-08-24",
+   "print": "4dbcdfbf834b0327fcd173f7",
+   "score": 106,
+   "seasons": 19
+  },
+  {
+   "mode": "daily",
+   "key": "2028-09-01",
+   "print": "1d2d5ef7f0fdcaa0334c687b",
+   "score": 149,
+   "seasons": 26
+  },
+  {
+   "mode": "duel",
+   "key": 1117579,
+   "print": "b260b7be6b00d251d32afac0",
+   "score": 105,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-11",
+   "print": "20570ad6d8a9afea363bc2c5",
+   "score": 228,
+   "seasons": 29
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-16",
+   "print": "aeb0de0151bb1a6704bef1a3",
+   "score": 146,
+   "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 1141336,
+   "print": "ffc0e6562159d7de85f9c6ad",
+   "score": 167,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-26",
+   "print": "0262cac89b2067944e07b1e8",
+   "score": 194,
+   "seasons": 28
+  },
+  {
+   "mode": "daily",
+   "key": "2028-03-03",
+   "print": "75c866c83715e41d50af749d",
+   "score": 107,
+   "seasons": 20
+  },
+  {
+   "mode": "duel",
+   "key": 1165093,
+   "print": "0dc34bbf9604d94f8916dfdd",
+   "score": 144,
+   "seasons": 33
+  },
+  {
+   "mode": "daily",
+   "key": "2030-05-13",
+   "print": "a658bf8dc38df3c53d367d64",
+   "score": 152,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
+   "key": "2031-06-18",
+   "print": "5c4ae30b00a982d030ed7375",
+   "score": 149,
+   "seasons": 24
+  },
+  {
+   "mode": "duel",
+   "key": 1188850,
+   "print": "6f95d842e6d771b8c3ce2fba",
+   "score": 101,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
+   "key": "2027-08-28",
+   "print": "2fc2f2c29354bf1ddee6a964",
+   "score": 153,
    "seasons": 24
   },
   {
    "mode": "daily",
+   "key": "2028-09-05",
+   "print": "b7dc1c6ede83fa0494ca50e0",
+   "score": 255,
+   "seasons": 33
+  },
+  {
+   "mode": "duel",
+   "key": 1212607,
+   "print": "508d34a02b7cdf903bf4178b",
+   "score": 150,
+   "seasons": 20
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-15",
+   "print": "d136d37481ba9f753935ca5a",
+   "score": 165,
+   "seasons": 30
+  },
+  {
+   "mode": "daily",
    "key": "2031-12-20",
-   "print": "7084f5bba6bcf336f4e2cb9f",
-   "score": 142,
+   "print": "2988ebe0844ad7486043604d",
+   "score": 140,
    "seasons": 26
   },
   {
    "mode": "duel",
    "key": 1236364,
-   "print": "2d2b4aba308668aea75b498a",
-   "score": 168,
-   "seasons": 28
+   "print": "faca7d667e191a511a20a7a4",
+   "score": 143,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2027-02-02",
-   "print": "0642e3007c5ec810bb89aa5f",
-   "score": 194,
-   "seasons": 34
+   "print": "33efeaa56f9c252c9e389cdd",
+   "score": 192,
+   "seasons": 19
   },
   {
    "mode": "daily",
    "key": "2028-03-07",
-   "print": "4b2679831468d8171ecddeea",
-   "score": 172,
-   "seasons": 24
+   "print": "021494ca4b49c0055370be59",
+   "score": 153,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 1260121,
-   "print": "ae2b3a9f6dfa49e44503779d",
-   "score": 166,
+   "print": "29997016293221514390181b",
+   "score": 148,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2030-05-17",
-   "print": "7f10613e06ab4b5dbd94941f",
-   "score": 108,
+   "print": "83888b3f624a438e82727d30",
+   "score": 117,
    "seasons": 27
   },
   {
    "mode": "daily",
    "key": "2031-06-22",
-   "print": "a3559b1b7e6361309d6f3abd",
-   "score": 317,
-   "seasons": 28
+   "print": "e33c7b39a6ed735d15adaf1e",
+   "score": 248,
+   "seasons": 22
   },
   {
    "mode": "duel",
    "key": 1283878,
-   "print": "8e14a38d80aa0a44c1032fa4",
-   "score": 142,
-   "seasons": 31
+   "print": "5ca34e2be02093fca9846d94",
+   "score": 147,
+   "seasons": 28
   },
   {
    "mode": "daily",
    "key": "2027-08-04",
-   "print": "557ea3221eaffb838cacf2fa",
-   "score": 130,
-   "seasons": 24
+   "print": "5d04a34cb982a95a36b795fe",
+   "score": 122,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2028-09-09",
-   "print": "5a47e55836194f10d780b514",
-   "score": 144,
-   "seasons": 25
+   "print": "29635466fd32b9f2be32e510",
+   "score": 169,
+   "seasons": 31
   },
   {
    "mode": "duel",
    "key": 1307635,
-   "print": "18cf94fb2c26ce89656fbdde",
-   "score": 92,
+   "print": "44ebca870cd2985258e1cc05",
+   "score": 93,
    "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-11-19",
-   "print": "59eb9373932eed10bb137883",
+   "print": "955e60601cd73008eb5e6ae8",
    "score": 115,
    "seasons": 26
   },
   {
    "mode": "daily",
    "key": "2031-12-24",
-   "print": "805fd82e81ae8f7f2ee67915",
-   "score": 202,
+   "print": "988f7105d91e2db87372531a",
+   "score": 166,
    "seasons": 35
   },
   {
    "mode": "duel",
    "key": 1331392,
-   "print": "8b3f466566c82b6f3bff1194",
-   "score": 145,
-   "seasons": 26
+   "print": "792f96a6caab4ab36ba1d525",
+   "score": 138,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2027-02-06",
-   "print": "18a939f943827611ac605853",
-   "score": 138,
-   "seasons": 23
+   "print": "ce2d1907fdc92574bca19f1d",
+   "score": 150,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2028-03-11",
-   "print": "993c7c193ae7fa6fed8bd3a4",
-   "score": 93,
+   "print": "8c7d1e09d1102861183bedfe",
+   "score": 100,
    "seasons": 22
   },
   {
    "mode": "duel",
    "key": 1355149,
-   "print": "744e334a0d2c37be9e2b4d69",
-   "score": 140,
-   "seasons": 24
+   "print": "4cfa55493283390a173a2bd5",
+   "score": 132,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2030-05-21",
-   "print": "bd112f37c2d9ca7288dc7b55",
-   "score": 139,
-   "seasons": 34
-  },
-  {
-   "mode": "daily",
-   "key": "2031-06-26",
-   "print": "c0123ce27af4d717265c5117",
-   "score": 137,
-   "seasons": 24
-  },
-  {
-   "mode": "duel",
-   "key": 1378906,
-   "print": "a61feaab6805e84d5c1b54e1",
-   "score": 181,
-   "seasons": 27
-  },
-  {
-   "mode": "daily",
-   "key": "2027-08-08",
-   "print": "8279766b7eb9aeae9cb771fd",
-   "score": 131,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-13",
-   "print": "6a3ff17d539a0a9ab3960aa2",
-   "score": 130,
-   "seasons": 24
-  },
-  {
-   "mode": "duel",
-   "key": 1402663,
-   "print": "30d9f972c4e7d08a0abdbba1",
-   "score": 153,
+   "print": "03fe4c97f67136992c541296",
+   "score": 182,
    "seasons": 35
   },
   {
    "mode": "daily",
+   "key": "2031-06-26",
+   "print": "5d01cef1034a9d9e4801dd2b",
+   "score": 130,
+   "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 1378906,
+   "print": "a4666ca3ef3e5aff9adf5517",
+   "score": 163,
+   "seasons": 28
+  },
+  {
+   "mode": "daily",
+   "key": "2027-08-08",
+   "print": "2b4a66373f04fd60dd02a5c0",
+   "score": 150,
+   "seasons": 22
+  },
+  {
+   "mode": "daily",
+   "key": "2028-09-13",
+   "print": "a1dcf7f64b3f5de70ccac701",
+   "score": 147,
+   "seasons": 27
+  },
+  {
+   "mode": "duel",
+   "key": 1402663,
+   "print": "36c1f4493db9c34f0fa180a0",
+   "score": 152,
+   "seasons": 33
+  },
+  {
+   "mode": "daily",
    "key": "2030-11-23",
-   "print": "68b1ea8b3683163a27220d80",
-   "score": 128,
+   "print": "5f6c91e31c1acc1b23f57faa",
+   "score": 140,
    "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2031-12-28",
-   "print": "46eadfaff895d6bf7808f9b5",
-   "score": 200,
-   "seasons": 27
+   "print": "d8cfe1f1e09394e91cb6304d",
+   "score": 216,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 1426420,
-   "print": "a3b3425a26268e1995bb73fa",
-   "score": 118,
-   "seasons": 28
+   "print": "4c0c0af9ecd3e59bc6d704da",
+   "score": 102,
+   "seasons": 20
   },
   {
    "mode": "daily",
    "key": "2027-02-10",
-   "print": "df0c9e484b36c4d5c99ca49d",
-   "score": 152,
-   "seasons": 23
+   "print": "b986dd8f8321f238cd944ffd",
+   "score": 168,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2028-03-15",
-   "print": "fa253cfe3e755088d1f2c961",
-   "score": 294,
-   "seasons": 29
+   "print": "9d85e9478c3b9e0bc1a858e9",
+   "score": 248,
+   "seasons": 30
   },
   {
    "mode": "duel",
    "key": 1450177,
-   "print": "4c18effa532e4a49decac9d6",
-   "score": 112,
-   "seasons": 18
+   "print": "7c764b710471e5d6342cef17",
+   "score": 117,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2030-05-25",
-   "print": "fe5d867b5c78c038b3e9abc8",
-   "score": 119,
-   "seasons": 24
+   "print": "6efd844f433d7943bb5778ec",
+   "score": 116,
+   "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2031-06-02",
-   "print": "20e8dd14444fbb512bd92681",
-   "score": 124,
-   "seasons": 24
+   "print": "e4c65f739ee10c8ca04de6ee",
+   "score": 112,
+   "seasons": 23
   },
   {
    "mode": "duel",
    "key": 1473934,
-   "print": "b602f8388a330c1fd84cde91",
-   "score": 124,
+   "print": "0f74076d658c117aeae2fb37",
+   "score": 127,
    "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2027-08-12",
-   "print": "e1097e8c4e3430b0c3cf86a6",
-   "score": 116,
-   "seasons": 30
+   "print": "68f3a2280223b82afa50f2cf",
+   "score": 106,
+   "seasons": 31
   },
   {
    "mode": "daily",
    "key": "2028-09-17",
-   "print": "28f3c131a0ac309f83f4111d",
-   "score": 131,
-   "seasons": 23
+   "print": "0cf44c365b5feee5caf39018",
+   "score": 108,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 1497691,
-   "print": "529cb9579a2df250d899b0dd",
-   "score": 105,
-   "seasons": 25
+   "print": "19b3dca44a3e512215398551",
+   "score": 95,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-11-27",
-   "print": "e33b2def2da372dd0d3f745b",
-   "score": 135,
+   "print": "24af680559d95fc42ee47626",
+   "score": 127,
    "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2031-12-04",
-   "print": "76fa2095a74648a4a79a9d41",
-   "score": 175,
-   "seasons": 24
+   "print": "ca51173841306f7f033365f6",
+   "score": 226,
+   "seasons": 22
   },
   {
    "mode": "duel",
    "key": 1521448,
-   "print": "206d5182edb39254ef9cd69d",
-   "score": 157,
-   "seasons": 32
+   "print": "01a592e150df5b9677324477",
+   "score": 165,
+   "seasons": 30
   },
   {
    "mode": "daily",
    "key": "2027-02-14",
-   "print": "aeb5483ea7f9e28c89304ede",
-   "score": 142,
+   "print": "da8bbfc40958c3a16937fe8a",
+   "score": 137,
    "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2028-03-19",
-   "print": "d090ab2add0259cec492c0b6",
-   "score": 236,
-   "seasons": 27
+   "print": "d83e1d92af492885d91ce98e",
+   "score": 156,
+   "seasons": 14
   },
   {
    "mode": "duel",
    "key": 1545205,
-   "print": "e0df25ee13f7cccaeb36c53e",
+   "print": "19a2a57b74c333b6ad434037",
    "score": 101,
    "seasons": 26
   },
   {
    "mode": "daily",
    "key": "2030-05-01",
-   "print": "499a661ad5350ca23b9b8c62",
-   "score": 124,
-   "seasons": 23
+   "print": "964cb0d48e6f295074c0dcfd",
+   "score": 129,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2031-06-06",
-   "print": "4e249d00317344ee201c343f",
-   "score": 194,
+   "print": "ef67feffa63645202a3b64f9",
+   "score": 174,
    "seasons": 32
   },
   {
    "mode": "duel",
    "key": 1568962,
-   "print": "2c7b44b6177cb36f3d660c09",
-   "score": 108,
-   "seasons": 22
-  },
-  {
-   "mode": "daily",
-   "key": "2027-08-16",
-   "print": "58d9696d388ba2c357c83054",
-   "score": 168,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2028-09-21",
-   "print": "116ce9f95584dd2b30c10466",
-   "score": 118,
-   "seasons": 24
-  },
-  {
-   "mode": "duel",
-   "key": 1592719,
-   "print": "c985c33c9ab4081313086107",
-   "score": 168,
-   "seasons": 20
-  },
-  {
-   "mode": "daily",
-   "key": "2030-11-03",
-   "print": "677b3c03b08f683a2e35f65a",
-   "score": 180,
-   "seasons": 35
-  },
-  {
-   "mode": "daily",
-   "key": "2031-12-08",
-   "print": "d954b9d9802cf31429c38880",
-   "score": 157,
-   "seasons": 22
-  },
-  {
-   "mode": "duel",
-   "key": 1616476,
-   "print": "213685dcb06995775f21ff40",
-   "score": 121,
-   "seasons": 24
-  },
-  {
-   "mode": "daily",
-   "key": "2027-02-18",
-   "print": "04d4ade19e48cfa8d6902069",
-   "score": 112,
-   "seasons": 21
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-23",
-   "print": "6234cb18643a80512220c9e2",
-   "score": 139,
-   "seasons": 21
-  },
-  {
-   "mode": "duel",
-   "key": 1640233,
-   "print": "34ab0d17313b56d79e9243a4",
-   "score": 193,
-   "seasons": 35
-  },
-  {
-   "mode": "daily",
-   "key": "2030-05-05",
-   "print": "97bf9ba12c1e21631b64875c",
-   "score": 185,
+   "print": "8efdb21cd392404f4023b278",
+   "score": 109,
    "seasons": 23
   },
   {
    "mode": "daily",
+   "key": "2027-08-16",
+   "print": "4b9a2c1fe8067baca2337df0",
+   "score": 222,
+   "seasons": 25
+  },
+  {
+   "mode": "daily",
+   "key": "2028-09-21",
+   "print": "02a196764ab0e9beb24defac",
+   "score": 102,
+   "seasons": 22
+  },
+  {
+   "mode": "duel",
+   "key": 1592719,
+   "print": "5b6b66e426ee9372ffd025d4",
+   "score": 197,
+   "seasons": 25
+  },
+  {
+   "mode": "daily",
+   "key": "2030-11-03",
+   "print": "9c6e944b3a24949bd756036e",
+   "score": 200,
+   "seasons": 34
+  },
+  {
+   "mode": "daily",
+   "key": "2031-12-08",
+   "print": "a4203bbdc0c77091e676ccaa",
+   "score": 135,
+   "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 1616476,
+   "print": "239c1dcf4e9d567f9467b312",
+   "score": 131,
+   "seasons": 23
+  },
+  {
+   "mode": "daily",
+   "key": "2027-02-18",
+   "print": "42faa2b6d50188c7fcadcb7c",
+   "score": 130,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
+   "key": "2028-03-23",
+   "print": "ab54f288c5f2100fd376adfd",
+   "score": 124,
+   "seasons": 23
+  },
+  {
+   "mode": "duel",
+   "key": 1640233,
+   "print": "46b94bc3cbd1938d9e3baf07",
+   "score": 180,
+   "seasons": 34
+  },
+  {
+   "mode": "daily",
+   "key": "2030-05-05",
+   "print": "a7fc739cbb84d5b3fc7ea620",
+   "score": 198,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
    "key": "2031-06-10",
-   "print": "bff0db3f4857e11186572222",
-   "score": 154,
-   "seasons": 21
+   "print": "de5269a496baa5eab1f86c36",
+   "score": 174,
+   "seasons": 23
   },
   {
    "mode": "duel",
    "key": 1663990,
-   "print": "2436f9305091f2ffbefb5270",
-   "score": 125,
-   "seasons": 30
+   "print": "e8cf257192cf659e0fc561e0",
+   "score": 138,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2027-08-20",
-   "print": "2974b8c793106aeb44364ae0",
+   "print": "93f009644596cd33cf6c01a2",
    "score": 106,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2028-09-25",
-   "print": "3516f1275000597c5762284d",
-   "score": 116,
-   "seasons": 29
+   "print": "ce6a093ca45950b4c5b57423",
+   "score": 164,
+   "seasons": 34
   },
   {
    "mode": "duel",
    "key": 1687747,
-   "print": "1d1ae39d53dde81ba6c3af99",
-   "score": 122,
-   "seasons": 22
+   "print": "2c597aef7350bfeefe8cb004",
+   "score": 148,
+   "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2030-11-07",
-   "print": "d47d6c8fc2ff43372cb8a0af",
-   "score": 136,
+   "print": "a7b9163f500aeb6bd9690d87",
+   "score": 122,
    "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2031-12-12",
-   "print": "0109908b1387bc665041e8dd",
-   "score": 151,
-   "seasons": 23
+   "print": "9477ffb08c47feb15c34c0ae",
+   "score": 158,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 1711504,
-   "print": "43ac213879cd27083b26475b",
-   "score": 105,
+   "print": "6b4d335b1385b7c3ab06b5df",
+   "score": 112,
    "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2027-02-22",
-   "print": "dfe0e9c9232c8f8099c49110",
-   "score": 138,
+   "print": "91f8f7369bf2f685fba61d87",
+   "score": 161,
    "seasons": 35
   },
   {
    "mode": "daily",
    "key": "2028-03-27",
-   "print": "3237a8bb429e22ffc5842ab9",
-   "score": 261,
-   "seasons": 24
+   "print": "c0043b05be68acee348c8d71",
+   "score": 259,
+   "seasons": 21
   },
   {
    "mode": "duel",
    "key": 1735261,
-   "print": "90107eecabfeee8697c05e7b",
-   "score": 138,
-   "seasons": 24
+   "print": "51d81f7e6da15d316f35fed6",
+   "score": 117,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2030-05-09",
-   "print": "a4eac67ff29137580bbd7068",
+   "print": "fb45f3b121d889d43411e502",
    "score": 105,
    "seasons": 21
   },
   {
    "mode": "daily",
    "key": "2031-06-14",
-   "print": "cda92fdc46c06b98af1b4f0b",
-   "score": 170,
-   "seasons": 24
+   "print": "7336ed88c919ca7099f65f24",
+   "score": 179,
+   "seasons": 26
   },
   {
    "mode": "duel",
    "key": 1759018,
-   "print": "6075df7004743a68c76dcd89",
-   "score": 197,
-   "seasons": 35
+   "print": "d82216aaa953b4cac4a5977c",
+   "score": 203,
+   "seasons": 34
   },
   {
    "mode": "daily",
    "key": "2027-08-24",
-   "print": "522b0e34187e793cc9474504",
-   "score": 106,
-   "seasons": 23
+   "print": "af8f63eade1837bf9d8d9b1b",
+   "score": 112,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2028-09-01",
-   "print": "a13cc48d4b9d1e97446c01f8",
-   "score": 132,
-   "seasons": 23
+   "print": "da9f51e3e1796ed7e94ef054",
+   "score": 139,
+   "seasons": 26
   },
   {
    "mode": "duel",
    "key": 1782775,
-   "print": "cdb93a3954f87f0d0bcbd850",
-   "score": 180,
-   "seasons": 20
+   "print": "3bf8b62750119d8728c6dcfe",
+   "score": 211,
+   "seasons": 25
   },
   {
    "mode": "daily",
    "key": "2030-11-11",
-   "print": "eedef2381bf9a221ec17104d",
-   "score": 184,
-   "seasons": 23
+   "print": "29007fab9d0659c9d30c12cc",
+   "score": 187,
+   "seasons": 22
   },
   {
    "mode": "daily",
    "key": "2031-12-16",
-   "print": "edfbe13f373151e5e15ac8f4",
-   "score": 124,
-   "seasons": 32
+   "print": "5b8a184321851bfa1e7e9171",
+   "score": 151,
+   "seasons": 34
   },
   {
    "mode": "duel",
    "key": 1806532,
-   "print": "0af12910b8cd1b22fbb1868e",
-   "score": 144,
+   "print": "bee7129121397ee264e7ab76",
+   "score": 132,
    "seasons": 26
   },
   {
    "mode": "daily",
    "key": "2027-02-26",
-   "print": "e67d390637e89fb1bd798791",
-   "score": 202,
-   "seasons": 30
-  },
-  {
-   "mode": "daily",
-   "key": "2028-03-03",
-   "print": "472cf366d5eb90798670c111",
-   "score": 125,
-   "seasons": 20
-  },
-  {
-   "mode": "duel",
-   "key": 1830289,
-   "print": "6f95f4532f2f43788c456ae8",
-   "score": 112,
+   "print": "ec8171d2ddfc559332a35b46",
+   "score": 175,
    "seasons": 23
   },
   {
    "mode": "daily",
+   "key": "2028-03-03",
+   "print": "469f729b654d459bddaffcec",
+   "score": 136,
+   "seasons": 25
+  },
+  {
+   "mode": "duel",
+   "key": 1830289,
+   "print": "813b5ced01fe6381687d34f0",
+   "score": 121,
+   "seasons": 24
+  },
+  {
+   "mode": "daily",
    "key": "2030-05-13",
-   "print": "d4346bb772ef7e8ed1ac6f06",
-   "score": 147,
-   "seasons": 32
+   "print": "41ca2cd7f113eb83afe57bef",
+   "score": 158,
+   "seasons": 34
   },
   {
    "mode": "daily",
@@ -1635,51 +1635,51 @@
   {
    "mode": "duel",
    "key": 1854046,
-   "print": "ecda46cbcfa5397e1facc2bd",
-   "score": 229,
+   "print": "cbbc8250e359a77ffc93373d",
+   "score": 175,
    "seasons": 23
   },
   {
    "mode": "daily",
    "key": "2027-08-28",
-   "print": "23b826ff16341e769b9c9d7f",
-   "score": 152,
-   "seasons": 26
+   "print": "388be6be313877bef6e462de",
+   "score": 139,
+   "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2028-09-05",
-   "print": "de8d6f6a53394232b33a57ea",
-   "score": 211,
-   "seasons": 21
+   "print": "97173ad510488d1bdd290484",
+   "score": 236,
+   "seasons": 27
   },
   {
    "mode": "duel",
    "key": 1877803,
-   "print": "0da5faf259e9c44962f0c44e",
-   "score": 113,
+   "print": "218768962d6819955347a36b",
+   "score": 115,
    "seasons": 30
   },
   {
    "mode": "daily",
    "key": "2030-11-15",
-   "print": "1e3d008579c6f7a8cbe1812e",
-   "score": 122,
+   "print": "1f41a428ba94ecaccc0dfb5d",
+   "score": 144,
    "seasons": 24
   },
   {
    "mode": "daily",
    "key": "2031-12-20",
-   "print": "a490ad4218d63d8afa829ec3",
-   "score": 143,
-   "seasons": 28
+   "print": "e9cc4761c5d659af74a17f49",
+   "score": 148,
+   "seasons": 24
   },
   {
    "mode": "duel",
    "key": 1901560,
-   "print": "3cf2aac2084eabe93f091685",
-   "score": 146,
-   "seasons": 25
+   "print": "0f7782d5d0d2dd77656f0c42",
+   "score": 128,
+   "seasons": 24
   }
  ]
 }
