@@ -7,7 +7,7 @@
    • Auth : e-mail + mot de passe. Chaque joueur ne lit que SA sauvegarde :
      c'est le serveur qui le vérifie.
    ============================================================ */
-import { FORBIDDEN_WORDS } from "@open-eleven/content";
+import { AVATAR_GROUPS, AVATAR_IDS, FORBIDDEN_WORDS } from "@open-eleven/content";
 import { Engine } from "@open-eleven/engine";
 import { api } from "./api";
 
@@ -46,9 +46,20 @@ import { api } from "./api";
   // Vrai quand on arrive depuis un lien « mot de passe oublié » : la session
   // ouverte par le jeton ne sert qu'à définir un nouveau mot de passe.
   let recoveryMode = false;
-  // Onglet actif de « Mon compte » — l'e-mail et le changement de mot de passe
-  // vivent dans Sécurité, pas sur l'écran principal.
-  let accTab = "compte";
+  // Onglet actif de « Mon compte » : Profil (pseudo, avatar), Sauvegarde, Sécurité.
+  let accTab = "profil";
+  // Avatar choisi (identifiant « clair-01 »…), ou null : on affiche alors 👤.
+  let avatar = null;
+  const avatarUrl = (id) => "/src/img/avatar/" + id + ".png";
+  // Un identifiant venu du serveur n'est affiché que s'il fait partie des avatars du jeu.
+  const avatarHtml = (id, cls) => (id && AVATAR_IDS.includes(id)
+    ? '<img class="av-img ' + cls + '" src="' + avatarUrl(id) + '" alt="" />'
+    : '<span class="av-img av-none ' + cls + '">👤</span>');
+  // Le bouton compte de l'accueil montre l'avatar du joueur connecté.
+  function paintFab() {
+    if (!btn) return;
+    btn.innerHTML = avatar && AVATAR_IDS.includes(avatar) ? '<img class="fab-av" src="' + avatarUrl(avatar) + '" alt="" />' : "👤";
+  }
 
   // Garde-fou de saisie. La validation qui fait foi reste celle du serveur ;
   // celle-ci évite juste d'envoyer une adresse manifestement erronée.
@@ -156,34 +167,43 @@ import { api } from "./api";
     if (recoveryMode) { renderNewPassword(); return; }
     if (!session && pendingEmail) { renderPending(); return; }
     if (session) {
+      if (accTab === "compte") accTab = "profil"; // ancien nom de l'onglet
+      const tab = (id, label) => '<button class="lb-tab' + (accTab === id ? " on" : "") + '" data-t="' + id + '">' + label + "</button>";
+      const avatarGrid = AVATAR_GROUPS.map((g) =>
+        '<p class="av-group">' + esc(T(g.label)) + '</p><div class="av-grid">' +
+        AVATAR_IDS.filter((id) => id.startsWith(g.id + "-")).map((id) =>
+          '<button class="av-pick' + (id === avatar ? " on" : "") + '" data-av="' + id + '" aria-label="' + id + '"><img src="' + avatarUrl(id) + '" alt="" loading="lazy" /></button>').join("") +
+        "</div>").join("");
       box.innerHTML =
         '<button class="acc-x" aria-label="Fermer">×</button>' +
-        "<h3>Mon compte</h3>" +
-        '<div class="lb-tabs">' +
-        '<button class="lb-tab' + (accTab === "compte" ? " on" : "") + '" data-t="compte">Compte</button>' +
-        '<button class="lb-tab' + (accTab === "securite" ? " on" : "") + '" data-t="securite">Sécurité</button>' +
-        "</div>" +
+        // En-tête : qui est connecté, toujours visible, avec la déconnexion.
+        '<div class="acc-head">' + avatarHtml(avatar, "acc-head-av") +
+        '<div class="acc-head-id"><strong>' + esc(pseudo || T("Sans pseudo")) + '</strong><span class="acc-mail">' + esc(session.user.email || "") + "</span></div>" +
+        '<button class="acc-btn danger acc-head-out" id="acc-signout">' + esc(T("Se déconnecter")) + "</button></div>" +
+        '<div class="lb-tabs">' + tab("profil", "Profil") + tab("sauvegarde", "Sauvegarde") + tab("securite", "Sécurité") + "</div>" +
         // Une sauvegarde automatique refusée ne doit pas passer inaperçue :
         // le joueur doit savoir que le cloud diverge, et pouvoir trancher.
-        // Affiché sur les DEUX onglets — trop important pour dépendre du choix.
+        // Affiché sur TOUS les onglets — trop important pour dépendre du choix.
         (conflictInfo
           ? '<p class="acc-warn">⚠️ ' + T("Une sauvegarde plus récente existe sur un autre appareil ({date}). Votre progression locale n'a pas été envoyée.", { date: esc(stampLabel(conflictInfo.serverStamp)) }) + "</p>"
           : "") +
         (accTab === "securite"
-          ? '<p class="acc-sub">Connecté : <span class="acc-mail">' + esc(session.user.email || "") + "</span></p>" +
-            '<input type="password" id="acc-curpass" placeholder="Mot de passe actuel" autocomplete="current-password" />' +
+          ? '<input type="password" id="acc-curpass" placeholder="Mot de passe actuel" autocomplete="current-password" />' +
             '<input type="password" id="acc-newpass" placeholder="Nouveau mot de passe (16+ caractères)" autocomplete="new-password" />' +
             '<input type="password" id="acc-newpass2" placeholder="Confirmer le nouveau mot de passe" autocomplete="new-password" />' +
             '<button class="acc-btn primary" id="acc-changepass">Changer le mot de passe</button>'
-          : '<p class="acc-sub" style="margin:0 0 4px">Pseudo au classement mondial :</p>' +
-            '<div class="acc-row"><input type="text" id="acc-pseudo" maxlength="24" placeholder="Ton pseudo" value="' + esc(pseudo || "") + '" style="margin:0" />' +
-            '<button class="acc-btn soft" id="acc-savepseudo" style="width:auto;padding:11px 14px">OK</button></div>' +
-            '<button class="acc-btn primary" id="acc-push">☁️ Sauvegarder maintenant</button>' +
-            '<button class="acc-btn soft" id="acc-profile">🏛️ Voir mon profil public</button>' +
-            '<button class="acc-btn soft" id="acc-pull">📥 Restaurer depuis le cloud</button>' +
-            '<button class="acc-btn danger" id="acc-signout">Se déconnecter</button>') +
+          : accTab === "sauvegarde"
+            ? '<p class="acc-sub">Ta progression (carrières, Panthéon, badges) part dans le cloud automatiquement. Tu peux aussi l\'envoyer tout de suite, ou récupérer celle d\'un autre appareil.</p>' +
+              '<button class="acc-btn primary" id="acc-push">☁️ Sauvegarder maintenant</button>' +
+              '<button class="acc-btn soft" id="acc-pull">📥 Restaurer depuis le cloud</button>'
+            : '<p class="acc-sub" style="margin:0 0 4px">Pseudo au classement mondial :</p>' +
+              '<div class="acc-row"><input type="text" id="acc-pseudo" maxlength="24" placeholder="Ton pseudo" value="' + esc(pseudo || "") + '" style="margin:0" />' +
+              '<button class="acc-btn soft" id="acc-savepseudo" style="width:auto;padding:11px 14px">OK</button></div>' +
+              '<button class="acc-btn primary" id="acc-profile">👁️ Voir mon profil</button>' +
+              '<p class="acc-sub" style="margin:12px 0 2px">Avatar</p>' + avatarGrid) +
         '<p class="acc-msg"></p>';
       box.querySelector(".acc-x").onclick = close;
+      box.querySelector("#acc-signout").onclick = async () => { await api.auth.signOut(); msg(""); };
       box.querySelectorAll(".lb-tab").forEach((b) => (b.onclick = () => { accTab = b.dataset.t; renderModal(); }));
       if (accTab === "securite") {
         box.querySelector("#acc-changepass").onclick = async () => {
@@ -203,36 +223,48 @@ import { api } from "./api";
         };
         return;
       }
+      if (accTab === "sauvegarde") {
+        box.querySelector("#acc-push").onclick = async () => {
+          msg(T("Sauvegarde…"));
+          let r = await pushSave();
+          if (r.conflict) {
+            // Version distante plus récente : on ne l'écrase pas sans un accord
+            // explicite, et on montre sa date pour que le choix soit éclairé.
+            const ok = confirm(T("Une sauvegarde plus récente existe sur un autre appareil ({date}).\n\nOK = l'écraser avec cette partie · Annuler = ne rien changer (vous pourrez la récupérer avec « Restaurer depuis le cloud »).",
+              { date: stampLabel(r.serverStamp) }));
+            if (!ok) return msg("Sauvegarde annulée : le cloud n'a pas été modifié.", "err");
+            r = await pushSave(true);
+          }
+          renderModal();
+          msg(r.ok ? "Sauvegarde envoyée au cloud ✔" : "Échec : " + (r.error && r.error.message || "erreur"), r.ok ? "ok" : "err");
+        };
+        box.querySelector("#acc-pull").onclick = async () => {
+          msg("Récupération…");
+          const r = await pullSave();
+          if (!r.ok) return msg("Échec : " + (r.error && r.error.message || "erreur"), "err");
+          if (!r.row || !r.row.data || !Object.keys(r.row.data).length) return msg("Aucune sauvegarde cloud pour l'instant.", "err");
+          if (confirm(T("Restaurer la sauvegarde cloud ? Cela REMPLACE votre partie locale actuelle."))) { applyLocal(r.row.data); location.reload(); }
+        };
+        return;
+      }
       box.querySelector("#acc-savepseudo").onclick = async () => {
         const r = await savePseudo(box.querySelector("#acc-pseudo").value);
+        if (r.ok) renderModal(); // l'en-tête affiche le nouveau pseudo
         msg(r.ok ? "Pseudo enregistré ✔" : (r.error && r.error.message) || "Échec", r.ok ? "ok" : "err");
-      };
-      box.querySelector("#acc-push").onclick = async () => {
-        msg(T("Sauvegarde…"));
-        let r = await pushSave();
-        if (r.conflict) {
-          // Version distante plus récente : on ne l'écrase pas sans un accord
-          // explicite, et on montre sa date pour que le choix soit éclairé.
-          const ok = confirm(T("Une sauvegarde plus récente existe sur un autre appareil ({date}).\n\nOK = l'écraser avec cette partie · Annuler = ne rien changer (vous pourrez la récupérer avec « Restaurer depuis le cloud »).",
-            { date: stampLabel(r.serverStamp) }));
-          if (!ok) return msg("Sauvegarde annulée : le cloud n'a pas été modifié.", "err");
-          r = await pushSave(true);
-        }
-        msg(r.ok ? "Sauvegarde envoyée au cloud ✔" : "Échec : " + (r.error && r.error.message || "erreur"), r.ok ? "ok" : "err");
-        renderModal();
       };
       box.querySelector("#acc-profile").onclick = async () => {
         if (!pseudo) return msg("Choisis d'abord un pseudo ci-dessus.", "err");
         await pushProfileStats(); close(); openProfile(pseudo);
       };
-      box.querySelector("#acc-pull").onclick = async () => {
-        msg("Récupération…");
-        const r = await pullSave();
-        if (!r.ok) return msg("Échec : " + (r.error && r.error.message || "erreur"), "err");
-        if (!r.row || !r.row.data || !Object.keys(r.row.data).length) return msg("Aucune sauvegarde cloud pour l'instant.", "err");
-        if (confirm(T("Restaurer la sauvegarde cloud ? Cela REMPLACE votre partie locale actuelle."))) { applyLocal(r.row.data); location.reload(); }
-      };
-      box.querySelector("#acc-signout").onclick = async () => { await api.auth.signOut(); msg(""); };
+      box.querySelectorAll(".av-pick").forEach((b) => (b.onclick = async () => {
+        if (!pseudo) return msg("Choisis d'abord un pseudo ci-dessus.", "err");
+        const { error } = await api.rpc("profile_set_avatar", { avatar: b.dataset.av });
+        if (error) return msg(traduire(error.message), "err");
+        avatar = b.dataset.av;
+        paintFab();
+        renderModal();
+        msg("Avatar enregistré ✔", "ok");
+      }));
     } else {
       box.innerHTML =
         '<button class="acc-x" aria-label="Fermer">×</button>' +
@@ -394,7 +426,7 @@ import { api } from "./api";
     if (s) pendingEmail = null; // confirmé et connecté : l'écran d'attente n'a plus lieu d'être
     renderModal();
     if (event === "SIGNED_IN" && !recoveryMode) { onFreshLogin(); loadPseudo().then(() => { renderModal(); pushProfileStats(); }); }
-    if (event === "SIGNED_OUT") { pseudo = null; cloudStamp = null; conflictInfo = null; }
+    if (event === "SIGNED_OUT") { pseudo = null; avatar = null; cloudStamp = null; conflictInfo = null; paintFab(); }
     refreshNotifs(); // session à jour : (re)pose ou efface les pastilles Amis/Duels
   });
   // Le lien peut aussi s'ouvrir dans un onglet où le jeu tourne déjà : seul le
@@ -441,9 +473,11 @@ import { api } from "./api";
   })();
 
   async function loadPseudo() {
-    if (!session) { pseudo = null; return; }
+    if (!session) { pseudo = null; avatar = null; paintFab(); return; }
     const { data } = await api.rpc("profile_me");
     pseudo = data && data.pseudo ? data.pseudo : null;
+    avatar = data && data.avatar ? data.avatar : null;
+    paintFab();
   }
   async function savePseudo(p) {
     if (!session) return { ok: false };
@@ -763,8 +797,11 @@ import { api } from "./api";
       ).join("");
     }
 
+    // Ma propre fiche : on le dit, et on donne de quoi la modifier.
+    const mine = !!(session && pseudo && row.pseudo && String(row.pseudo).toLowerCase() === pseudo.toLowerCase());
     pfBox.innerHTML =
-      pfHead("🏛️ " + esc(row.pseudo || who)) +
+      pfHead(avatarHtml(row.avatar, "pf-av") + esc(row.pseudo || who)) +
+      (mine ? '<div class="pf-mine"><span>⭐ ' + esc(T("C'est ton profil, tel que les autres le voient.")) + '</span><button class="acc-btn soft" id="pf-edit">✏️ ' + esc(T("Modifier")) + "</button></div>" : "") +
       rankLine +
       '<div class="pf-counters"><span>⭐ ' + T("Niveau {n}", { n: Math.max(1, num(st.level, 9999)) }) + "</span><span>🏆 " + num(st.badges, 999) + " badges</span><span>🔥 " + num(st.bestStreak, 99999) + " " + T("j (série)") + "</span><span>👤 " + num(st.careers, 99999) + " " + T("carrières") + "</span></div>" +
       '<p class="pf-section">Meilleure carrière <span class="lb-sub" style="text-transform:none;letter-spacing:0">(vitrine, non vérifiée)</span></p>' +
@@ -772,6 +809,8 @@ import { api } from "./api";
       '<p class="pf-section">Panthéon</p>' +
       pantheon;
     pfFermer();
+    const edit = pfBox.querySelector("#pf-edit");
+    if (edit) edit.onclick = () => { pfOverlay.classList.remove("on"); accTab = "profil"; open(); };
   }
 
   // ============================================================================
@@ -891,7 +930,7 @@ import { api } from "./api";
         '<button class="acc-btn primary" id="du-go" style="margin:0">🆚 Lancer le défi</button><p class="acc-msg"></p>' +
         (friends.length
           ? '<p class="fr-head">Tes amis</p><ul class="lb-list">' + friends.map((f) =>
-              '<li class="lb-row"><span class="lb-name">👤 ' + esc(f.friend_pseudo) + '</span>' +
+              '<li class="lb-row"><span class="lb-name">' + avatarHtml(f.avatar, "av-mini") + " " + esc(f.friend_pseudo) + '</span>' +
               '<button class="acc-btn soft du-pick" data-p="' + esc(f.friend_pseudo) + '" style="width:auto;margin:0;padding:6px 10px;font-size:.78rem">⚔️ Défier</button></li>'
             ).join("") + "</ul>"
           : "");
@@ -1004,8 +1043,8 @@ import { api } from "./api";
     soPending = incoming.length;
     paintPendingBadge();
     refreshNotifs(); // garde la pastille d'accueil synchro (accept/refus la font varier)
-    const nameCell = (p) =>
-      '<span class="lb-name" data-pseudo="' + esc(p || "") + '" style="cursor:pointer">👤 ' + esc(p || "Joueur") + "</span>";
+    const nameCell = (p, av) =>
+      '<span class="lb-name" data-pseudo="' + esc(p || "") + '" style="cursor:pointer">' + avatarHtml(av, "av-mini") + " " + esc(p || "Joueur") + "</span>";
     const btn = (cls, label, i) =>
       '<button class="acc-btn ' + cls + '" data-i="' + i + '" style="width:auto;margin:0;padding:6px 10px;font-size:.78rem">' + label + "</button>";
     const group = (title, rows, html) =>
@@ -1015,14 +1054,14 @@ import { api } from "./api";
       '<div class="acc-row" style="margin:2px 0 6px"><input type="text" id="fr-pseudo" maxlength="24" placeholder="Inviter un ami par pseudo" style="margin:0" />' +
       '<button class="acc-btn soft" id="fr-add" style="width:auto;padding:11px 14px">Inviter</button></div><p class="acc-msg"></p>' +
       group("Demandes reçues", incoming, (f, i) =>
-        '<li class="lb-row">' + nameCell(f.from_pseudo) +
+        '<li class="lb-row">' + nameCell(f.from_pseudo, f.avatar) +
         '<span class="fr-acts">' + btn("soft fr-ok", "Accepter", i) + btn("danger fr-no", "Refuser", i) + "</span></li>") +
       group("Invitations envoyées", outgoing, (f, i) =>
-        '<li class="lb-row">' + nameCell(f.friend_pseudo) +
+        '<li class="lb-row">' + nameCell(f.friend_pseudo, f.avatar) +
         '<span class="fr-acts"><span class="lb-sub">En attente</span>' + btn("danger fr-cancel", "Annuler", i) + "</span></li>") +
       (friends.length
         ? group("Amis", friends, (f, i) =>
-            '<li class="lb-row">' + nameCell(f.friend_pseudo) +
+            '<li class="lb-row">' + nameCell(f.friend_pseudo, f.avatar) +
             '<span class="fr-acts">' + btn("soft fr-challenge", "⚔️ Défier", i) + btn("danger fr-del", "Retirer", i) + "</span></li>")
         : '<p class="lb-empty">Aucun ami pour l\'instant. Invite un pseudo ci-dessus : il devra accepter ta demande.</p>');
 

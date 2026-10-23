@@ -27,6 +27,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { kind: "new", text: "Nouvelles compétitions : la Coupe arabe, et les Jeux régionaux en U23 (Jeux asiatiques, africains, panaméricains et du Pacifique)." },
       { kind: "new", text: "Cette page de nouveautés, et la version du jeu affichée sur l'accueil." },
       { kind: "new", text: "Fiche finale : le classement du club à chaque saison, et la sélection saison par saison (matchs, buts, passes décisives, tournois joués)." },
+      { kind: "new", text: "Profil : choisissez votre avatar parmi 36, consultez votre propre fiche telle que les autres la voient, et retrouvez « Mon compte » rangé en trois onglets (Profil, Sauvegarde, Sécurité)." },
       { kind: "new", text: "Notifications : une cloche 🔔 et un bandeau en direct quand on vous invite, vous défie, accepte votre demande d'ami ou rejoint votre salle — avec les boutons pour répondre aussitôt." },
       { kind: "new", text: "Salles : comparatif côte à côte de tous les membres et historique saison par saison de chacun, en direct comme en fin de carrière." },
       { kind: "balance", text: "Salles : la saison du club est la même pour tous (classement, montée, descente, finales et leur résultat), tirée selon le niveau moyen de l'équipe. Une finale se joue ensemble ; votre choix décide de votre prestation." },

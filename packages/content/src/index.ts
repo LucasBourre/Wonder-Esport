@@ -1,6 +1,7 @@
 // Contenu du jeu : toutes les tables de données, regroupées par thème.
 
 export * from "./balance";
+export * from "./avatars";
 export * from "./brand";
 export * from "./changelog";
 export * from "./clubs";

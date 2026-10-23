@@ -2,6 +2,7 @@
 // des salles. Chacune remplace un accès direct de l'interface à une table —
 // c'est donc ici que se décide qui a le droit de lire ou d'écrire quoi.
 import type { Db } from "./db";
+import { isAvatarId } from "@open-eleven/content";
 import { pseudoForbidden } from "./pseudo";
 
 export class ProcedureError extends Error {
@@ -66,7 +67,22 @@ export const procedures: Record<string, Procedure> = {
   // --- Profil -------------------------------------------------------------------
   profile_me: {
     auth: true,
-    async run(db, me) { return { pseudo: await pseudoOf(db, me!) }; },
+    async run(db, me) {
+      const { rows } = await db.query("select pseudo, avatar from profiles where user_id = $1", [me]);
+      return { pseudo: rows[0]?.pseudo ?? null, avatar: rows[0]?.avatar ?? null };
+    },
+  },
+  // Avatar : un des identifiants du jeu, ou null pour revenir à l'avatar par défaut.
+  // Il faut un pseudo d'abord : l'avatar vit sur la même fiche.
+  profile_set_avatar: {
+    auth: true,
+    async run(db, me, args) {
+      const avatar = args.avatar === null ? null : args.avatar;
+      if (avatar !== null && !isAvatarId(avatar)) throw new ProcedureError("Avatar inconnu.");
+      const r = await db.query("update profiles set avatar = $2 where user_id = $1", [me, avatar]);
+      if (!r.rowCount) throw new ProcedureError("Choisis d'abord un pseudo.", 400, "no_pseudo");
+      return { avatar };
+    },
   },
   profile_set_pseudo: {
     auth: true,
@@ -110,9 +126,10 @@ export const procedures: Record<string, Procedure> = {
     auth: true,
     async run(db, me) {
       const cols = "f.user_id, f.friend_id, f.friend_pseudo, f.created_at, f.status";
-      const mine = await db.query("select " + cols + " from friends f where f.user_id = $1 order by f.created_at desc", [me]);
+      // L'avatar de l'autre joueur accompagne chaque ligne (null s'il n'en a pas choisi).
+      const mine = await db.query("select " + cols + ", fp.avatar from friends f left join profiles fp on fp.user_id = f.friend_id where f.user_id = $1 order by f.created_at desc", [me]);
       const incoming = await db.query(
-        "select " + cols + ", coalesce(p.pseudo, 'Joueur') as from_pseudo from friends f left join profiles p on p.user_id = f.user_id " +
+        "select " + cols + ", coalesce(p.pseudo, 'Joueur') as from_pseudo, p.avatar from friends f left join profiles p on p.user_id = f.user_id " +
         "where f.friend_id = $1 and f.status = 'pending' order by f.created_at desc", [me]);
       return {
         friends: mine.rows.filter((r) => r.status === "accepted"),

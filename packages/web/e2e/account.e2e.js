@@ -21,6 +21,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   report.check("pseudo enregistré", await alice.until(`/enregistré/.test((document.querySelector('.acc-overlay.on .acc-msg') || {}).textContent || '')`), await msg(alice));
 
   await alice.js("localStorage.setItem('destinDeChampion_progress', JSON.stringify({ xp: 1234, careersPlayed: 3, unlockedBadges: ['a', 'b'] }))");
+  await alice.js(`${BOX}.querySelector('.lb-tab[data-t=sauvegarde]').click()`); // la sauvegarde a son onglet
   await alice.js(`${BOX}.querySelector('#acc-push').click()`);
   await wait(900);
   const saved = await alice.rpc("save_get");
@@ -47,6 +48,22 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   report.check("le classement mondial s'affiche", await alice.until("!!document.querySelector('.acc-overlay.on .lb-tabs')"));
   await alice.js(`window.OpenElevenAccount.openProfile('${alice.pseudo}')`);
   report.check("le profil public s'affiche", await alice.until(`[...document.querySelectorAll('.acc-overlay.on')].some(o => o.textContent.includes('${alice.pseudo}'))`));
+  await alice.js("document.querySelectorAll('.acc-overlay.on').forEach(o => o.classList.remove('on'))");
+
+  report.section("Avatar et profil");
+  await alice.js("document.getElementById('btn-account').click()");
+  report.check("36 avatars proposés, en trois familles", (await alice.js(`${BOX}.querySelectorAll(".av-pick").length`)) === 36 && (await alice.js(`${BOX}.querySelectorAll(".av-group").length`)) === 3);
+  await alice.js(`${BOX}.querySelector('.av-pick[data-av="mat-03"]').click()`);
+  report.check("avatar enregistré", await alice.until(`/Avatar enregistré/.test((document.querySelector(".acc-overlay.on .acc-msg") || {}).textContent || "")`), await msg(alice));
+  report.check("le serveur le garde", (await alice.rpc("profile_me")).data.avatar === "mat-03");
+  report.check("le bouton compte de l'accueil montre l'avatar", /mat-03.png/.test(await alice.js("document.getElementById('btn-account').innerHTML")));
+  report.check("l'en-tête du compte aussi", /mat-03.png/.test(await alice.js(`${BOX}.querySelector(".acc-head").innerHTML`)));
+  report.check("un avatar inventé est refusé", !!(await alice.rpc("profile_set_avatar", { avatar: "../../etc" })).error);
+  await alice.js(`${BOX}.querySelector("#acc-profile").click()`);
+  report.check("« Voir mon profil » ouvre ma fiche, marquée comme la mienne", await alice.until("!!document.querySelector('.acc-overlay.on .pf-mine')"));
+  report.check("ma fiche montre mon avatar", /mat-03.png/.test(await alice.js("document.querySelector('.acc-overlay.on .pf-name').innerHTML")));
+  await alice.js("document.querySelector('#pf-edit').click()");
+  report.check("« Modifier » ramène au choix de l'avatar", await alice.until("!!document.querySelector('.acc-overlay.on .av-grid')"));
   await alice.js("document.querySelectorAll('.acc-overlay.on').forEach(o => o.classList.remove('on'))");
 
   report.section("Amis");
