@@ -7,7 +7,8 @@ import { youthSelections } from "./international";
 import { roleForClub } from "./role";
 import { seasonPrelude } from "./season";
 import { marketValue } from "./transfers";
-import { continentOf, countryOf, lvlOf, visibilityOf } from "./clubs";
+import { continentOf, countryOf, isTopFlightOf, lvlOf, visibilityOf } from "./clubs";
+import { roomClubSeason } from "./rooms";
 import { ovr } from "./player";
 import type { CareerState, Club, LevelId, SeasonReport } from "./types";
 import { BALANCE, CONTINENTAL_CUPS, ENGINE_TEXT, YOUTH_STAGES } from "@open-eleven/content";
@@ -128,12 +129,25 @@ export function playDevSeason(s: CareerState, lvl: LevelId) {
 
   s.peakOvr = Math.max(s.peakOvr, ovr(s));
   const mv = Math.round(marketValue(s) * 10) / 10;
-  s.seasons.push({ age: s.age, year: s.year, clubName: s.club.name, countryId: s.club.countryId, level: lvl, matches: 0, goals: 0, assists: 0, cleanSheets: 0, rating: report.rating, trophies: [], divisionTitle: false, onLoan: false, leaguePos: null, mv, squad, dev });
+  // Mode salle : le club vit la même saison que chez les coéquipiers en équipe première
+  // (classement, montée, descente), même si ce membre est encore en U17 ou en réserve —
+  // sinon son club divergerait des leurs. Barrages et finales sont tranchés d'office.
+  const club = s.roomClub ? roomClubSeason(s, lvl, isTopFlightOf(lvl, s.club.countryId)) : null;
+  if (club && club.cupFinal && club.cupWin) s.roomCupWonYear = s.year;
+  const leaguePos = club ? (club.relegPlayoff && !club.relegWin ? Math.max(club.leaguePos, lvl === "d1" ? 17 : 18) : club.leaguePos) : null;
+  s.seasons.push({ age: s.age, year: s.year, clubName: s.club.name, countryId: s.club.countryId, level: lvl, matches: 0, goals: 0, assists: 0, cleanSheets: 0, rating: report.rating, trophies: [], divisionTitle: false, onLoan: false, leaguePos, mv, squad, dev });
 
   if (rating >= 7.4) s.coachRel = clamp(s.coachRel + 4, 5, 100);
   else if (rating <= 5.5) s.coachRel = clamp(s.coachRel - 5, 5, 100);
-  // Pas de « destin du club » à rejouer pour une saison hors équipe première.
-  s.lastSeason = null;
+  // Pas de « destin du club » à rejouer pour une saison hors équipe première (hors salle).
+  s.lastSeason = club
+    ? {
+        clubId: s.club.id, leaguePos: leaguePos!, rating: report.rating,
+        promoted: (club.title && !isTopFlightOf(lvl, s.club.countryId)) || (club.playoff && club.playoffWin),
+        relegated: club.relegDirect || (club.relegPlayoff && !club.relegWin),
+        wonLeague: club.title,
+      }
+    : null;
   reviewSquad(s, report);
   // Un réserviste qui s'éternise attire les clubs d'en dessous (mercato).
   if (squadOf(s) === "reserve" && s.age >= 19) report.benched = true;

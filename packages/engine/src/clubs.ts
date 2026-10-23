@@ -49,6 +49,18 @@ export function divShort(level: LevelId, countryId: string) {
   return _DIV_SHORTS[Math.max(0, baseIdx - shift)];
 }
 
+/**
+ * Le club est-il dans la division la plus haute DE SON PAYS (« Élite », ou « D1 » d'une
+ * nation sans élite) ? Décidé sur le niveau, pas sur le libellé : divShort() est traduit
+ * (« Élite » devient « Elite » en anglais), et la règle ne doit pas dépendre de la langue.
+ */
+export function isTopFlightOf(level: LevelId, countryId: string) {
+  if (level === "elite") return true;
+  const baseIdx = { d1: 0, d2: 1, d3: 2, d4: 3, regional: 4 }[level];
+  if (baseIdx == null) return false;
+  return Math.max(0, baseIdx - Math.max(0, 4 - countryTopRank(countryId))) === 0;
+}
+
 // Niveau EFFECTIF d'un club pour cette carrière : les montées/descentes
 // vécues sont stockées dans s.clubLevels sans toucher aux données globales.
 export function lvlOf(s: CareerState, club: Club) {

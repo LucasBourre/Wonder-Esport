@@ -128,7 +128,13 @@ export function applyFx(s: CareerState, fx: Fx) {
     s.chronicWeeks = (s.chronicWeeks || 0) + Math.max(1, w);
   }
   if (fx.pot) s.potCap = clamp(s.potCap + fx.pot, 68, 99);
-  if (fx.clubBoost) {
+  if (fx.clubBoost && s.room) {
+    // Mode salle : la division du club est commune. Le changement est noté, transmis à la
+    // salle avec le bilan de saison, puis appliqué à TOUS les membres au même moment
+    // (cf. creditClubTrophies) — sinon le club changerait de division chez un seul.
+    s.roomClubShift = (s.roomClubShift || 0) + fx.clubBoost;
+    chips.push({ label: `🏗️ ${s.club.name} : ${fx.clubBoost > 0 ? "montée" : "rétrogradation"} en fin de saison`, kind: fx.clubBoost > 0 ? "trophy" : "bad" });
+  } else if (fx.clubBoost) {
     const newLvl = shiftClubLevel(s, s.club, fx.clubBoost);
     chips.push({ label: `🏗️ ${s.club.name} passe en ${divShort(newLvl, s.club.countryId)}`, kind: "trophy" });
     s.history.push({ age: s.age, text: tx(s, "clubInvestor", { div: divShort(newLvl, s.club.countryId) }), impact: 8 });

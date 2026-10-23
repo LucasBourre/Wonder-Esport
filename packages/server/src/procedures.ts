@@ -167,6 +167,25 @@ export const procedures: Record<string, Procedure> = {
     },
   },
 
+  // --- Notifications ----------------------------------------------------------------
+  // Les 40 plus récentes, et le nombre de non lues (pour la cloche et le titre de l'onglet).
+  notifications_list: {
+    auth: true,
+    async run(db, me) {
+      const list = await db.query(
+        "select id, kind, payload, created_at, read_at is not null as read from notifications where user_id = $1 order by created_at desc limit 40", [me]);
+      const unread = await db.query("select count(*)::int as n from notifications where user_id = $1 and read_at is null", [me]);
+      return { items: list.rows.map((r) => ({ id: Number(r.id), kind: r.kind, payload: r.payload, at: iso(r.created_at), read: r.read })), unread: unread.rows[0].n };
+    },
+  },
+  notifications_read: {
+    auth: true,
+    async run(db, me) {
+      await db.query("update notifications set read_at = now() where user_id = $1 and read_at is null", [me]);
+      return null;
+    },
+  },
+
   // --- Salles (lecture) -----------------------------------------------------------
   // Les écritures passent par les fonctions SQL room_* ; ici, ce qu'un joueur
   // peut VOIR : ses invitations, ses salles, et l'état complet d'une salle

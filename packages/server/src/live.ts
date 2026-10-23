@@ -9,6 +9,16 @@ import { currentUser } from "./auth";
 import { pool } from "./db";
 
 const watchers = new Map<string, Set<WebSocket>>();
+// Canal joueur : un signal « notif » quand une notification arrive (cf. notify.ts).
+const userSockets = new Map<string, Set<WebSocket>>();
+
+export function notifyUsers(userIds: string[]): void {
+  for (const id of userIds) {
+    for (const socket of userSockets.get(id) ?? []) {
+      try { socket.send("notif"); } catch { /* socket en cours de fermeture */ }
+    }
+  }
+}
 
 function notifyRoom(roomId: string): void {
   for (const socket of watchers.get(roomId) ?? []) {
@@ -29,6 +39,18 @@ export function registerLive(app: FastifyInstance): void {
   app.get("/api/live", { websocket: true }, async (socket, req) => {
     const roomId = String((req.query as Record<string, unknown>).room ?? "");
     const user = await currentUser(req);
+    // Sans salle : canal personnel du joueur connecté (notifications).
+    if (!roomId) {
+      if (!user) { socket.close(4403, "forbidden"); return; }
+      let mine = userSockets.get(user.id);
+      if (!mine) userSockets.set(user.id, (mine = new Set()));
+      mine.add(socket);
+      socket.on("close", () => {
+        mine.delete(socket);
+        if (!mine.size) userSockets.delete(user.id);
+      });
+      return;
+    }
     const member = user && /^[0-9a-f-]{36}$/i.test(roomId)
       ? (await pool.query("select 1 from room_members where room_id = $1 and user_id = $2", [roomId, user.id])).rowCount
       : 0;

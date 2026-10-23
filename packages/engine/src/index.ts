@@ -27,7 +27,7 @@ import { hashInt, dailyChallenge, dailySeedFor, duelChallenge, replayDaily, repl
 import { countryOf, levelRank, lvlOf, divShort, visibilityOf } from "./clubs";
 import { ovr, hasTrait } from "./player";
 import { sponsorDealDue, sponsorTierFor, sponsorOffersFor, applySponsorDeal } from "./sponsors";
-import { creditClubTrophies } from "./rooms";
+import { creditClubTrophies, roomClubSeason, roomClubSeed, teamRatingFromOvr } from "./rooms";
 import { ENGINE_VERSION } from "./version";
 import { BALANCE } from "@open-eleven/content";
 
@@ -47,7 +47,7 @@ export const Engine = {
   playSeason, resolveSeasonMoment, advanceYear, marketValue, salaryFor,
   buildOffer, offersFor, loanOffersFor, applyLoan, transferWindow,
   sponsorDealDue, sponsorTierFor, sponsorOffersFor, applySponsorDeal,
-  applyTransfer, renewContract, totalAwards, careerRating, computeCareerScore, visibilityOf, creditClubTrophies,
+  applyTransfer, renewContract, totalAwards, careerRating, computeCareerScore, visibilityOf, creditClubTrophies, roomClubSeed, teamRatingFromOvr, roomClubSeason,
   careerTitle, pickHighlights, buildNarrative, buildUntakenPath,
   newRival, rivalSeason, rivalNewsLine, compareVerdict,
   hashInt, dailyChallenge, dailySeedFor, duelChallenge, replayDaily, replayDuel, scoreDaily, scoreDuel,

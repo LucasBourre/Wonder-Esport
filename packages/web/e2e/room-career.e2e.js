@@ -36,12 +36,12 @@ export async function run({ browser, stackUrl, mailpit, report }) {
     await other.goto(await mailLink(mailpit, b.email, /https?:\/\/\S+#type=recovery&token=[\w-]+/));
     report.check("le lien ouvre « Nouveau mot de passe »", await other.until(`/Nouveau mot de passe/.test((${BOX} || { textContent: '' }).textContent)`));
     report.check("le jeton a quitté la barre d'adresse", (await other.js("location.hash")) === "");
-    await other.js(`${BOX}.querySelector('#acc-np').value = 'tout-nouveau-9'; ${BOX}.querySelector('#acc-np2').value = 'tout-nouveau-9'; ${BOX}.querySelector('#acc-np-save').click()`);
+    await other.js(`${BOX}.querySelector('#acc-np').value = 'tout-nouveau-mot-de-passe-9'; ${BOX}.querySelector('#acc-np2').value = 'tout-nouveau-mot-de-passe-9'; ${BOX}.querySelector('#acc-np-save').click()`);
     report.check("nouveau mot de passe enregistré, connecté", await other.until(`!!(${BOX} && ${BOX}.querySelector('#acc-signout'))`));
     await b.goto(stackUrl + "/");
     report.check("l'ancien appareil de Ben est déconnecté", (await b.js("window.OpenElevenAccount.getSession()")) === null);
     await b.js("document.getElementById('btn-account').click()");
-    await b.js(`${BOX}.querySelector('#acc-email').value = '${b.email}'; ${BOX}.querySelector('#acc-pass').value = 'tout-nouveau-9'; ${BOX}.querySelector('#acc-login').click()`);
+    await b.js(`${BOX}.querySelector('#acc-email').value = '${b.email}'; ${BOX}.querySelector('#acc-pass').value = 'tout-nouveau-mot-de-passe-9'; ${BOX}.querySelector('#acc-login').click()`);
     report.check("Ben se reconnecte avec le nouveau mot de passe", await b.until("!!window.OpenElevenAccount.getSession()"));
     await wait(1200);
     await b.js("document.querySelectorAll('.acc-overlay.on').forEach(o => o.classList.remove('on'))");
@@ -77,6 +77,9 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   report.check("même club de départ, celui de la salle", startClubs[0] === startClubs[1] && startClubs[0] === start.room.club_id, startClubs.join(" / ") + " · salle " + start.room.club_id);
 
   report.section("Carrière commune");
+  // Hors de la fenêtre 16-18 ans du « coup du sort » (fin de carrière brutale, 0,8 % par
+  // saison) : sinon un des deux finit parfois seul, et rien ne se compare plus.
+  for (const p of players) await p.js("window.OE.G().age = 19");
   const startAge = await a.js("window.OE.G().age");
   const target = startAge + SEASONS;
   const seen = { waits: 0, votes: 0, maxGap: 0, maxCandidates: 0 };
@@ -111,6 +114,7 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   const summary = async (p) => JSON.parse(await p.js("JSON.stringify({ age: window.OE.G().age, club: window.OE.G().club.id, league: window.OE.G().trophies.league, cup: window.OE.G().trophies.cup })"));
   const [ga, gb] = [await summary(a), await summary(b)];
   report.note(`Ana ${JSON.stringify(ga)} · Ben ${JSON.stringify(gb)}`);
+  for (const p of players) report.note(`${p.name} : écran ${await p.screen()} · carte « ${flat(await p.js(CARD)).slice(0, 160)} »`);
   report.note(`salle : phase ${final.room.phase}, saison ${final.room.season_year}, club ${final.room.club_id} · attentes ${seen.waits} · bulletins ${seen.votes} · candidats au plus ${seen.maxCandidates}`);
   report.check(`les deux ont joué ${SEASONS} saisons`, ga.age >= target && gb.age >= target, `${ga.age} / ${gb.age}`);
   report.check("la barrière de fin de saison a fait attendre", seen.waits > 0);
@@ -120,6 +124,16 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   report.check("toujours dans le même club, celui de la salle", ga.club === gb.club && ga.club === final.room.club_id, `${ga.club} / ${gb.club} / ${final.room.club_id}`);
   report.check("trophées de club identiques", ga.league === gb.league && ga.cup === gb.cup, JSON.stringify([ga, gb]));
   report.check("statistiques en direct publiées", final.members.every((m) => m.live_stats && typeof m.live_stats === "object"));
+  // Saison de club commune : le club vit la même saison chez les deux (classement, division).
+  const clubSeasons = async (p) => JSON.parse(await p.js("JSON.stringify(window.OE.G().seasons.map((s) => [s.year, s.clubName, s.level, s.leaguePos]))"));
+  const [sa, sb] = [await clubSeasons(a), await clubSeasons(b)];
+  report.check("même saison de club chaque année (classement, division)", JSON.stringify(sa) === JSON.stringify(sb), sa.map((x, i) => JSON.stringify(x) === JSON.stringify(sb[i]) ? null : JSON.stringify(x) + " ≠ " + JSON.stringify(sb[i])).filter(Boolean).join(" · ") || "longueurs " + sa.length + "/" + sb.length);
+  report.check("l'historique de chacun est publié", final.members.every((m) => m.live_stats && Array.isArray(m.live_stats.history) && m.live_stats.history.length >= SEASONS - 1));
+  report.check("l'OVR de fin de saison est publié (note d'équipe)", final.members.every((m) => m.live_stats && m.live_stats.ovrByYear && Object.keys(m.live_stats.ovrByYear).length >= SEASONS - 1));
+  const compare = await a.js(`(async () => { const el = document.createElement("div"); document.body.appendChild(el); await window.OpenElevenRoom.renderMembersStats("${roomId}", el); const out = { table: !!el.querySelector(".rm-compare table"), names: el.querySelector(".rm-compare") ? el.querySelector(".rm-compare").textContent : "", histories: el.querySelectorAll("details.rm-history").length }; el.remove(); return JSON.stringify(out); })()`);
+  const cmp = JSON.parse(compare);
+  report.check("comparatif côte à côte des deux membres", cmp.table && cmp.names.includes(a.pseudo) && cmp.names.includes(b.pseudo), compare.slice(0, 200));
+  report.check("historique de chaque membre consultable", cmp.histories === 2, "historiques : " + cmp.histories);
   report.noErrors(a, b);
   for (const p of players) await p.close();
 }

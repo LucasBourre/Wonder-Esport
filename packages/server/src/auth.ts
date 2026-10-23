@@ -229,8 +229,10 @@ export function registerAuth(app: FastifyInstance): void {
   });
 }
 
-/** Ménage périodique des sessions et jetons expirés. */
+/** Ménage périodique des sessions, jetons expirés et vieilles notifications. */
 export async function purgeExpired(): Promise<void> {
   await pool.query("delete from sessions where expires_at < now()");
   await pool.query("delete from email_tokens where expires_at < now()");
+  // Notifications : un mois d'historique suffit.
+  await pool.query("delete from notifications where created_at < now() - interval '30 days'");
 }

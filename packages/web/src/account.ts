@@ -172,7 +172,7 @@ import { api } from "./api";
         (accTab === "securite"
           ? '<p class="acc-sub">Connecté : <span class="acc-mail">' + esc(session.user.email || "") + "</span></p>" +
             '<input type="password" id="acc-curpass" placeholder="Mot de passe actuel" autocomplete="current-password" />' +
-            '<input type="password" id="acc-newpass" placeholder="Nouveau mot de passe (8+ caractères)" autocomplete="new-password" />' +
+            '<input type="password" id="acc-newpass" placeholder="Nouveau mot de passe (16+ caractères)" autocomplete="new-password" />' +
             '<input type="password" id="acc-newpass2" placeholder="Confirmer le nouveau mot de passe" autocomplete="new-password" />' +
             '<button class="acc-btn primary" id="acc-changepass">Changer le mot de passe</button>'
           : '<p class="acc-sub" style="margin:0 0 4px">Pseudo au classement mondial :</p>' +
@@ -239,7 +239,7 @@ import { api } from "./api";
         "<h3>Compte & sauvegarde cloud</h3>" +
         '<p class="acc-sub">Optionnel. Retrouvez vos carrières, votre Panthéon et votre progression sur tous vos appareils.</p>' +
         '<input type="email" id="acc-email" placeholder="E-mail" autocomplete="email" />' +
-        '<input type="password" id="acc-pass" placeholder="Mot de passe (8+ caractères)" autocomplete="current-password" />' +
+        '<input type="password" id="acc-pass" placeholder="Mot de passe (16+ caractères)" autocomplete="current-password" />' +
         '<button class="acc-btn primary" id="acc-login">Se connecter</button>' +
         '<button class="acc-btn ghost" id="acc-signup">Créer un compte</button>' +
         '<button class="acc-link" id="acc-forgot">Mot de passe oublié ?</button>' +
@@ -291,7 +291,7 @@ import { api } from "./api";
       '<button class="acc-x" aria-label="Fermer">×</button>' +
       "<h3>Nouveau mot de passe</h3>" +
       '<p class="acc-sub">Choisissez un nouveau mot de passe pour votre compte.</p>' +
-      '<input type="password" id="acc-np" placeholder="Nouveau mot de passe (8+ caractères)" autocomplete="new-password" />' +
+      '<input type="password" id="acc-np" placeholder="Nouveau mot de passe (16+ caractères)" autocomplete="new-password" />' +
       '<input type="password" id="acc-np2" placeholder="Confirmer le mot de passe" autocomplete="new-password" />' +
       '<button class="acc-btn primary" id="acc-np-save">Enregistrer</button>' +
       '<p class="acc-msg"></p>';
@@ -1066,8 +1066,9 @@ import { api } from "./api";
     }));
     content.querySelectorAll("[data-pseudo]").forEach((el) => { if (el.dataset.pseudo) el.onclick = () => openProfile(el.dataset.pseudo); });
   }
-  function openSocial() {
-    soTab = "challenge";
+  // tab : onglet à ouvrir (« incoming », « history », « friends »…) — depuis une notification.
+  function openSocial(tab?) {
+    soTab = typeof tab === "string" ? tab : "challenge";
     renderSocial();
     soOverlay.classList.add("on");
     // Compté en arrière-plan : la pastille de l'onglet Amis doit apparaître

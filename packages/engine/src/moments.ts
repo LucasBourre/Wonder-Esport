@@ -35,12 +35,15 @@ export function keyMomentSuccess(s: CareerState, option: EventOption) {
 }
 
 // Applique un moment décisif générique : retourne { success, text, chips }.
-export function playKeyMoment(s: CareerState, moment: KeyMoment, option: EventOption) {
-  const success = keyMomentSuccess(s, option);
+// `forced` (mode salle) : l'issue est commune à toute la salle et fixée d'avance ; le
+// choix du joueur ne décide plus que de SA prestation (réputation, trait).
+export function playKeyMoment(s: CareerState, moment: KeyMoment, option: EventOption, forced?: boolean) {
+  const personal = keyMomentSuccess(s, option);
+  const success = forced ?? personal;
   const chips: Chip[] = [];
-  if (success && option.repWin) chips.push(...applyFx(s, { rep: option.repWin }));
-  if (!success && option.repFail) chips.push(...applyFx(s, { rep: option.repFail }));
-  if (success && option.traitWin && !hasTrait(s, option.traitWin)) {
+  if (personal && option.repWin) chips.push(...applyFx(s, { rep: option.repWin }));
+  if (!personal && option.repFail) chips.push(...applyFx(s, { rep: option.repFail }));
+  if (personal && option.traitWin && !hasTrait(s, option.traitWin)) {
     chips.push(...applyFx(s, { trait: option.traitWin }));
   }
   // Beats scénarisés (mode Histoire) : drapeau posé selon le CHOIX (toujours),
@@ -48,5 +51,5 @@ export function playKeyMoment(s: CareerState, moment: KeyMoment, option: EventOp
   if (option.flag) s.flags[option.flag] = true;
   const winTxt = option.winText || moment.winText;
   const failTxt = option.failText || moment.failText;
-  return { success, text: renderText(s, success ? winTxt : failTxt), chips };
+  return { success, personal, text: renderText(s, success ? winTxt : failTxt), chips };
 }

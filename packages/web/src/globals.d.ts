@@ -19,6 +19,7 @@ interface Window {
   OE?: OpenElevenBridge;
   OpenElevenAccount?: any;
   OpenElevenRoom?: any;
+  OpenElevenNotifs?: any;
   OpenElevenGame?: any;
   I18N?: any;
   /** Pack de traduction du contenu, posé par public/i18n-content quand l'anglais est retenu. */

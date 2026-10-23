@@ -8,6 +8,7 @@ import { Engine } from "@open-eleven/engine";
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { currentUser } from "./auth";
 import { pool } from "./db";
+import { notify } from "./notify";
 
 // Fenêtre de rattrapage : au-delà, un défi passé n'entre plus au classement.
 // Sans elle, rejouer des centaines de défis anciens gonflait le classement
@@ -106,6 +107,9 @@ export function registerScores(app: FastifyInstance): void {
         "insert into duels (seed, from_user, from_pseudo, from_label, from_choices, from_score, to_pseudo, status) " +
         "values ($1, $2, $3, $4, $5::jsonb, $6, $7, 'pending') returning id",
         [seed, user.id, fromPseudo, label ?? fromPseudo, JSON.stringify(choices), fromScore, toPseudo]);
+      // Le joueur défié est prévenu (s'il existe : le pseudo cible n'est pas vérifié à la création).
+      pool.query("select user_id from profiles where lower(pseudo) = lower($1)", [toPseudo])
+        .then((r) => notify([r.rows[0]?.user_id], "duel_received", { from: fromPseudo, duelId: rows[0].id })).catch(() => {});
       return { ok: true, id: rows[0].id, from_score: fromScore, to_pseudo: toPseudo };
     }
 
@@ -140,6 +144,8 @@ export function registerScores(app: FastifyInstance): void {
         "winner = $8, status = 'done', answered_at = now() where id = $1 and status = 'pending'",
         [id, user.id, myPseudo, label ?? myPseudo, JSON.stringify(choices), fromScore, toScore, winner]);
       if (!updated.rowCount) return reply.code(409).send({ error: "Duel déjà terminé" });
+      // Le lanceur du défi apprend le résultat, de SON point de vue.
+      notify([duel.from_user], "duel_result", { from: myPseudo, result: winner === "from" ? "win" : winner === "to" ? "loss" : "tie", mine: fromScore, theirs: toScore }).catch(() => {});
       return { ok: true, from_score: fromScore, to_score: toScore, winner, from_pseudo: duel.from_pseudo };
     }
 

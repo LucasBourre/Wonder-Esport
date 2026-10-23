@@ -8,8 +8,9 @@
 // Réponse : { data } ou { error: { message, code? } }.
 import type { FastifyInstance } from "fastify";
 import { currentUser } from "./auth";
-import { withUser, type Db } from "./db";
+import { pool, withUser, type Db } from "./db";
 import { limits } from "./limits";
+import { notify, pseudoOf, roomMembersExcept } from "./notify";
 import { notifyRoomsOf } from "./live";
 import { ProcedureError, procedures } from "./procedures";
 
@@ -59,6 +60,7 @@ const SQL_FUNCTIONS: Record<string, SqlFunction> = {
   room_report_season: fn("void", true, "p_room_id", "p_pending_offer:jsonb", "p_club_trophies:jsonb"),
   room_mark_career_ended: fn("void", true, "p_room_id", "p_score", "p_summary:jsonb"),
   room_update_stats: fn("void", true, "p_room_id", "p_stats:jsonb"),
+  room_claim_season_club: fn("scalar", true, "p_room_id", "p_year", "p_club_id"),
 };
 
 const MAX_JSON_ARG_BYTES = 256 * 1024;
@@ -121,6 +123,47 @@ async function callSql(db: Db, name: string, def: SqlFunction, args: Record<stri
 //   22xxx : valeur invalide (uuid mal formé…) · 23xxx : contrainte violée
 const isClientFault = (code: string | undefined): boolean => !!code && (code === "P0001" || code.startsWith("22") || code.startsWith("23"));
 
+// Qui prévenir après une action réussie (cf. notify.ts). Hors transaction, sans attendre :
+// la réponse au joueur qui agit ne dépend pas de l'envoi des notifications.
+async function notifyAfter(name: string, me: string, args: Record<string, unknown>, data: unknown): Promise<void> {
+  const roomId = typeof args.p_room_id === "string" ? args.p_room_id : null;
+  // Une invitation traitée (d'ici, du panneau Amis ou de l'overlay Salle) ne propose plus
+  // ses boutons : la notification correspondante est marquée « faite ».
+  const done = (kind: string, key: string, value: unknown) => typeof value === "string"
+    ? pool.query("update notifications set payload = payload || '{\"done\": true}'::jsonb where user_id = $1 and kind = $2 and payload->>$3 = $4", [me, kind, key, value])
+    : null;
+  if (name === "friend_accept") await done("friend_request", "fromId", args.from_id);
+  if (name === "friend_remove" || name === "friend_request") await done("friend_request", "fromId", args.friend_id);
+  if (name === "room_join" || name === "room_decline") await done("room_invite", "roomId", roomId);
+  const from = await pseudoOf(me);
+  switch (name) {
+    case "friend_request": {
+      const accepted = !!(data as { accepted?: boolean } | null)?.accepted;
+      return notify([args.friend_id as string], accepted ? "friend_accepted" : "friend_request", { from, fromId: me });
+    }
+    case "friend_accept":
+      return notify([args.from_id as string], "friend_accepted", { from });
+    case "room_invite":
+      return notify([args.p_friend_id as string], "room_invite", { from, roomId });
+    case "room_join":
+      return notify(await roomMembersExcept(roomId!, me), "room_joined", { from, roomId });
+    case "room_decline": {
+      const { rows } = await pool.query("select invited_by from room_members where room_id = $1 and user_id = $2", [roomId, me]);
+      return notify([rows[0]?.invited_by], "room_declined", { from, roomId });
+    }
+    case "room_launch":
+      return notify(await roomMembersExcept(roomId!, me), "room_launched", { from, roomId });
+    case "room_open_transfer_vote": case "room_open_relocation_vote": case "room_propose_kick": {
+      // Plusieurs membres peuvent ouvrir « le même » vote en même temps : une seule notification par vote.
+      const voteId = typeof data === "string" ? data : null;
+      if (!voteId) return;
+      const seen = await pool.query("select 1 from notifications where kind = 'room_vote' and payload->>'voteId' = $1 limit 1", [voteId]);
+      if (seen.rowCount) return;
+      return notify(await roomMembersExcept(roomId!, me), "room_vote", { from, roomId, voteId, kick: name === "room_propose_kick" });
+    }
+  }
+}
+
 export function registerRpc(app: FastifyInstance): void {
   app.post("/api/rpc/:name", async (req, reply) => {
     const name = (req.params as { name: string }).name;
@@ -143,6 +186,7 @@ export function registerRpc(app: FastifyInstance): void {
       const data = await withUser(userId, (db) => (sql ? callSql(db, name, sql, args) : proc!.run(db, userId, args)));
       // Une salle a pu changer : ses membres connectés en sont prévenus.
       if (userId && name.startsWith("room_") && name !== "room_state") notifyRoomsOf(userId).catch(() => {});
+      if (userId) notifyAfter(name, userId, args, data).catch(() => {});
       return { data };
     } catch (err) {
       if (err instanceof ProcedureError) return reply.code(err.status).send({ error: { message: err.message, code: err.code } });

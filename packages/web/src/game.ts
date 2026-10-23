@@ -968,6 +968,21 @@ import { Engine } from "@open-eleven/engine";
   }
 
   function proceedToSeason() {
+    // Mode salle : un vote de club en cours se tranche AVANT la saison, puis chacun rejoint
+    // le club de l'équipe — tous jouent la saison dans le même club (cf. renderPreSeasonSync).
+    if (G.room && !G.roomPreSynced && globalThis.OpenElevenRoom && globalThis.OpenElevenRoom.renderPreSeasonSync) {
+      globalThis.OpenElevenRoom.renderPreSeasonSync(G.room.id, showCard, async (_result, teamClub) => {
+        syncToTeamClub(teamClub);
+        // Le club de CETTE saison est celui du premier membre à l'avoir commencée : un transfert
+        // voté entre-temps vaudra pour la saison suivante, pour tout le monde.
+        try { const seasonClub = await globalThis.OpenElevenRoom.claimSeasonClub(G.room.id, G.year, G.club.id); if (seasonClub) syncToTeamClub(seasonClub); } catch (_) { /* hors ligne : on joue où l'on est */ }
+        updateHeader();
+        G.roomPreSynced = true;
+        proceedToSeason();
+      });
+      return;
+    }
+    G.roomPreSynced = false;
     // Coup du sort rarissime en tout début de carrière
     if (G.age <= 18 && E.rng() < E.BALANCE_REF.earlyEndChance) {
       G.careerEnded = true;
@@ -982,16 +997,18 @@ import { Engine } from "@open-eleven/engine";
       return;
     }
 
+    // Mode salle : la saison du CLUB (classement, montée, finales) est tirée en commun
+    // pour toute la salle — graine salle + année + club, note d'équipe fixée à la barrière.
+    if (G.room) G.roomClub = { seed: E.roomClubSeed(G.room.id, G.year, G.club.id), teamRating: G.room.teamRating != null ? G.room.teamRating : 6.6 };
     lastReport = E.playSeason(G);
-    // Mode salle : publie un instantané pour le tableau de comparaison en direct
-    // des autres membres. Best-effort (pushLiveStats avale ses propres erreurs).
+    // Mode salle : publie un instantané pour le comparatif en direct des autres membres,
+    // avec l'OVR de fin de saison qui fixera la note d'équipe de la suivante.
     if (G.room) {
+      (G.room.ovrByYear = G.room.ovrByYear || {})[lastReport.year] = E.ovr(G);
       window.OpenElevenRoom.pushLiveStats(G.room.id, {
-        name: G.name, age: G.age,
-        club: G.club.name, level: lastReport.level, countryId: G.club.countryId,
+        ...roomSnapshot(),
+        level: lastReport.level,
         seasonGoals: lastReport.goals, seasonAssists: lastReport.assists, seasonRating: lastReport.rating,
-        totalGoals: G.totals.goals, totalAssists: G.totals.assists, totalMatches: G.totals.matches,
-        ovr: E.ovr(G),
       });
     }
     updateHeader();
@@ -1631,11 +1648,19 @@ import { Engine } from "@open-eleven/engine";
       const CLUB_TROPHY_KEYS = ["league", "cup", "continental", "continental2", "continental3", "supercup"];
       const myClubTrophies = (lastReport.trophies || []).filter((t) => CLUB_TROPHY_KEYS.includes(t));
       if (lastReport.divisionTitle && !myClubTrophies.includes("league")) myClubTrophies.push("league");
-      globalThis.OpenElevenRoom.renderSeasonBarrierStep(G.room.id, myPendingOffer, myClubTrophies, showCard, (result, teamClub) => {
+      // Changement de division venu d'un événement (investisseur…) : transmis à la salle,
+      // qui l'applique à tous au passage de la saison (cf. E.creditClubTrophies).
+      if (G.roomClubShift > 0) myClubTrophies.push("clubUp");
+      else if (G.roomClubShift < 0) myClubTrophies.push("clubDown");
+      G.roomClubShift = 0;
+      const seasonYear = lastReport.year;
+      globalThis.OpenElevenRoom.renderSeasonBarrierStep(G.room.id, myPendingOffer, myClubTrophies, showCard, async (result, teamClub) => {
         syncToTeamClub(teamClub || (result && result.choice !== "stay" ? result.choice : null));
         // Contrat arrivé à échéance et resté au même club (vote « rester », ou aucune offre
         // à trancher) : prolongé. Un transfert a déjà signé un contrat neuf.
         if (window && window.contractUp && G.contract.years <= 0) E.renewContract(G, window);
+        // Note d'équipe de la saison suivante : OVR moyen publié par la salle pour celle-ci.
+        try { G.room.teamRating = E.teamRatingFromOvr(await globalThis.OpenElevenRoom.teamOvr(G.room.id, seasonYear)); } catch (_) { /* repli : saison moyenne */ }
         updateHeader();
         nextSeason();
       });
@@ -2955,10 +2980,7 @@ import { Engine } from "@open-eleven/engine";
     // pour les autres (décision produit : pas d'arrêt collectif anticipé).
     // Best-effort, jamais bloquant (cf. room.ts markCareerEnded).
     if (G.room && window.OpenElevenRoom && window.OpenElevenRoom.markCareerEnded) {
-      window.OpenElevenRoom.markCareerEnded(G.room.id, score, {
-        name: G.name, position: G.position ? G.position.name : null,
-        club: G.club ? G.club.name : null, seasons: (G.seasons || []).length,
-      });
+      window.OpenElevenRoom.markCareerEnded(G.room.id, score, { ...roomSnapshot(), score, seasons: (G.seasons || []).length });
     }
     const questNotes = evaluateQuests(); // avant les badges (streak/total à jour)
     const newBadges = evaluateBadges();
@@ -3148,6 +3170,30 @@ import { Engine } from "@open-eleven/engine";
   // laissaient une trace : une demi-finale de Coupe du Monde disparaissait avec
   // la saison. Le moteur archive désormais chaque tournoi disputé, on n'affiche
   // ici que le meilleur de chacun.
+  // Mode salle : instantané de carrière partagé avec la salle — en direct après chaque
+  // saison, puis comme bilan de fin. Clés courtes dans l'historique : il voyage à chaque envoi.
+  const ROOM_TROPHY_KEYS = ["league", "cup", "continental", "continental2", "continental3", "supercup", "worldCup", "ballon"];
+  function roomSnapshot() {
+    const t = G.trophies || {};
+    return {
+      name: G.name, age: G.age, position: G.position ? G.position.name : null,
+      club: G.club ? G.club.name : null, countryId: G.club ? G.club.countryId : null,
+      level: G.club ? E.lvlOf(G, G.club) : null,
+      ovr: E.ovr(G), peakOvr: G.peakOvr,
+      totalGoals: G.totals.goals, totalAssists: G.totals.assists, totalMatches: G.totals.matches,
+      natCaps: G.natTeam ? G.natTeam.caps : 0, natGoals: G.natTeam ? G.natTeam.goals : 0,
+      trophies: {
+        league: t.league || 0, cup: t.cup || 0, worldCup: t.worldCup || 0, ballon: t.ballon || 0,
+        continental: (t.continental || 0) + (t.continental2 || 0) + (t.continental3 || 0),
+      },
+      ovrByYear: (G.room && G.room.ovrByYear) || {},
+      history: (G.seasons || []).map((se) => {
+        const st = se.squad && se.dev ? se.dev : se;
+        return { a: se.age, y: se.year, c: se.clubName, p: se.leaguePos, m: st.matches, g: st.goals, as: st.assists || 0, r: se.rating, t: (se.trophies || []).filter((k) => ROOM_TROPHY_KEYS.includes(k)) };
+      }),
+    };
+  }
+
   // Nom affiché de chaque compétition de sélection (le continent décide de la coupe et des Jeux).
   function natCompNames(s) {
     const contId = (E.countryOf(s.nationality.homeCountryId) || {}).continent;
@@ -3388,6 +3434,13 @@ import { Engine } from "@open-eleven/engine";
       natBloc.style.display = natRuns ? "" : "none";
       natLabel.style.display = natRuns ? "" : "none";
     }
+    // Mode salle : comparatif de tous les membres (les autres peuvent encore jouer : le
+    // bouton Actualiser du bloc relit leurs chiffres).
+    const inRoom = !!(G.room && !reviewingPantheon && window.OpenElevenRoom && window.OpenElevenRoom.renderMembersStats);
+    $("final-room-label").style.display = inRoom ? "" : "none";
+    $("final-room").style.display = inRoom ? "" : "none";
+    $("final-room").innerHTML = "";
+    if (inRoom) window.OpenElevenRoom.renderMembersStats(G.room.id, $("final-room"));
     // Historique en sélection, replié comme le détail des saisons.
     const natHistory = natHistoryHtml(G);
     $("final-nat-history").innerHTML = natHistory;

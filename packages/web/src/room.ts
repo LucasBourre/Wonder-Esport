@@ -11,7 +11,7 @@
    (Phase C) n'est PAS ici : une fois le club de départ résolu, chacun joue
    sa saison normalement, sans re-synchronisation.
    ============================================================ */
-import { CLUBS } from "@open-eleven/content";
+import { CLUBS, COMPETITIONS } from "@open-eleven/content";
 import { Engine } from "@open-eleven/engine";
 
 (function () {
@@ -120,6 +120,7 @@ import { Engine } from "@open-eleven/engine";
               '<span class="lb-sub">' + (detail ? detail + " — " : "") + (m.final_score != null ? Math.round(m.final_score) + " pts" : "?") + "</span></li>";
           }).join("");
           return group("Salle terminée", '<ul class="lb-list">' + rows + "</ul>" +
+            '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("soft rm-stats", "📊 Comparer les carrières", room.id) + "</div>" +
             '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("danger rm-leave", "Retirer de ma liste", room.id) + "</div>");
         }
 
@@ -290,14 +291,66 @@ import { Engine } from "@open-eleven/engine";
   // par l'overlay Salle (renderStatsInline) ET par l'onglet "Salle" du
   // panneau de profil en jeu (renderMembersStats), pour ne pas dupliquer le
   // rendu entre les deux points d'entrée.
+  // Tout ce qui vient d'un autre membre (live_stats, final_summary) est écrit par SON
+  // client, sans contrôle : chaque valeur est échappée, et les nombres bornés.
+  const num = (v) => { const x = Number(v); return Number.isFinite(x) ? x : null; };
+  const n = (v) => (v == null ? "?" : esc(v));
+  // Instantané le plus complet d'un membre : son bilan de fin s'il a terminé, sinon le direct.
+  const snapshotOf = (m) => (m.final_summary && m.final_summary.history ? m.final_summary : m.live_stats) || null;
+
+  // Comparatif côte à côte : une colonne par membre, la meilleure valeur de chaque ligne en or.
+  function compareTableHtml(rows) {
+    const data = rows.map((m) => ({ m, s: snapshotOf(m) })).filter((x) => x.s);
+    if (data.length < 2) return "";
+    const tr = (s) => (s && s.trophies) || {};
+    const lines = [
+      [T("OVR max"), (s) => num(s.peakOvr != null ? s.peakOvr : s.ovr)],
+      [T("Matchs"), (s) => num(s.totalMatches)],
+      [T("Buts"), (s) => num(s.totalGoals)],
+      [T("Passes décisives"), (s) => num(s.totalAssists)],
+      [COMPETITIONS.league.icon + " " + T("Titres"), (s) => num(tr(s).league)],
+      [COMPETITIONS.cup.icon + " " + T("Coupes"), (s) => num(tr(s).cup)],
+      [COMPETITIONS.continental.icon + " " + T("Coupes continentales"), (s) => num(tr(s).continental)],
+      [COMPETITIONS.worldCup.icon + " " + T("Coupe du Monde"), (s) => num(tr(s).worldCup)],
+      [COMPETITIONS.ballon.icon + " " + T("Ballon d'Or"), (s) => num(tr(s).ballon)],
+      [T("Sélections"), (s) => num(s.natCaps)],
+      [T("Buts en sélection"), (s) => num(s.natGoals)],
+      [T("Score final"), (s) => num(s.score)],
+    ];
+    const head = "<tr><th></th>" + data.map((x) => "<th>" + esc(x.m.pseudo) + "</th>").join("") + "</tr>";
+    const body = lines.map(([label, get]) => {
+      const vals = data.map((x) => get(x.s));
+      if (vals.every((v) => v == null)) return "";
+      const best = Math.max(...vals.filter((v) => v != null));
+      return "<tr><td>" + esc(label) + "</td>" + vals.map((v) =>
+        "<td" + (v != null && v === best && best > 0 ? ' class="rm-best"' : "") + ">" + (v == null ? "–" : esc(Math.round(v))) + "</td>").join("") + "</tr>";
+    }).join("");
+    return '<div class="rm-compare"><table>' + head + body + "</table></div>";
+  }
+
+  // Historique saison par saison d'un membre, replié par défaut.
+  function historyHtml(m, s) {
+    const hist = Array.isArray(s && s.history) ? s.history : [];
+    if (!hist.length) return "";
+    const icons = (keys) => (Array.isArray(keys) ? keys : []).map((k) => (COMPETITIONS[k] ? COMPETITIONS[k].icon : "")).join("");
+    const rows = hist.map((h) => {
+      const pos = num(h.p);
+      return "<tr><td>" + n(h.a) + "</td><td>" + n(h.y) + "</td><td>" + esc(h.c || "") + "</td><td>" + (pos ? pos : "–") + "</td><td>" +
+        n(h.m) + " · " + n(h.g) + " · " + n(h.as) + "</td><td>" + n(h.r) + "</td><td>" + icons(h.t) + "</td></tr>";
+    }).join("");
+    return '<details class="rm-history"><summary>📜 ' + esc(T("Historique de {p}", { p: m.pseudo })) + "</summary>" +
+      '<div class="rm-compare"><table><tr><th>' + esc(T("Âge")) + "</th><th>" + esc(T("Année")) + "</th><th>" + esc(T("Club")) + "</th><th>" + esc(T("Clt")) +
+      "</th><th>" + esc(T("M · B · PD")) + "</th><th>" + esc(T("Note")) + "</th><th></th></tr>" + rows + "</table></div></details>";
+  }
+
   async function buildStatsListHtml(roomId) {
     const members = joined(await roomState(roomId));
     const rows = (members || []).slice().sort((a, b) =>
-      (((b.live_stats || {}).totalGoals) || 0) - (((a.live_stats || {}).totalGoals) || 0));
+      ((snapshotOf(b) || {}).totalGoals || 0) - ((snapshotOf(a) || {}).totalGoals || 0));
     if (!rows.length) return '<p class="lb-empty">' + esc(T("Aucun membre actif.")) + "</p>";
 
     const lines = rows.map((m, i) => {
-      const s = m.live_stats;
+      const s = snapshotOf(m);
       const statusTag = m.career_ended ? ' <span class="lb-sub">🏁 ' + esc(T("carrière terminée")) + "</span>" : "";
       if (!s) {
         return '<li class="lb-row" style="flex-direction:column;align-items:flex-start;gap:4px">' +
@@ -310,9 +363,6 @@ import { Engine } from "@open-eleven/engine";
         ? '<span class="lb-sub">' + (s.level ? '<span class="level-tag level-' + esc(s.level) + '">' + esc(E.divShort(s.level, s.countryId)) + "</span> " : "") +
           esc(s.club) + (cc ? " " + flagHtml(cc) : "") + (s.age != null ? " · " + esc(s.age) + " ans" : "") + "</span>"
         : "";
-      // live_stats est écrit par chaque membre, sans contrôle : ce ne sont des nombres
-      // que pour un client honnête, d'où l'échappement de chaque valeur.
-      const n = (v) => (v == null ? "?" : esc(v));
       const seasonPart = s.seasonGoals != null
         ? n(s.seasonGoals) + " ⚽ " + n(s.seasonAssists || 0) + " 🅰️" + (s.seasonRating != null ? " · " + n(s.seasonRating) : "")
         : "?";
@@ -321,9 +371,9 @@ import { Engine } from "@open-eleven/engine";
         (s.ovr != null ? " · " + n(s.ovr) + " OVR" : "");
       const statLine = '<span class="lb-sub">' + esc(T("Saison")) + " : " + seasonPart + " — " + esc(T("Carrière")) + " : " + careerPart + "</span>";
       return '<li class="lb-row" style="flex-direction:column;align-items:flex-start;gap:4px">' +
-        '<span class="lb-name">' + rank + "👤 " + esc(m.pseudo) + statusTag + "</span>" + clubLine + statLine + "</li>";
+        '<span class="lb-name">' + rank + "👤 " + esc(m.pseudo) + statusTag + "</span>" + clubLine + statLine + historyHtml(m, s) + "</li>";
     }).join("");
-    return '<ul class="lb-list">' + lines + "</ul>";
+    return compareTableHtml(rows) + '<ul class="lb-list">' + lines + "</ul>";
   }
 
   // Comparatif des statistiques en direct des membres, consulté depuis
@@ -654,6 +704,7 @@ import { Engine } from "@open-eleven/engine";
         const st = await roomState(roomId);
         if (!st) throw new Error("salle illisible"); // on réessaiera : sans année de départ, on ne peut pas détecter la barrière
         mark.season = st.room.season_year || 0;
+        await pendingPush; // nos chiffres de fin de saison d'abord, le bilan ensuite
         return api.rpc("room_report_season", { p_room_id: roomId, p_pending_offer: myPendingOffer, p_club_trophies: myClubTrophies || [] });
       },
       true, renderFn, onResolved, mark
@@ -684,6 +735,21 @@ import { Engine } from "@open-eleven/engine";
     );
   }
 
+  // Point de synchro AVANT de jouer sa saison : si un vote de club est ouvert (un coéquipier
+  // vient d'être transféré par un événement…), on le vote d'abord, puis on rejoint le club
+  // de l'équipe. Sans ça, un membre jouait sa saison dans l'ancien club pendant que l'autre
+  // la jouait dans le nouveau. Rien à ouvrir côté serveur : on ne fait que lire et voter.
+  function renderPreSeasonSync(roomId, renderFn, onResolved) {
+    return watchTransferPhase(roomId, async () => ({}), false, renderFn, onResolved);
+  }
+
+  // Club de la saison : le premier membre à la commencer le fixe pour toute la salle
+  // (cf. migration 004). Renvoie le club à jouer, ou null si le serveur ne répond pas.
+  async function claimSeasonClub(roomId, year, clubId) {
+    const { data, error } = await api.rpc("room_claim_season_club", { p_room_id: roomId, p_year: year, p_club_id: clubId });
+    return error ? null : data;
+  }
+
   // Signale la fin de SA carrière (retraite/blessure définitive) — le membre
   // devient spectateur : exclu du dénominateur de tous les votes futurs, sans
   // bloquer les autres. Appelé depuis finalize() (game.ts) en mode salle.
@@ -696,8 +762,23 @@ import { Engine } from "@open-eleven/engine";
   // Publie un instantané de carrière (club, âge, buts…) — appelé après chaque
   // saison jouée en mode salle (game.ts). Best-effort, comme markCareerEnded :
   // ne doit jamais interrompre le déroulé d'une saison.
-  async function pushLiveStats(roomId, stats) {
-    try { await api.rpc("room_update_stats", { p_room_id: roomId, p_stats: stats }); } catch (_) {}
+  // Le dernier envoi est gardé : la barrière l'attend avant de rendre le bilan, pour que
+  // tous les membres lisent les mêmes chiffres de fin de saison (note d'équipe, cf. teamOvr).
+  let pendingPush = Promise.resolve();
+  function pushLiveStats(roomId, stats) {
+    pendingPush = api.rpc("room_update_stats", { p_room_id: roomId, p_stats: stats }).catch(() => {});
+    return pendingPush;
+  }
+
+  // OVR moyen de l'équipe à l'issue d'une saison (ce que chaque membre a publié pour cette
+  // année) : il fixe la note d'équipe de la saison suivante, la même pour tous puisque ces
+  // chiffres ne bougent plus une fois la barrière franchie. null si personne n'a publié.
+  async function teamOvr(roomId, year) {
+    const st = await roomState(roomId);
+    const vals = (st ? st.members : [])
+      .map((m) => m.live_stats && m.live_stats.ovrByYear ? Number(m.live_stats.ovrByYear[year]) : NaN)
+      .filter((v) => Number.isFinite(v) && v > 0 && v <= 99);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   }
 
   // ---- pastille d'accueil : compte des invitations reçues, sondage 60 s ----
@@ -712,6 +793,6 @@ import { Engine } from "@open-eleven/engine";
   refreshBadge();
   setInterval(() => { if (document.visibilityState === "visible" && acc.getSession()) refreshBadge(); }, 60000);
 
-  window.OpenElevenRoom = { open, renderAcademyStep, renderSeasonBarrierStep, renderNarrativeVoteStep, renderRelocationVoteStep, markCareerEnded, pushLiveStats, renderMembersStats };
+  window.OpenElevenRoom = { open, renderAcademyStep, renderSeasonBarrierStep, renderNarrativeVoteStep, renderRelocationVoteStep, markCareerEnded, pushLiveStats, renderMembersStats, teamOvr, renderPreSeasonSync, refreshBadge, claimSeasonClub };
   if (btn) btn.addEventListener("click", open);
 })();

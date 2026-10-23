@@ -10,4 +10,6 @@ import "./i18n";
 // Compte, sauvegarde en ligne, classements, amis et duels, puis les salles.
 import "./account";
 import "./room";
+// Notifications : cloche, bandeaux en direct ; s'appuie sur le compte et les salles.
+import "./notifs";
 import "./sw-register";

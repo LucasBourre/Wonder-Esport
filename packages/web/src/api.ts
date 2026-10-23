@@ -10,7 +10,8 @@
 export interface ApiError { message: string; code?: string; status?: number; }
 export interface Result<T> { data: T | null; error: ApiError | null; }
 export interface Session { user: { id: string; email: string }; recovery: boolean; }
-export type AuthEvent = "SIGNED_IN" | "SIGNED_OUT" | "PASSWORD_RECOVERY";
+/** INITIAL_SESSION : session relue au chargement de la page (connecté ou non). */
+export type AuthEvent = "SIGNED_IN" | "SIGNED_OUT" | "PASSWORD_RECOVERY" | "INITIAL_SESSION";
 
 async function send(method: string, path: string, body?: unknown): Promise<{ status: number; json: any }> {
   try {
@@ -70,7 +71,7 @@ export const api = {
     /** Relit la session auprès du serveur (au chargement de la page). */
     async load(): Promise<Session | null> {
       const { status, json } = await send("GET", "/api/auth/session");
-      if (status === 200) setSession(json ? json.session : null);
+      if (status === 200) setSession(json ? json.session : null, "INITIAL_SESSION");
       return session;
     },
     signUp: (email: string, password: string) => authCall("/api/auth/signup", { email, password }, "SIGNED_IN"),
@@ -95,6 +96,11 @@ export const api = {
    * l'appelant relit l'état ; la reconnexion est automatique. Renvoie de quoi
    * arrêter l'écoute.
    */
+  /** Canal personnel : prévient quand une notification arrive (même logique que watchRoom). */
+  watchMe(onNotif: () => void): () => void {
+    return this.watchRoom("", onNotif);
+  },
+
   watchRoom(roomId: string, onChange: () => void): () => void {
     let socket: WebSocket | null = null;
     let stopped = false;
@@ -102,7 +108,7 @@ export const api = {
     const connect = () => {
       if (stopped) return;
       try {
-        socket = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/api/live?room=" + encodeURIComponent(roomId));
+        socket = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/api/live" + (roomId ? "?room=" + encodeURIComponent(roomId) : ""));
       } catch (_) { return; }
       socket.onmessage = () => onChange();
       // 4403 : le serveur refuse (plus membre, plus connecté) — inutile d'insister.

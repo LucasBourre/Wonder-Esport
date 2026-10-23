@@ -4037,5 +4037,11 @@ window.I18N_DATA = { en: {
  "Seizième de finale": "Round of 32",
  "L'aventure s'arrête en seizièmes : premier tour à élimination directe, premier couperet.": "The adventure ends in the round of 32: first knockout round, first axe to fall.",
  "Fiche finale : le classement du club à chaque saison, et la sélection saison par saison (matchs, buts, passes décisives, tournois joués).": "Final card: your club's league position each season, and your national team career season by season (appearances, goals, assists, tournaments played).",
- "En anglais, les étapes de la Coupe du Monde ne restent plus en français.": "In English, World Cup stages are no longer left in French."
+ "En anglais, les étapes de la Coupe du Monde ne restent plus en français.": "In English, World Cup stages are no longer left in French.",
+ "{club} est rétrogradé administrativement en {div}.": "{club} is administratively demoted to {div}.",
+ "Salles : comparatif côte à côte de tous les membres et historique saison par saison de chacun, en direct comme en fin de carrière.": "Rooms: side-by-side comparison of all members and each one's season-by-season history, live and at the end of the career.",
+ "Salles : la saison du club est la même pour tous (classement, montée, descente, finales et leur résultat), tirée selon le niveau moyen de l'équipe. Une finale se joue ensemble ; votre choix décide de votre prestation.": "Rooms: the club's season is the same for everyone (league position, promotion, relegation, finals and their result), drawn from the team's average level. A final is played together; your choice decides your own performance.",
+ "Salles : un transfert voté en cours de saison s'applique à tous avant la saison suivante, et un changement de division du club vaut pour toute la salle.": "Rooms: a transfer voted mid-season applies to everyone before the next season, and a change in the club's division applies to the whole room.",
+ "En anglais, un club d'élite n'est plus traité comme une division inférieure (plus de « barrage de montée » depuis l'élite).": "In English, an elite club is no longer treated as a lower division (no more \"promotion play-off\" from the elite).",
+ "Notifications : une cloche 🔔 et un bandeau en direct quand on vous invite, vous défie, accepte votre demande d'ami ou rejoint votre salle — avec les boutons pour répondre aussitôt.": "Notifications: a 🔔 bell and a live banner when someone invites you, challenges you, accepts your friend request or joins your room — with buttons to answer right away."
 } };

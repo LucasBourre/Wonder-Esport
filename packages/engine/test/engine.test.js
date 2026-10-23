@@ -144,3 +144,43 @@ test("des carrières longues et variées se rejouent sans erreur", () => {
     assert.doesNotThrow(() => E.replayDuel(50000 + i * 131, choices));
   }
 });
+
+test("salle : deux joueurs du même club vivent exactement la même saison de club", () => {
+  const { loadContent } = require("./load-engine");
+  const C = loadContent();
+  const choices = (i) => Array.from({ length: 400 }, (_, k) => ((i * 7 + k * 3 + (k % 5) * i) % 5) - 1);
+  // Deux joueurs que tout oppose (poste, niveau, événements, langue du libellé de division).
+  const base = [E.replayDuel(7001, choices(3)), E.replayDuel(9137, choices(11))];
+  const clubs = ["elite", "d1", "d2", "d3"].map((lvl) => C.CLUBS.find((c) => c.level === lvl && c.countryId === "fr") || C.CLUBS.find((c) => c.level === lvl));
+  const CLUB_KEYS = ["leaguePos", "promoted", "relegated", "playoffRun", "relegationPlayoff", "divisionTitle"];
+  const clubView = (s, r) => JSON.stringify({
+    ...Object.fromEntries(CLUB_KEYS.map((k) => [k, r[k] ?? null])),
+    league: r.trophies.includes("league"),
+    moments: r.pendingMoments.filter((m) => ["playoff", "relegation_playoff", "cup_final", "continental_final"].includes(m.type)).map((m) => m.type + ":" + m.sharedWin + ":" + (m.tier || 0)),
+    next: s.lastSeason && { promoted: s.lastSeason.promoted, relegated: s.lastSeason.relegated, pos: s.lastSeason.leaguePos },
+  });
+  let elitePlayoffs = 0, divergences = 0, seasons = 0;
+  for (const club of clubs) for (let year = 2030; year < 2070; year++) {
+    const views = base.map((p) => {
+      const s = JSON.parse(JSON.stringify(p));
+      Object.assign(s, { club, year, clubLevels: {}, squad: "first", loan: null, careerEnded: false, retiring: false, seasonTrophies: [], seasonAwards: [], scheduled: [], injuryWeeks: 0 });
+      s.roomClub = { seed: E.roomClubSeed("salle-test", year, club.id), teamRating: E.teamRatingFromOvr(72) };
+      const r = E.playSeason(s);
+      if (club.level === "elite" && r.playoffRun) elitePlayoffs++;
+      return clubView(s, r);
+    });
+    seasons++;
+    if (views[0] !== views[1]) divergences++;
+  }
+  assert.equal(divergences, 0, divergences + " saison(s) sur " + seasons + " où le club n'a pas vécu la même saison chez les deux joueurs");
+  assert.equal(elitePlayoffs, 0, "un club d'élite ne joue jamais de barrage de montée");
+  // Le hasard commun varie bien d'une saison à l'autre.
+  const pos = new Set();
+  for (let year = 2030; year < 2050; year++) {
+    const s = JSON.parse(JSON.stringify(base[0]));
+    Object.assign(s, { club: clubs[1], year, clubLevels: {}, squad: "first" });
+    s.roomClub = { seed: E.roomClubSeed("salle-test", year, clubs[1].id), teamRating: 6.6 };
+    pos.add(E.roomClubSeason(s, "d1", true).leaguePos);
+  }
+  assert.ok(pos.size >= 4, "classements trop uniformes : " + [...pos]);
+});

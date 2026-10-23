@@ -137,6 +137,7 @@ export const ENGINE_TEXT: Record<string, string> = {
   supercupWin: "Vainqueur de la {cupName} {year} !",
   supercupLoss: "{cupName} {year} perdue face au tenant de l'autre coupe.",
   clubInvestor: "Un investisseur propulse {club} en {div}.",
+  clubDemoted: "{club} est rétrogradé administrativement en {div}.",
   clubUp: "{seasonClub} évolue désormais en {div} — l'ascension continue.",
   clubElite: "{seasonClub} change de dimension et rejoint l'élite européenne.",
   clubFade: "{seasonClub} n'est plus que l'ombre du géant qu'il fut.",

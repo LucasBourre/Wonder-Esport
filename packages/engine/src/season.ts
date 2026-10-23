@@ -14,9 +14,10 @@ import { grantAward, rollSeasonAwards, rollSupercup, rollBallon, rollContinental
 import { applyInjury, rollInjury, injuryTier, injuryEndChance } from "./injuries";
 import { squadOf, reviewSquad, playDevSeason } from "./squad";
 import { marketValue } from "./transfers";
-import { continentOf, countryOf, divShort, lvlOf, visibilityOf } from "./clubs";
+import { continentOf, countryOf, divShort, isTopFlightOf, lvlOf, visibilityOf } from "./clubs";
 import { ovr, hasTrait } from "./player";
-import type { CareerState, SeasonMomentEntry, SeasonReport } from "./types";
+import { roomClubSeason, type RoomClubOutcome } from "./rooms";
+import type { CareerState, LevelId, SeasonMomentEntry, SeasonReport } from "./types";
 import { BALANCE, COMPETITIONS, CONTINENTAL_CUPS, CONTINENTAL_CUPS2, CONTINENTAL_CUPS3, EVENTS, LEVEL_ORDER, MICRO_EVENTS } from "@open-eleven/content";
 
 // --- Simulation d'une saison ----------------------------------------------
@@ -123,8 +124,8 @@ export function playSeason(s: CareerState) {
   // pas seulement le top mondial : un petit pays dont le meilleur échelon vaut
   // un D3 mondial n'a AUCUNE division au-dessus — donc ni barrage de montée ni
   // « montée » possibles (on est déjà champion de son pays).
-  const topDiv = divShort(lvl, s.club.countryId);
-  const isTopFlight = topDiv === "D1" || topDiv === "Élite";
+  // Décidé sur le niveau, pas sur le libellé traduit (cf. isTopFlightOf).
+  const isTopFlight = isTopFlightOf(lvl, s.club.countryId);
   const teamBoost = 1 + (rating - 6.6) * 0.12;
   // Ticket "vainqueur de Coupe Nationale la saison PASSÉE" → C2 continental ;
   // on le lit et le vide AVANT tout crédit de coupe de cette saison (sinon un
@@ -150,123 +151,129 @@ export function playSeason(s: CareerState) {
   if (evTrophies.includes("league")) {
     s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
   }
-  const wonDivision = !evTrophies.includes("league") && rng() < BALANCE.titleChance[lvl] * teamBoost;
-  if (wonDivision && isTopFlight) {
-    s.trophies.league += 1;
-    report.trophies.push("league");
-    s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
-  } else if (wonDivision) {
-    report.divisionTitle = true;
-    report.promoted = true;
-    // Un titre de division inférieure (Régional/D3/D2) EST un titre de champion :
-    // il compte dans le total (compteur « Titres », carte partageable, Panthéon),
-    // au même titre qu'un sacre en D1. Le détail par division reste distinct via
-    // leagueTitlesDetail ; les quêtes/badges « champion top-flight » filtrent par
-    // niveau et ne sont donc pas affectés.
-    s.trophies.league += 1;
-    s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
-    s.rep = clamp(s.rep + Math.round(4 * visibilityOf(s)), 0, 100);
-    s.moral = clamp(s.moral + 6, 5, 100);
-    s.history.push({ age: s.age, text: tx(s, "divTitlePromo", { div: divShort(lvl, s.club.countryId) }), impact: 9 });
-  } else if (!isTopFlight && rating >= 6.4 && rng() < (BALANCE.playoffChance[lvl] || 0) * teamBoost) {
-    // Saison solide sans titre : la montée se joue en barrage (moment décisif)
-    report.playoffRun = true;
-    report.pendingMoments.push({
-      // Libellé explicite sur la division VISÉE : « Barrage de montée » tout court
-      // laissait croire à une montée depuis la division où l'on est déjà affiché.
-      type: "playoff", label: tx(s, "momPromo", { div: divShort(LEVEL_ORDER[Math.min(LEVEL_ORDER.length - 1, LEVEL_ORDER.indexOf(lvl) + 1)], s.club.countryId) }),
-      winLabel: tx(s, "momPromoWin"), failLabel: tx(s, "momPromoFail"),
-      moment: keyMomentFor(s, "promo_playoff"),
-    });
-  }
-  // Relégation (d1 et d2) : vos performances protègent le club — et les
-  // géants historiques ne coulent presque jamais plus bas que la D1
-  let relegBase = BALANCE.relegationChance[lvl] || 0;
-  if (relegBase && lvl === "d1" && s.club.level === "elite") relegBase *= BALANCE.eliteRelegShield;
-  if (!report.promoted && !report.playoffRun && relegBase > 0 &&
-      rng() < relegBase * clamp(1 - (rating - 6.3) * 0.35, 0.2, 1.6)) {
-    // La descente ne tombe plus en silence : elle se joue en BARRAGE DE MAINTIEN,
-    // moment décisif interactif — symétrique du barrage de montée. Une saison
-    // vraiment catastrophique reste toutefois sans appel (relégation directe).
-    if (rating <= BALANCE.relegDirectRating) {
-      report.relegated = true;
-      s.moral = clamp(s.moral - 8, 5, 100);
-      s.history.push({ age: s.age, text: tx(s, "relegated"), impact: -10 });
-    } else {
-      report.relegationPlayoff = true;
+  // Mode salle : le destin du club (titre, barrages, relégation, finales, classement) est
+  // tiré une seule fois pour toute la salle, cf. rooms.ts. Le solo garde son propre tirage.
+  if (s.roomClub) {
+    applyRoomClubSeason(s, report, roomClubSeason(s, lvl, isTopFlight), evTrophies, lvl, isTopFlight);
+  } else {
+    const wonDivision = !evTrophies.includes("league") && rng() < BALANCE.titleChance[lvl] * teamBoost;
+    if (wonDivision && isTopFlight) {
+      s.trophies.league += 1;
+      report.trophies.push("league");
+      s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
+    } else if (wonDivision) {
+      report.divisionTitle = true;
+      report.promoted = true;
+      // Un titre de division inférieure (Régional/D3/D2) EST un titre de champion :
+      // il compte dans le total (compteur « Titres », carte partageable, Panthéon),
+      // au même titre qu'un sacre en D1. Le détail par division reste distinct via
+      // leagueTitlesDetail ; les quêtes/badges « champion top-flight » filtrent par
+      // niveau et ne sont donc pas affectés.
+      s.trophies.league += 1;
+      s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
+      s.rep = clamp(s.rep + Math.round(4 * visibilityOf(s)), 0, 100);
+      s.moral = clamp(s.moral + 6, 5, 100);
+      s.history.push({ age: s.age, text: tx(s, "divTitlePromo", { div: divShort(lvl, s.club.countryId) }), impact: 9 });
+    } else if (!isTopFlight && rating >= 6.4 && rng() < (BALANCE.playoffChance[lvl] || 0) * teamBoost) {
+      // Saison solide sans titre : la montée se joue en barrage (moment décisif)
+      report.playoffRun = true;
       report.pendingMoments.push({
-        type: "relegation_playoff", label: tx(s, "momStay"),
-        winLabel: tx(s, "momStayWin"), failLabel: tx(s, "momStayFail"),
-        moment: keyMomentFor(s, "relegation_playoff"),
+        // Libellé explicite sur la division VISÉE : « Barrage de montée » tout court
+        // laissait croire à une montée depuis la division où l'on est déjà affiché.
+        type: "playoff", label: tx(s, "momPromo", { div: divShort(LEVEL_ORDER[Math.min(LEVEL_ORDER.length - 1, LEVEL_ORDER.indexOf(lvl) + 1)], s.club.countryId) }),
+        winLabel: tx(s, "momPromoWin"), failLabel: tx(s, "momPromoFail"),
+        moment: keyMomentFor(s, "promo_playoff"),
       });
     }
-  }
-  // La coupe nationale : atteindre la finale se joue ici, la gagner se
-  // joue dans un moment décisif
-  if (!evTrophies.includes("cup") && rng() < BALANCE.cupChance[lvl] * BALANCE.cupFinalReachMult * teamBoost) {
-    report.pendingMoments.push({
-      type: "cup_final", label: tx(s, "momCup"),
-      winLabel: tx(s, "momCupWin"), failLabel: tx(s, "momCupFail"),
-      moment: keyMomentFor(s, "cup_final"),
-    });
-  }
-  // Coupe continentale de club : ATTEINDRE la finale se joue ici, la GAGNER se
-  // joue dans un moment décisif interactif (continental_final). Hors d'Europe,
-  // la D1 est le sommet (pas de clubs "élite") → elle conteste sa Coupe des
-  // Champions comme l'élite européenne conteste la sienne.
-  // 3 paliers, PAS uniformes sur les 5 continents (cf. CONTINENTAL_CUPS2/3
-  // dans content) : sommet (élite en Europe, D1 ailleurs) → C1 ; vainqueur de
-  // Coupe Nationale (ticket), TOUTES divisions → C2 (Europe/Asie/Afrique/
-  // Amérique SEULEMENT) ; division juste sous le sommet par défaut → C3
-  // (Europe/Asie SEULEMENT). Océanie : C1 uniquement, inchangé. UN SEUL
-  // engagement/saison. Tier décidé SANS hasard ; le rng() de portée reste
-  // l'unique tirage, à sa place (même pour tier 0 : rng consommé).
-  if (!evTrophies.includes("continental") && !evTrophies.includes("continental2") && !evTrophies.includes("continental3")) {
-    const continent = continentOf(s.club.countryId) || "eu";
-    const topLvl = continent === "eu" ? "elite" : "d1";
-    const c3Lvl = continent === "eu" ? "d1" : "d2";
-    let tier = 0, reachP = 0, cup = null;
-    if (lvl === topLvl) {
-      tier = 1;
-      reachP = (continent === "eu" ? BALANCE.continentalReach.eu.elite : BALANCE.continentalReach.other[topLvl]) || 0;
-      cup = CONTINENTAL_CUPS[continent] || CONTINENTAL_CUPS.eu;
-    } else if (subTicket && CONTINENTAL_CUPS2[continent]) {
-      tier = 2; reachP = BALANCE.subCupReach.c2[lvl] || 0; cup = CONTINENTAL_CUPS2[continent];
-    } else if (lvl === c3Lvl && CONTINENTAL_CUPS3[continent]) {
-      tier = 3; reachP = BALANCE.subCupReach.c3[c3Lvl] || 0; cup = CONTINENTAL_CUPS3[continent];
+    // Relégation (d1 et d2) : vos performances protègent le club — et les
+    // géants historiques ne coulent presque jamais plus bas que la D1
+    let relegBase = BALANCE.relegationChance[lvl] || 0;
+    if (relegBase && lvl === "d1" && s.club.level === "elite") relegBase *= BALANCE.eliteRelegShield;
+    if (!report.promoted && !report.playoffRun && relegBase > 0 &&
+        rng() < relegBase * clamp(1 - (rating - 6.3) * 0.35, 0.2, 1.6)) {
+      // La descente ne tombe plus en silence : elle se joue en BARRAGE DE MAINTIEN,
+      // moment décisif interactif — symétrique du barrage de montée. Une saison
+      // vraiment catastrophique reste toutefois sans appel (relégation directe).
+      if (rating <= BALANCE.relegDirectRating) {
+        report.relegated = true;
+        s.moral = clamp(s.moral - 8, 5, 100);
+        s.history.push({ age: s.age, text: tx(s, "relegated"), impact: -10 });
+      } else {
+        report.relegationPlayoff = true;
+        report.pendingMoments.push({
+          type: "relegation_playoff", label: tx(s, "momStay"),
+          winLabel: tx(s, "momStayWin"), failLabel: tx(s, "momStayFail"),
+          moment: keyMomentFor(s, "relegation_playoff"),
+        });
+      }
     }
-    // contMult : certains championnats (Pays-Bas, Portugal) placent rarement leurs
-    // clubs en finale européenne malgré un bon niveau interne. Défaut 1.
-    const contM = (countryOf(s.club.countryId) || {}).contMult;
-    // rng() TOUJOURS consommé, même tier 0 (reachP y vaut 0 → jamais vrai) :
-    // sauter l'appel changerait le tirage de tous les joueurs non qualifiés.
-    if (rng() < reachP * teamBoost * (contM != null ? contM : 1)) {
+    // La coupe nationale : atteindre la finale se joue ici, la gagner se
+    // joue dans un moment décisif
+    if (!evTrophies.includes("cup") && rng() < BALANCE.cupChance[lvl] * BALANCE.cupFinalReachMult * teamBoost) {
       report.pendingMoments.push({
-        type: "continental_final",
-        tier,
-        continent,
-        label: tx(s, "momCont", { cupName: cup!.name }),
-        winLabel: tx(s, tier === 3 ? "momCont3Win" : tier === 2 ? "momCont2Win" : "momContWin"),
-        failLabel: tx(s, tier === 1 ? "momContFail" : "momContEuFail"),
-        moment: keyMomentFor(s, "continental_final"),
+        type: "cup_final", label: tx(s, "momCup"),
+        winLabel: tx(s, "momCupWin"), failLabel: tx(s, "momCupFail"),
+        moment: keyMomentFor(s, "cup_final"),
       });
     }
-  }
+    // Coupe continentale de club : ATTEINDRE la finale se joue ici, la GAGNER se
+    // joue dans un moment décisif interactif (continental_final). Hors d'Europe,
+    // la D1 est le sommet (pas de clubs "élite") → elle conteste sa Coupe des
+    // Champions comme l'élite européenne conteste la sienne.
+    // 3 paliers, PAS uniformes sur les 5 continents (cf. CONTINENTAL_CUPS2/3
+    // dans content) : sommet (élite en Europe, D1 ailleurs) → C1 ; vainqueur de
+    // Coupe Nationale (ticket), TOUTES divisions → C2 (Europe/Asie/Afrique/
+    // Amérique SEULEMENT) ; division juste sous le sommet par défaut → C3
+    // (Europe/Asie SEULEMENT). Océanie : C1 uniquement, inchangé. UN SEUL
+    // engagement/saison. Tier décidé SANS hasard ; le rng() de portée reste
+    // l'unique tirage, à sa place (même pour tier 0 : rng consommé).
+    if (!evTrophies.includes("continental") && !evTrophies.includes("continental2") && !evTrophies.includes("continental3")) {
+      const continent = continentOf(s.club.countryId) || "eu";
+      const topLvl = continent === "eu" ? "elite" : "d1";
+      const c3Lvl = continent === "eu" ? "d1" : "d2";
+      let tier = 0, reachP = 0, cup = null;
+      if (lvl === topLvl) {
+        tier = 1;
+        reachP = (continent === "eu" ? BALANCE.continentalReach.eu.elite : BALANCE.continentalReach.other[topLvl]) || 0;
+        cup = CONTINENTAL_CUPS[continent] || CONTINENTAL_CUPS.eu;
+      } else if (subTicket && CONTINENTAL_CUPS2[continent]) {
+        tier = 2; reachP = BALANCE.subCupReach.c2[lvl] || 0; cup = CONTINENTAL_CUPS2[continent];
+      } else if (lvl === c3Lvl && CONTINENTAL_CUPS3[continent]) {
+        tier = 3; reachP = BALANCE.subCupReach.c3[c3Lvl] || 0; cup = CONTINENTAL_CUPS3[continent];
+      }
+      // contMult : certains championnats (Pays-Bas, Portugal) placent rarement leurs
+      // clubs en finale européenne malgré un bon niveau interne. Défaut 1.
+      const contM = (countryOf(s.club.countryId) || {}).contMult;
+      // rng() TOUJOURS consommé, même tier 0 (reachP y vaut 0 → jamais vrai) :
+      // sauter l'appel changerait le tirage de tous les joueurs non qualifiés.
+      if (rng() < reachP * teamBoost * (contM != null ? contM : 1)) {
+        report.pendingMoments.push({
+          type: "continental_final",
+          tier,
+          continent,
+          label: tx(s, "momCont", { cupName: cup!.name }),
+          winLabel: tx(s, tier === 3 ? "momCont3Win" : tier === 2 ? "momCont2Win" : "momContWin"),
+          failLabel: tx(s, tier === 1 ? "momContFail" : "momContEuFail"),
+          moment: keyMomentFor(s, "continental_final"),
+        });
+      }
+    }
 
-  // Classement (mise en scène cohérente avec le destin du club)
-  if (report.trophies.includes("league") || report.divisionTitle) report.leaguePos = 1;
-  else if (report.playoffRun) report.leaguePos = randInt(2, 4);
-  // Barragiste pour le maintien : place de relégable, mais pas encore condamné —
-  // le classement définitif est réaligné si le barrage est perdu.
-  else if (report.relegationPlayoff) report.leaguePos = lvl === "d1" ? randInt(15, 17) : randInt(16, 18);
-  else if (report.relegated) report.leaguePos = lvl === "d1" ? randInt(16, 18) : randInt(17, 19);
-  else {
-    // Le classement du club n'est plus un pur dé : la saison du joueur pèse. La
-    // moitié des objectifs hors élite est de type « top N » — ils étaient donc
-    // décidés par un tirage sur lequel le joueur n'avait aucune prise. On réutilise
-    // l'écart à la note de référence (même 6.6 que teamBoost) pour décaler le rang.
-    const [lo, hi] = lvl === "elite" ? [2, 7] : lvl === "d1" ? [2, 12] : [4, 14];
-    report.leaguePos = clamp(randInt(lo, hi) - Math.round((rating - 6.6) * 2.4), 1, hi + 2);
+    // Classement (mise en scène cohérente avec le destin du club)
+    if (report.trophies.includes("league") || report.divisionTitle) report.leaguePos = 1;
+    else if (report.playoffRun) report.leaguePos = randInt(2, 4);
+    // Barragiste pour le maintien : place de relégable, mais pas encore condamné —
+    // le classement définitif est réaligné si le barrage est perdu.
+    else if (report.relegationPlayoff) report.leaguePos = lvl === "d1" ? randInt(15, 17) : randInt(16, 18);
+    else if (report.relegated) report.leaguePos = lvl === "d1" ? randInt(16, 18) : randInt(17, 19);
+    else {
+      // Le classement du club n'est plus un pur dé : la saison du joueur pèse. La
+      // moitié des objectifs hors élite est de type « top N » — ils étaient donc
+      // décidés par un tirage sur lequel le joueur n'avait aucune prise. On réutilise
+      // l'écart à la note de référence (même 6.6 que teamBoost) pour décaler le rang.
+      const [lo, hi] = lvl === "elite" ? [2, 7] : lvl === "d1" ? [2, 12] : [4, 14];
+      report.leaguePos = clamp(randInt(lo, hi) - Math.round((rating - 6.6) * 2.4), 1, hi + 2);
+    }
   }
 
   // Les deux bornes d'une carrière. Garanties, pas tirées au sort : le
@@ -528,6 +535,65 @@ export function playSeason(s: CareerState) {
 // valider l'objectif a posteriori : on annule la sanction déjà appliquée
 // et on verse la récompense prévue. Sans hasard consommé, pour ne pas
 // décaler le PRNG (Défi du jour / rejeu de duel restent identiques).
+// Mode salle : applique le destin COMMUN du club (rooms.ts) avec les mêmes effets que
+// le tirage solo de playSeason. Les finales et barrages restent des moments joués par
+// chacun : leur issue est fixée d'avance (sharedWin), le choix ne pèse que sur la
+// performance personnelle du joueur (cf. playKeyMoment).
+function applyRoomClubSeason(s: CareerState, report: SeasonReport, club: RoomClubOutcome, evTrophies: string[], lvl: LevelId, isTopFlight: boolean) {
+  if (club.cupFinal && club.cupWin) s.roomCupWonYear = s.year; // ticket C2 de la salle pour N+1
+  if (club.title && !evTrophies.includes("league")) {
+    s.trophies.league += 1;
+    s.leagueTitlesDetail.push({ countryId: s.club.countryId, level: lvl, clubId: s.club.id, year: s.year });
+    if (isTopFlight) report.trophies.push("league");
+    else {
+      report.divisionTitle = true;
+      report.promoted = true;
+      s.rep = clamp(s.rep + Math.round(4 * visibilityOf(s)), 0, 100);
+      s.moral = clamp(s.moral + 6, 5, 100);
+      s.history.push({ age: s.age, text: tx(s, "divTitlePromo", { div: divShort(lvl, s.club.countryId) }), impact: 9 });
+    }
+  } else if (club.playoff) {
+    report.playoffRun = true;
+    report.pendingMoments.push({
+      type: "playoff", label: tx(s, "momPromo", { div: divShort(LEVEL_ORDER[Math.min(LEVEL_ORDER.length - 1, LEVEL_ORDER.indexOf(lvl) + 1)], s.club.countryId) }),
+      winLabel: tx(s, "momPromoWin"), failLabel: tx(s, "momPromoFail"),
+      moment: keyMomentFor(s, "promo_playoff"), sharedWin: club.playoffWin,
+    });
+  }
+  if (club.relegDirect) {
+    report.relegated = true;
+    s.moral = clamp(s.moral - 8, 5, 100);
+    s.history.push({ age: s.age, text: tx(s, "relegated"), impact: -10 });
+  } else if (club.relegPlayoff) {
+    report.relegationPlayoff = true;
+    report.pendingMoments.push({
+      type: "relegation_playoff", label: tx(s, "momStay"),
+      winLabel: tx(s, "momStayWin"), failLabel: tx(s, "momStayFail"),
+      moment: keyMomentFor(s, "relegation_playoff"), sharedWin: club.relegWin,
+    });
+  }
+  if (club.cupFinal && !evTrophies.includes("cup")) {
+    report.pendingMoments.push({
+      type: "cup_final", label: tx(s, "momCup"),
+      winLabel: tx(s, "momCupWin"), failLabel: tx(s, "momCupFail"),
+      moment: keyMomentFor(s, "cup_final"), sharedWin: club.cupWin,
+    });
+  }
+  if (club.contFinal && !evTrophies.includes("continental") && !evTrophies.includes("continental2") && !evTrophies.includes("continental3")) {
+    const continent = continentOf(s.club.countryId) || "eu";
+    const tier = club.contTier;
+    const cup = (tier === 1 ? CONTINENTAL_CUPS[continent] || CONTINENTAL_CUPS.eu : tier === 2 ? CONTINENTAL_CUPS2[continent] : CONTINENTAL_CUPS3[continent])!;
+    report.pendingMoments.push({
+      type: "continental_final", tier, continent,
+      label: tx(s, "momCont", { cupName: cup.name }),
+      winLabel: tx(s, tier === 3 ? "momCont3Win" : tier === 2 ? "momCont2Win" : "momContWin"),
+      failLabel: tx(s, tier === 1 ? "momContFail" : "momContEuFail"),
+      moment: keyMomentFor(s, "continental_final"), sharedWin: club.contWin,
+    });
+  }
+  report.leaguePos = club.leaguePos;
+}
+
 export function recheckObjective(s: CareerState, report: SeasonReport) {
   if (!report || report.objectiveMet) return false;
   if (!objectiveMet(s.objective, report)) return false;
@@ -548,7 +614,8 @@ export function recheckObjective(s: CareerState, report: SeasonReport) {
 export function resolveSeasonMoment(s: CareerState, report: SeasonReport, entry: SeasonMomentEntry, optionId: string | null) {
   const moment = entry.moment;
   const option = moment.options.find((o) => o.id === optionId) || pick(moment.options);
-  const res: any = playKeyMoment(s, moment, option);
+  // En salle, l'issue d'une finale ou d'un barrage du club est commune (sharedWin).
+  const res: any = playKeyMoment(s, moment, option, entry.sharedWin);
   res.option = option;
   if (res.success) {
     s.momentWins += 1;

@@ -2293,3 +2293,42 @@ body { color: var(--text-0); }
 .season-club { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .season-club > * { flex-shrink: 0; }
 .season-club > .season-club-name { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Salle : comparatif côte à côte et historiques ---------- */
+.rm-compare { width: 100%; overflow-x: auto; margin: 4px 0 10px; }
+.rm-compare table { border-collapse: collapse; width: 100%; font-size: 0.74rem; }
+.rm-compare th, .rm-compare td { padding: 4px 6px; text-align: center; border-bottom: 1px dashed var(--line); white-space: nowrap; }
+.rm-compare th { font-weight: 800; }
+.rm-compare td:first-child, .rm-compare th:first-child { text-align: left; }
+.rm-compare .rm-best { font-weight: 800; color: var(--gold-soft); }
+.rm-compare .rm-best::after { content: " 👑"; font-size: 0.7em; }
+.rm-history { width: 100%; margin-top: 4px; }
+.rm-history summary { cursor: pointer; font-size: 0.78rem; font-weight: 700; }
+#final-room { margin-bottom: 18px; text-align: left; }
+
+/* ---------- Notifications : cloche, liste, bandeaux en direct ---------- */
+.notif-fab { position: relative; margin-left: auto; margin-right: 8px; }
+.notif-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.notif-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.notif-item.unread { border-color: var(--gold-soft); box-shadow: inset 3px 0 0 var(--gold-soft); }
+.notif-icon { font-size: 1.2rem; line-height: 1.2; }
+.notif-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.notif-text { font-size: 0.86rem; line-height: 1.35; }
+.notif-time { font-size: 0.7rem; opacity: 0.65; }
+.notif-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.notif-actions .acc-btn { width: auto; padding: 7px 12px; font-size: 0.78rem; margin: 0; }
+.notif-msg { font-size: 0.78rem; font-weight: 700; }
+.notif-msg.ok { color: var(--accent-soft); }
+.notif-msg.err { color: #b3261e; }
+.notif-toasts { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; width: min(92vw, 440px); pointer-events: none; }
+.notif-toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 10px;
+  background: var(--card-bg); color: var(--green-ink); border-radius: 14px; padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); border-left: 4px solid var(--gold-bright);
+  animation: notif-in 0.25s ease; transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.notif-toast.out { opacity: 0; transform: translateY(-8px); }
+.notif-toast .notif-text { flex: 1; font-size: 0.84rem; }
+.notif-toast-open { border: none; background: var(--green); color: #fff; font-weight: 800; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-family: var(--font); }
+.notif-toast-x { border: none; background: none; font-size: 1.1rem; cursor: pointer; color: inherit; opacity: 0.6; }
+@keyframes notif-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
