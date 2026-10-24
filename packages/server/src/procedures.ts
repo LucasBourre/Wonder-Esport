@@ -210,21 +210,28 @@ export const procedures: Record<string, Procedure> = {
   rooms_mine: {
     auth: true,
     async run(db, me) {
+      // Invitations reçues : l'hôte (pseudo, avatar) et qui est déjà dans la salle.
       const invitations = await db.query(
-        "select m.room_id, coalesce(p.pseudo, 'Joueur') as from_pseudo from room_members m join rooms r on r.id = m.room_id " +
+        "select m.room_id, coalesce(p.pseudo, 'Joueur') as from_pseudo, p.avatar as from_avatar from room_members m join rooms r on r.id = m.room_id " +
         "left join profiles p on p.user_id = m.invited_by where m.user_id = $1 and m.status = 'invited' and r.status <> 'ended' order by m.created_at desc", [me]);
       const rooms = await db.query(
         "select r.id, r.status, r.phase, r.created_by from room_members m join rooms r on r.id = m.room_id " +
         "where m.user_id = $1 and m.status = 'joined' order by m.created_at desc", [me]);
-      const members = rooms.rowCount
+      const roomIds = [...rooms.rows.map((r) => r.id), ...invitations.rows.map((r) => r.room_id)];
+      // Chaque membre : avatar, qui l'a invité, et si son profil de départ est prêt.
+      const members = roomIds.length
         ? await db.query(
-          "select room_id, user_id, pseudo, status, career_ended, final_score, final_summary from room_members " +
-          "where room_id = any($1::uuid[]) and status in ('joined', 'invited')", [rooms.rows.map((r) => r.id)])
+          "select m.room_id, m.user_id, m.pseudo, m.status, m.invited_by, m.career_ended, m.final_score, m.final_summary, " +
+          "m.starting_offers is not null as ready, p.avatar from room_members m left join profiles p on p.user_id = m.user_id " +
+          "where m.room_id = any($1::uuid[]) and m.status in ('joined', 'invited') order by m.created_at", [roomIds])
         : { rows: [] as Record<string, unknown>[] };
       return {
-        invitations: invitations.rows.map((r) => ({ roomId: r.room_id, fromPseudo: r.from_pseudo })),
+        invitations: invitations.rows.map((r) => ({
+          roomId: r.room_id, fromPseudo: r.from_pseudo, fromAvatar: r.from_avatar,
+          members: members.rows.filter((m) => m.room_id === r.room_id && m.status === "joined").map((m) => ({ pseudo: m.pseudo, avatar: m.avatar })),
+        })),
         rooms: rooms.rows.map((r) => ({
-          id: r.id, status: r.status, phase: r.phase, isCreator: r.created_by === me,
+          id: r.id, status: r.status, phase: r.phase, isCreator: r.created_by === me, createdBy: r.created_by,
           members: members.rows.filter((m) => m.room_id === r.id),
         })),
       };
@@ -238,7 +245,8 @@ export const procedures: Record<string, Procedure> = {
       if (!member.rowCount) throw new ProcedureError("Salle introuvable.", 404);
       const room = (await db.query("select * from rooms where id = $1", [roomId])).rows[0];
       const members = (await db.query(
-        "select room_id, user_id, pseudo, status, starting_offers, career_ended, final_score, final_summary, live_stats from room_members where room_id = $1 order by created_at", [roomId])).rows;
+        "select m.room_id, m.user_id, m.pseudo, m.status, m.starting_offers, m.career_ended, m.final_score, m.final_summary, m.live_stats, p.avatar " +
+        "from room_members m left join profiles p on p.user_id = m.user_id where m.room_id = $1 order by m.created_at", [roomId])).rows;
       const openVote = (await db.query("select * from room_votes where room_id = $1 and status = 'open' order by opened_at desc limit 1", [roomId])).rows[0] ?? null;
       if (openVote) openVote.ballots = (await db.query("select vote_id, user_id, choice, cast_at from room_ballots where vote_id = $1", [openVote.id])).rows;
       // Dernier vote de mercato clos : son résultat dit où part l'équipe.

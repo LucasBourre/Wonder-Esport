@@ -48,6 +48,7 @@ const SQL_FUNCTIONS: Record<string, SqlFunction> = {
   room_invite: fn("void", true, "p_room_id", "p_friend_id"),
   room_join: fn("void", true, "p_room_id"),
   room_decline: fn("void", true, "p_room_id"),
+  room_cancel_invite: fn("void", true, "p_room_id", "p_user_id"),
   room_leave: fn("void", true, "p_room_id"),
   room_launch: fn("void", true, "p_room_id", "p_club_id"),
   room_submit_starting_offers: fn("void", true, "p_room_id", "p_offers:jsonb"),
@@ -135,6 +136,10 @@ async function notifyAfter(name: string, me: string, args: Record<string, unknow
   if (name === "friend_accept") await done("friend_request", "fromId", args.from_id);
   if (name === "friend_remove" || name === "friend_request") await done("friend_request", "fromId", args.friend_id);
   if (name === "room_join" || name === "room_decline") await done("room_invite", "roomId", roomId);
+  // Invitation annulée par l'hôte : chez l'invité, la notification ne propose plus « Rejoindre ».
+  if (name === "room_cancel_invite" && typeof args.p_user_id === "string") {
+    await pool.query("update notifications set payload = payload || '{\"done\": true}'::jsonb where user_id = $1 and kind = 'room_invite' and payload->>'roomId' = $2", [args.p_user_id, roomId]);
+  }
   const from = await pseudoOf(me);
   switch (name) {
     case "friend_request": {

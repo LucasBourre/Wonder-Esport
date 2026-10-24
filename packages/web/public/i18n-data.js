@@ -4142,6 +4142,7 @@ window.I18N_DATA = { en: {
  "Retraite : un dernier défi dans votre pays natal, et un ancien coéquipier devenu entraîneur qui veut vous dans son staff.": "Retirement: one last challenge in your home country, and a former teammate turned coach who wants you on his staff.",
  "Classement du championnat": "League standings",
  "Un club ne peut plus finir premier de son championnat sans être sacré champion : la première place est désormais réservée au titre.": "A club can no longer finish first in its league without being crowned champion: first place is now reserved for the title.",
- "Clubs régionaux": "Regional clubs",
+ "Clubs régionaux et salles repensées": "Regional clubs and redesigned rooms",
+ "Salles repensées : les étapes de la partie, une place par joueur avec son avatar et son état, des invitations en un clic (et annulables), et un seul bouton pour la suite.": "Redesigned rooms: the game steps, one spot per player with their avatar and status, one-click invitations (that can be cancelled), and a single button for what comes next.",
  "Un échelon régional (« Rég. ») dans les 13 grands championnats, avec 66 clubs amateurs : votre carrière peut désormais commencer tout en bas de la pyramide.": "A regional tier (\"Reg.\") in the 13 major leagues, with 66 amateur clubs: your career can now start at the very bottom of the pyramid."
 } };

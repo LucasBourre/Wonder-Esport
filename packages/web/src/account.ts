@@ -1190,7 +1190,7 @@ import { api } from "./api";
     // Exposés pour room.ts (mode « carrière commune ») : ce module reste
     // autonome (aucune notion de salle ici), il ne fait qu'exposer ce qu'il
     // sait déjà (client du serveur, session, liste d'amis acceptés).
-    getClient: () => api, getSession: () => session, listFriends,
+    getClient: () => api, getSession: () => session, listFriends, listOutgoing, addFriend, avatarHtml,
   };
 
   // ---- bouton d'accueil -------------------------------------------------------

@@ -91,3 +91,33 @@ test("marquer comme lu, et personne d'autre ne voit mes notifications", { skip }
   assert.equal((await c.rpc("notifications_list")).data.items.length, 0);
   assert.equal((await client().rpc("notifications_list")).status, 401, "sans compte, rien");
 });
+
+test("salle : l'hôte annule une invitation, et la liste des salles donne avatars, hôte et profils prêts", { skip }, async () => {
+  const host = await player("ra"), friend = await player("rb"), other = await player("rc");
+  for (const p of [friend, other]) {
+    await host.rpc("friend_request", { friend_id: p.id });
+    await p.rpc("friend_accept", { from_id: host.id });
+  }
+  await host.rpc("profile_set_avatar", { avatar: "mat-03" });
+  const roomId = (await host.rpc("room_create")).data;
+  await host.rpc("room_invite", { p_room_id: roomId, p_friend_id: friend.id });
+  await host.rpc("room_invite", { p_room_id: roomId, p_friend_id: other.id });
+  await other.rpc("room_join", { p_room_id: roomId });
+
+  const mine = (await host.rpc("rooms_mine")).data.rooms.find((r) => r.id === roomId);
+  assert.equal(mine.createdBy, host.id, "l'hôte est connu de tous");
+  const me = mine.members.find((m) => m.user_id === host.id);
+  assert.equal(me.avatar, "mat-03");
+  assert.equal(me.ready, false, "profil pas encore prêt");
+  const inv = (await friend.rpc("rooms_mine")).data.invitations.find((i) => i.roomId === roomId);
+  assert.equal(inv.fromAvatar, "mat-03", "l'invitation montre l'avatar de l'hôte");
+  assert.ok(inv.members.some((m) => m.pseudo), "et qui est déjà dans la salle");
+
+  // Un simple membre ne peut pas annuler l'invitation d'un autre ; l'hôte, si.
+  assert.ok((await other.rpc("room_cancel_invite", { p_room_id: roomId, p_user_id: friend.id })).error);
+  assert.equal((await host.rpc("room_cancel_invite", { p_room_id: roomId, p_user_id: friend.id })).status, 200);
+  assert.equal((await friend.rpc("rooms_mine")).data.invitations.length, 0, "l'invitation a disparu chez l'invité");
+  await wait(300);
+  const notif = (await friend.rpc("notifications_list")).data.items.find((n) => n.kind === "room_invite");
+  assert.equal(notif.payload.done, true, "sa notification ne propose plus « Rejoindre »");
+});

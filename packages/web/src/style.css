@@ -2357,3 +2357,55 @@ body { color: var(--text-0); }
 .pf-av { width: 48px; height: 48px; font-size: 1.4rem; border: 2px solid var(--gold-soft); }
 .pf-mine { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding: 8px 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--gold-soft); font-size: 0.8rem; text-align: left; }
 .pf-mine .acc-btn { width: auto; margin: 0; padding: 7px 12px; font-size: 0.78rem; }
+
+/* ---------- Salle : création, invitations, places, étapes ---------- */
+.rm-hero { text-align: center; padding: 6px 4px 12px; }
+.rm-hero p { font-size: 0.86rem; line-height: 1.45; margin: 0 0 10px; }
+.rm-card, .rm-invite-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px; margin: 0 0 12px; text-align: left; }
+.rm-card-title { font-weight: 800; font-size: 0.86rem; margin: 0 0 8px; }
+.rm-invite-card { display: flex; gap: 12px; align-items: flex-start; border-color: var(--gold-soft); }
+.rm-av-lg { width: 52px; height: 52px; font-size: 1.5rem; flex-shrink: 0; border: 2px solid var(--gold-soft); }
+.rm-ic-body { flex: 1; min-width: 0; }
+.rm-ic-body p { margin: 0 0 6px; font-size: 0.88rem; }
+.rm-mini { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 0 8px; }
+.rm-mini-name { font-size: 0.74rem; opacity: 0.8; margin-right: 4px; }
+.rm-ic-acts, .rm-sub-acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rm-ic-acts .acc-btn, .rm-sub-acts .acc-btn { width: auto; margin: 0; padding: 8px 14px; font-size: 0.8rem; }
+.rm-sub-acts { justify-content: center; margin-top: 8px; }
+.rm-sub-acts .acc-btn.ghost { padding: 6px 10px; font-size: 0.76rem; }
+.rm-danger { color: #b3261e !important; }
+.rm-steps { list-style: none; display: flex; gap: 4px; margin: 0 0 6px; padding: 0; }
+.rm-steps li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.68rem; font-weight: 700; opacity: 0.5; text-align: center; }
+.rm-steps li span { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--line); font-size: 0.72rem; }
+.rm-steps li.done { opacity: 0.85; }
+.rm-steps li.done span { background: var(--accent-soft); color: #fff; }
+.rm-steps li.on { opacity: 1; color: var(--accent-soft); }
+.rm-steps li.on span { background: var(--gold-bright); color: var(--green-ink); box-shadow: 0 0 0 3px rgba(232, 195, 74, 0.35); }
+.rm-hint { font-size: 0.78rem; text-align: center; margin: 2px 0 10px; opacity: 0.85; }
+.rm-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 10px; }
+@media (max-width: 420px) { .rm-slots { grid-template-columns: repeat(2, 1fr); } }
+.rm-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card-bg); border: 2px solid var(--line); min-width: 0; font-family: var(--font); color: inherit; }
+.rm-av { width: 46px; height: 46px; font-size: 1.3rem; }
+.rm-name { font-size: 0.78rem; font-weight: 800; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rm-me { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent-soft); }
+.rm-state { font-size: 0.68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--line); }
+.rm-ok { border-color: var(--accent-soft); }
+.rm-ok .rm-state { background: var(--accent-soft); color: #fff; }
+.rm-todo .rm-state { background: rgba(232, 195, 74, 0.35); }
+.rm-wait { border-style: dashed; opacity: 0.8; }
+.rm-play .rm-state { background: var(--green); color: #fff; }
+.rm-end { opacity: 0.75; }
+.rm-slot-x { position: absolute; top: 4px; right: 4px; border: none; background: none; cursor: pointer; font-size: 0.78rem; opacity: 0.55; padding: 2px; }
+.rm-slot-x:hover { opacity: 1; }
+.rm-empty { border-style: dashed; cursor: pointer; justify-content: center; background: transparent; }
+.rm-empty:hover { border-color: var(--gold-bright); }
+.rm-plus { font-size: 1.6rem; line-height: 46px; height: 46px; opacity: 0.6; }
+.rm-invite-panel { border-top: 1px dashed var(--line); padding-top: 10px; margin: 0 0 10px; }
+.rm-add { margin-top: 8px; }
+.rm-add input { margin: 0; }
+.rm-add .acc-btn { width: auto; margin: 0; padding: 11px 14px; }
+.rm-card > .acc-btn.primary { margin: 4px 0 0; }
+.rm-invite-panel .lb-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rm-invite-panel .lb-row .acc-btn { width: auto; flex-shrink: 0; margin: 0; padding: 6px 14px; font-size: 0.78rem; }
+.rm-state { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+

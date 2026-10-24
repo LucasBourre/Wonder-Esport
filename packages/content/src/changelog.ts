@@ -21,8 +21,9 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "10.86",
     date: "2026-10-24",
-    title: "Clubs régionaux",
+    title: "Clubs régionaux et salles repensées",
     items: [
+      { kind: "new", text: "Salles repensées : les étapes de la partie, une place par joueur avec son avatar et son état, des invitations en un clic (et annulables), et un seul bouton pour la suite." },
       { kind: "new", text: "Un échelon régional (« Rég. ») dans les 13 grands championnats, avec 66 clubs amateurs : votre carrière peut désormais commencer tout en bas de la pyramide." },
     ],
   },

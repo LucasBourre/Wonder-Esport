@@ -73,120 +73,149 @@ import { Engine } from "@open-eleven/engine";
   const box = overlay.querySelector(".lb-box");
   overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.remove("on"); });
 
+  // Salle dont le panneau d'invitation est déplié (gardé d'un rendu à l'autre).
+  let inviteOpen = null;
+
   async function render(msg?) {
-    box.innerHTML = '<button class="acc-x" aria-label="Fermer">×</button><h3>🏟️ Salle</h3><div class="lb-content"><p class="lb-empty">Chargement…</p></div>';
+    box.innerHTML = '<button class="acc-x" aria-label="Fermer">×</button><h3>🏟️ ' + esc(T("Salle")) + '</h3><div class="lb-content"><p class="lb-empty">Chargement…</p></div>';
     box.querySelector(".acc-x").onclick = () => overlay.classList.remove("on");
     const content = box.querySelector(".lb-content");
     const session = acc.getSession();
     if (!session) { content.innerHTML = '<p class="lb-empty">Connecte-toi (👤) pour jouer en salle.</p>'; return; }
+    const me = session.user.id;
 
-    const [{ invitations: incoming, rooms: myRooms }, friends] = await Promise.all([fetchMyRooms(), acc.listFriends()]);
+    const [{ invitations: incoming, rooms: myRooms }, friends, outgoing] = await Promise.all([
+      fetchMyRooms(), acc.listFriends(), acc.listOutgoing ? acc.listOutgoing().catch(() => []) : Promise.resolve([]),
+    ]);
     setNavBadge(incoming.length);
-    // Un seul salle ACTIVE (non 'ended') à la fois par joueur — imposé aussi
-    // côté serveur (room_create/room_join, fonction SQL has_active_room) ;
-    // ici on évite juste de proposer une action vouée à échouer.
+    // Une seule salle ACTIVE (non terminée) à la fois par joueur — imposé aussi côté
+    // serveur (room_create/room_join) ; ici on évite de proposer une action vouée à échouer.
     const hasActive = myRooms.some((r) => r.status !== "ended");
+    const av = (id, cls) => (acc.avatarHtml ? acc.avatarHtml(id, cls) : '<span class="av-img av-none ' + cls + '">👤</span>');
+    const btn = (cls, label, data, title?) => '<button class="acc-btn ' + cls + '" data-i="' + esc(data) + '"' + (title ? ' title="' + esc(title) + '"' : "") + ">" + label + "</button>";
 
-    const nameCell = (p) => '<span class="lb-name">👤 ' + esc(p || "Joueur") + "</span>";
-    const btnHtml = (cls, label, data) => '<button class="acc-btn ' + cls + '" data-i="' + esc(data) + '" style="width:auto;margin:0;padding:6px 10px;font-size:.78rem">' + label + "</button>";
-    const group = (title, html) => '<p class="fr-head">' + title + "</p>" + html;
+    let html = '<p class="acc-msg"></p>';
 
-    let html = (hasActive
-      ? '<p class="lb-sub" style="margin:2px 0 6px">' + esc(T("Tu es déjà dans une salle active — quitte-la ou termine ta carrière avant d'en créer/rejoindre une autre.")) + "</p>"
-      : '<div class="acc-row" style="margin:2px 0 6px"><button class="acc-btn soft" id="rm-create" style="width:auto;padding:11px 14px">+ Créer une salle</button></div>'
-    ) + '<p class="acc-msg"></p>';
+    // --- Créer une salle : seulement sans salle active -------------------------------
+    if (!hasActive) {
+      html += '<div class="rm-hero"><p>' + esc(T("Vivez une carrière à plusieurs : jusqu'à 4 amis dans le même club, et les grandes décisions se votent ensemble.")) + "</p>" +
+        '<button class="acc-btn primary" id="rm-create">＋ ' + esc(T("Créer une salle")) + "</button></div>";
+    }
 
-    html += incoming.length
-      ? group("Invitations reçues", '<ul class="lb-list">' + incoming.map((r) =>
-          '<li class="lb-row">' + nameCell(r.fromPseudo) +
-          '<span class="fr-acts">' + (hasActive ? "" : btnHtml("soft rm-join", "Rejoindre", r.roomId)) + btnHtml("danger rm-decline", "Refuser", r.roomId) + "</span></li>"
-        ).join("") + "</ul>")
-      : "";
+    // --- Invitations reçues : une carte par salle ------------------------------------
+    if (incoming.length) {
+      html += '<p class="fr-head">' + esc(T("Invitations reçues")) + "</p>" + incoming.map((inv) =>
+        '<div class="rm-invite-card">' + av(inv.fromAvatar, "rm-av-lg") +
+        '<div class="rm-ic-body"><p>' + T("{p} t'invite dans sa salle.", { p: "<strong>" + esc(inv.fromPseudo) + "</strong>" }) + "</p>" +
+        '<div class="rm-mini">' + (inv.members || []).map((m) => av(m.avatar, "av-mini") + '<span class="rm-mini-name">' + esc(m.pseudo) + "</span>").join("") + "</div>" +
+        '<div class="rm-ic-acts">' +
+        (hasActive ? '<span class="lb-sub">' + esc(T("Quitte d'abord ta salle actuelle pour la rejoindre.")) + "</span>" : btn("primary rm-join", esc(T("Rejoindre")), inv.roomId)) +
+        btn("ghost rm-decline", esc(T("Refuser")), inv.roomId) + "</div></div></div>"
+      ).join("");
+    }
 
-    if (myRooms.length) {
-      html += myRooms.map((room) => {
-        // Salle terminée (tout le monde a fini sa carrière) : récap plutôt
-        // que les actions habituelles — classement par score, cf.
-        // room_mark_career_ended (final_score/final_summary, jsonb best-effort
-        // rempli par chaque client, jamais vérifié — même compromis que le
-        // reste du mode).
-        if (room.status === "ended") {
-          const ranked = room.members.filter((m) => m.status === "joined")
-            .sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
-          const rows = ranked.map((m, i) => {
-            const s = m.final_summary || {};
-            const detail = s.name ? esc(s.name) + (s.position ? " · " + esc(s.position) : "") : "";
-            return '<li class="lb-row"><span class="lb-name">' + (i === 0 ? "🏆 " : "") + "👤 " + esc(m.pseudo) + "</span>" +
-              '<span class="lb-sub">' + (detail ? detail + " — " : "") + (m.final_score != null ? Math.round(m.final_score) + " pts" : "?") + "</span></li>";
-          }).join("");
-          return group("Salle terminée", '<ul class="lb-list">' + rows + "</ul>" +
-            '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("soft rm-stats", "📊 Comparer les carrières", room.id) + "</div>" +
-            '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("danger rm-leave", "Retirer de ma liste", room.id) + "</div>");
-        }
+    // --- Mes salles ------------------------------------------------------------------
+    for (const room of myRooms) html += room.status === "ended" ? endedRoomHtml(room) : roomHtml(room);
+    if (!myRooms.length && !incoming.length) {
+      html += '<p class="lb-empty">' + esc(T("Aucune salle pour l'instant.")) + "</p>";
+    }
 
-        const rows = room.members.map((m) => {
-          const status = m.status === "invited" ? ' <span class="lb-sub">(invité)</span>'
-            : m.career_ended ? ' <span class="lb-sub">🏁 carrière terminée</span>' : "";
-          const kickBtn = (m.status === "joined" && m.user_id !== session.user.id &&
-            room.members.filter((x) => x.status === "joined").length >= 3)
-            ? btnHtml("danger rm-kick", "Exclure", room.id + "|" + m.user_id) : "";
-          return '<li class="lb-row">' + nameCell(m.pseudo) + status + (kickBtn ? '<span class="fr-acts">' + kickBtn + "</span>" : "") + "</li>";
-        }).join("");
-        const full = room.members.filter((m) => m.status === "joined" || m.status === "invited").length >= 4;
-        const invitable = friends.filter((f) => !room.members.some((m) => m.user_id === f.friend_id));
-        // Inviter n'a de sens que tant que le club de départ n'est pas
-        // encore tranché — au-delà, la salle a déjà démarré sa saison.
-        const inviteRow = room.phase !== "profile_setup" ? "" : (full ? '<p class="lb-sub">Salle complète (4/4).</p>' : (
-          invitable.length
-            ? '<div class="acc-row" style="margin:6px 0"><select class="rm-invite-select" data-room="' + esc(room.id) + '" style="margin:0">' +
-              invitable.map((f) => '<option value="' + esc(f.friend_id) + '">' + esc(f.friend_pseudo) + "</option>").join("") +
-              '</select><button class="acc-btn soft rm-invite" data-i="' + esc(room.id) + '" style="width:auto;padding:11px 14px">Inviter</button></div>'
-            : '<p class="lb-sub">Tous tes amis sont déjà dans cette salle, ou tu n\'as pas encore d\'ami à inviter.</p>'
-        ));
-        const phaseLabel = {
-          profile_setup: "Configuration des profils",
-          starting_vote: "Vote du club de départ en cours",
-          in_season: "Carrière commune en cours",
-          season_vote: "Vote en cours",
-        }[room.phase] || room.phase;
-        // Un vote de mercato peut s'ouvrir pendant que ce membre est ailleurs
-        // dans SA propre saison (rien ne les synchronise en dehors de ce
-        // point de contact) : ce bouton lui permet de le découvrir et voter
-        // sans attendre de retomber par hasard sur son propre point de
-        // synchro. Cf. room.ts renderNarrativeVoteStep / renderSeasonBarrierStep.
-        const playLabel = room.phase === "in_season" ? "Rejoindre la carrière"
-          : room.phase === "profile_setup" && room.isCreator ? "Configurer mon profil (tu lanceras la salle)"
-          : "Configurer mon profil";
-        const playRow = room.phase === "season_vote"
-          ? '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("soft rm-vote-now", "Voter maintenant", room.id) + "</div>"
-          : '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("soft rm-play", playLabel, room.id) + "</div>";
-        // Le comparatif n'a de sens qu'une fois la salle lancée (avant, live_stats
-        // est vide pour tout le monde — cf. pushLiveStats, appelé après chaque
-        // saison jouée en mode salle).
-        const statsRow = room.status === "active"
-          ? '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("soft rm-stats", "📊 Comparer les stats", room.id) + "</div>"
-          : "";
-        return group("Salle · " + esc(phaseLabel) + " (" + room.members.filter((m) => m.status === "joined").length + "/4)",
-          '<ul class="lb-list">' + rows + "</ul>" + inviteRow + playRow + statsRow +
-          '<div class="acc-row" style="margin:6px 0 2px">' + btnHtml("danger rm-leave", "Quitter la salle", room.id) + "</div>");
-      }).join("");
-    } else if (!incoming.length) {
-      html += '<p class="lb-empty">Aucune salle pour l\'instant. Crée-en une et invite jusqu\'à 3 amis pour vivre une carrière commune dans le même club.</p>';
+    function endedRoomHtml(room) {
+      const ranked = room.members.filter((m) => m.status === "joined").sort((a, b) => (b.final_score || 0) - (a.final_score || 0));
+      return '<div class="rm-card rm-ended"><p class="rm-card-title">🏁 ' + esc(T("Salle terminée")) + "</p>" +
+        '<ul class="lb-list">' + ranked.map((m, i) => {
+          const s = m.final_summary || {};
+          return '<li class="lb-row"><span class="lb-name">' + (i === 0 ? "🏆 " : "") + av(m.avatar, "av-mini") + " " + esc(m.pseudo) + "</span>" +
+            '<span class="lb-sub">' + (s.name ? esc(s.name) + " — " : "") + (m.final_score != null ? esc(Math.round(m.final_score)) + " pts" : "?") + "</span></li>";
+        }).join("") + "</ul>" +
+        '<div class="rm-sub-acts">' + btn("soft rm-stats", "📊 " + esc(T("Comparer les carrières")), room.id) + btn("ghost rm-leave", esc(T("Retirer de ma liste")), room.id) + "</div></div>";
+    }
+
+    function roomHtml(room) {
+      const joinedM = room.members.filter((m) => m.status === "joined");
+      const invitedM = room.members.filter((m) => m.status === "invited");
+      const mine = joinedM.find((m) => m.user_id === me);
+      const setup = room.phase === "profile_setup";
+      const playing = room.phase === "in_season" || room.phase === "season_vote";
+      // Étape en cours : ① Équipe ② Profils ③ Club ④ Carrière.
+      const step = playing ? 4 : room.phase === "starting_vote" ? 3
+        : joinedM.length < 2 ? 1 : joinedM.every((m) => m.ready) ? 3 : 2;
+      const steps = [T("Équipe"), T("Profils"), T("Club"), T("Carrière")];
+      const stepper = '<ol class="rm-steps">' + steps.map((label, i) =>
+        '<li class="' + (i + 1 < step ? "done" : i + 1 === step ? "on" : "") + '"><span>' + (i + 1 < step ? "✓" : i + 1) + "</span>" + esc(label) + "</li>").join("") + "</ol>";
+      const hint = [
+        T("Invite jusqu'à 3 amis : ils reçoivent une notification."),
+        T("Chacun crée son joueur. L'hôte choisira ensuite le club de départ."),
+        T("L'hôte choisit le club de départ, puis la carrière commence."),
+        T("Même club pour tous : les transferts se votent ensemble."),
+      ][step - 1];
+
+      // Les 4 places : membres, invités, puis places libres (tant que la salle se forme).
+      const slot = (m) => {
+        const isMe = m.user_id === me, isHost = m.user_id === room.createdBy;
+        const state = m.status === "invited" ? ["wait", T("Invité…")]
+          : m.career_ended ? ["end", "🏁 " + T("Terminé")]
+          : playing ? ["play", T("En jeu")]
+          : m.ready ? ["ok", T("Prêt ✓")] : ["todo", T("À faire")];
+        const canCancel = m.status === "invited" && (room.isCreator || m.invited_by === me);
+        const canKick = m.status === "joined" && !isMe && !m.career_ended && joinedM.length >= 3;
+        return '<div class="rm-slot rm-' + state[0] + '">' + av(m.avatar, "rm-av") +
+          '<span class="rm-name">' + esc(m.pseudo) + (isHost ? ' <span title="' + esc(T("Hôte")) + '">👑</span>' : "") + "</span>" +
+          (isMe ? '<span class="rm-me">' + esc(T("toi")) + "</span>" : "") +
+          '<span class="rm-state">' + esc(state[1]) + "</span>" +
+          (canCancel ? '<button class="rm-slot-x rm-cancel" data-i="' + esc(room.id + "|" + m.user_id + "|" + m.pseudo) + '" title="' + esc(T("Annuler l'invitation")) + '">✕</button>' : "") +
+          (canKick ? '<button class="rm-slot-x rm-kick" data-i="' + esc(room.id + "|" + m.user_id + "|" + m.pseudo) + '" title="' + esc(T("Proposer son exclusion")) + '">🚫</button>' : "") +
+          "</div>";
+      };
+      const taken = joinedM.length + invitedM.length;
+      const empty = setup ? Math.max(0, 4 - taken) : 0;
+      const slots = '<div class="rm-slots">' + [...joinedM, ...invitedM].map(slot).join("") +
+        Array.from({ length: empty }, () => '<button class="rm-slot rm-empty rm-open-invite" data-i="' + esc(room.id) + '"><span class="rm-plus">＋</span><span class="rm-state">' + esc(T("Inviter")) + "</span></button>").join("") + "</div>";
+
+      // Panneau d'invitation : tes amis, un bouton chacun ; et l'ajout d'un ami par pseudo.
+      let invite = "";
+      if (setup && inviteOpen === room.id) {
+        const inRoom = new Set(room.members.map((m) => m.user_id));
+        const rows = friends.map((f) =>
+          '<li class="lb-row"><span class="lb-name">' + av(f.avatar, "av-mini") + " " + esc(f.friend_pseudo) + "</span>" +
+          (inRoom.has(f.friend_id)
+            ? '<span class="lb-sub">' + esc(T("Invité ✓")) + "</span>"
+            : taken >= 4 ? "" : btn("soft rm-invite-friend", esc(T("Inviter")), room.id + "|" + f.friend_id)) + "</li>").join("");
+        invite = '<div class="rm-invite-panel"><p class="rm-card-title">' + esc(T("Inviter des amis")) + "</p>" +
+          (friends.length ? '<ul class="lb-list">' + rows + "</ul>" : '<p class="lb-sub">' + esc(T("Tu n'as pas encore d'ami : ajoute quelqu'un par son pseudo, il pourra rejoindre dès qu'il aura accepté.")) + "</p>") +
+          '<div class="acc-row rm-add"><input type="text" class="rm-add-pseudo" maxlength="24" placeholder="' + esc(T("Ajouter un ami par pseudo")) + '" />' +
+          btn("soft rm-add-friend", esc(T("Ajouter")), room.id) + "</div>" +
+          (outgoing.length ? '<p class="lb-sub">' + esc(T("En attente d'acceptation : {list}", { list: outgoing.map((o) => o.friend_pseudo).join(", ") })) + "</p>" : "") +
+          "</div>";
+      }
+
+      // Une action principale, selon l'étape ; le reste en discret.
+      const primary = room.phase === "season_vote" ? btn("primary rm-vote-now", "🗳️ " + esc(T("Voter maintenant")), room.id)
+        : playing ? btn("primary rm-play", "▶️ " + esc(T("Reprendre la carrière")), room.id)
+        : room.phase === "starting_vote" ? btn("primary rm-play", "🗳️ " + esc(T("Choisir le club")), room.id)
+        : mine && mine.ready ? btn("primary rm-play", room.isCreator ? "🏟️ " + esc(T("Choisir le club de départ")) : "⏳ " + esc(T("Rejoindre l'attente")), room.id)
+        : btn("primary rm-play", "🎮 " + esc(T("Créer mon joueur")), room.id);
+      const secondary = '<div class="rm-sub-acts">' +
+        (setup ? btn("ghost rm-open-invite", "👥 " + esc(inviteOpen === room.id ? T("Masquer les invitations") : T("Inviter des amis")), room.id) : "") +
+        (room.status === "active" ? btn("ghost rm-stats", "📊 " + esc(T("Stats")), room.id) : "") +
+        btn("ghost rm-leave rm-danger", "🚪 " + esc(T("Quitter")), room.id) + "</div>";
+
+      return '<div class="rm-card">' + stepper + '<p class="rm-hint">' + esc(hint) + "</p>" + slots + invite + primary + secondary + "</div>";
     }
 
     content.innerHTML = html;
     const m = content.querySelector(".acc-msg");
     if (msg) { m.textContent = msg.text; m.className = "acc-msg " + msg.cls; }
 
+    const on = (sel, fn) => content.querySelectorAll(sel).forEach((b) => (b.onclick = () => fn(b)));
+    const act = (sel, fn) => on(sel, async (b) => { b.disabled = true; render(await fn(b.dataset.i, b)); });
     const createBtn = content.querySelector("#rm-create");
     if (createBtn) createBtn.onclick = async () => {
-      const { error } = await api.rpc("room_create");
-      render(error ? { text: T("Échec, réessaie."), cls: "err" } : { text: T("Salle créée ✔"), cls: "ok" });
+      createBtn.disabled = true;
+      const { data, error } = await api.rpc("room_create");
+      if (!error) inviteOpen = data; // salle neuve : on enchaîne directement sur les invitations
+      render(error ? { text: T("Échec, réessaie."), cls: "err" } : { text: T("Salle créée ✔ Invite maintenant tes amis."), cls: "ok" });
     };
-    const act = (sel, fn) => content.querySelectorAll(sel).forEach((b) => (b.onclick = async () => {
-      b.disabled = true;
-      render(await fn(b.dataset.i));
-    }));
     act(".rm-join", async (roomId) => {
       const { error } = await api.rpc("room_join", { p_room_id: roomId });
       return error ? { text: T("Échec, réessaie."), cls: "err" } : { text: T("Tu as rejoint la salle ✔"), cls: "ok" };
@@ -195,31 +224,50 @@ import { Engine } from "@open-eleven/engine";
       await api.rpc("room_decline", { p_room_id: roomId });
       return { text: T("Invitation refusée."), cls: "ok" };
     });
-    act(".rm-leave", async (roomId) => {
-      await api.rpc("room_leave", { p_room_id: roomId });
-      return { text: T("Tu as quitté la salle."), cls: "ok" };
+    on(".rm-leave", async (b) => {
+      if (!confirm(T("Quitter la salle ? Tes coéquipiers continueront sans toi."))) return;
+      b.disabled = true;
+      await api.rpc("room_leave", { p_room_id: b.dataset.i });
+      render({ text: T("Tu as quitté la salle."), cls: "ok" });
     });
-    content.querySelectorAll(".rm-play").forEach((b) => (b.onclick = () => {
+    on(".rm-play", (b) => {
       overlay.classList.remove("on");
       if (window.OE && window.OE.startRoomCareer) window.OE.startRoomCareer(b.dataset.i);
-    }));
-    content.querySelectorAll(".rm-invite").forEach((b) => (b.onclick = async () => {
-      const roomId = b.dataset.i;
-      const sel = content.querySelector('.rm-invite-select[data-room="' + roomId + '"]');
-      if (!sel || !sel.value) return;
+    });
+    on(".rm-open-invite", (b) => { inviteOpen = inviteOpen === b.dataset.i ? null : b.dataset.i; render(); });
+    act(".rm-invite-friend", async (data) => {
+      const [roomId, friendId] = data.split("|");
+      const { error } = await api.rpc("room_invite", { p_room_id: roomId, p_friend_id: friendId });
+      return error ? { text: T("Échec de l'invitation."), cls: "err" } : { text: T("Invitation envoyée ✔"), cls: "ok" };
+    });
+    on(".rm-cancel", async (b) => {
+      const [roomId, userId, pseudo] = b.dataset.i.split("|");
+      if (!confirm(T("Annuler l'invitation de {p} ?", { p: pseudo }))) return;
       b.disabled = true;
-      const { error } = await api.rpc("room_invite", { p_room_id: roomId, p_friend_id: sel.value });
-      render(error ? { text: T("Échec de l'invitation."), cls: "err" } : { text: T("Invitation envoyée ✔"), cls: "ok" });
-    }));
-    content.querySelectorAll(".rm-vote-now").forEach((b) => (b.onclick = () => renderVoteInline(b.dataset.i)));
-    content.querySelectorAll(".rm-stats").forEach((b) => (b.onclick = () => renderStatsInline(b.dataset.i)));
-    content.querySelectorAll(".rm-kick").forEach((b) => (b.onclick = async () => {
-      const [roomId, targetId] = b.dataset.i.split("|");
+      const { error } = await api.rpc("room_cancel_invite", { p_room_id: roomId, p_user_id: userId });
+      render(error ? { text: T("Échec, réessaie."), cls: "err" } : { text: T("Invitation annulée."), cls: "ok" });
+    });
+    on(".rm-add-friend", async (b) => {
+      const input = b.closest(".rm-add").querySelector(".rm-add-pseudo");
+      const pseudo = input.value.trim();
+      if (!pseudo) return;
+      b.disabled = true;
+      const r = await acc.addFriend(pseudo);
+      render(r && r.ok === false
+        ? { text: (r.error && r.error.message) || T("Échec, réessaie."), cls: "err" }
+        : r && r.accepted ? { text: T("Vous êtes maintenant amis ✔ Tu peux inviter {p}.", { p: r.pseudo }), cls: "ok" }
+        : { text: T("Demande envoyée à {p} : dès qu'il accepte, tu pourras l'inviter.", { p: pseudo }), cls: "ok" });
+    });
+    on(".rm-vote-now", (b) => renderVoteInline(b.dataset.i));
+    on(".rm-stats", (b) => renderStatsInline(b.dataset.i));
+    on(".rm-kick", async (b) => {
+      const [roomId, targetId, pseudo] = b.dataset.i.split("|");
+      if (!confirm(T("Proposer d'exclure {p} ? La salle votera.", { p: pseudo }))) return;
       b.disabled = true;
       const { error } = await api.rpc("room_propose_kick", { p_room_id: roomId, p_target_user_id: targetId });
       if (error) render({ text: T("Échec — un vote est peut-être déjà en cours."), cls: "err" });
       else renderVoteInline(roomId);
-    }));
+    });
   }
 
   function open() { render(); overlay.classList.add("on"); }
