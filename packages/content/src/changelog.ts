@@ -19,6 +19,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "10.86",
+    date: "2026-10-24",
+    title: "Clubs régionaux",
+    items: [
+      { kind: "new", text: "Un échelon régional (« Rég. ») dans les 13 grands championnats, avec 66 clubs amateurs : votre carrière peut désormais commencer tout en bas de la pyramide." },
+    ],
+  },
+  {
     version: "10.85",
     date: "2026-10-24",
     title: "Classement du championnat",

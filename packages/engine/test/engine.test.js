@@ -197,3 +197,29 @@ test("la première place du championnat est réservée au champion", () => {
   }
   assert.deepEqual(bad.slice(0, 5), [], bad.length + " saison(s) finie(s) 1re sans titre");
 });
+
+test("tout joueur reçoit au moins une offre de centre de formation, quels que soient pays et profil", () => {
+  const { loadContent } = require("./load-engine");
+  const C = loadContent();
+  const empty = [];
+  for (const nat of C.NATIONALITIES) for (const origin of C.ORIGINS) for (const potCap of [68, 80, 92]) {
+    const offers = E.academyOffers({ nationality: nat, origin, lifestyle: C.LIFESTYLES[0], entourage: C.ENTOURAGES[0], potCap });
+    if (!offers.length) empty.push(nat.id + "/" + origin.id);
+  }
+  assert.deepEqual(empty.slice(0, 5), [], empty.length + " départ(s) sans aucune offre");
+});
+
+test("les grands championnats ont un échelon régional, proposé au départ", () => {
+  const { loadContent } = require("./load-engine");
+  const C = loadContent();
+  for (const cc of ["fr", "de", "es", "it", "en", "pt", "nl", "br", "ar", "be", "mx", "tr", "us"]) {
+    assert.ok(C.CLUBS.filter((c) => c.countryId === cc && c.level === "regional").length >= 5, "pas de clubs régionaux : " + cc);
+  }
+  const fr = C.NATIONALITIES.find((n) => (n.homeCountryId || n.id) === "fr");
+  let reg = 0;
+  for (let i = 0; i < 400; i++) {
+    const offers = E.academyOffers({ nationality: fr, origin: C.ORIGINS[i % C.ORIGINS.length], lifestyle: C.LIFESTYLES[0], entourage: C.ENTOURAGES[0], potCap: 75 });
+    if (offers.some((o) => o.level === "regional")) reg++;
+  }
+  assert.ok(reg > 40 && reg < 260, "un départ « Rég. » doit être possible sans être la règle : " + reg + "/400");
+});

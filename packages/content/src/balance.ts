@@ -171,7 +171,9 @@ const BALANCE_VALUES = {
   // Exposition médiatique → amplification des gains de réputation
   mediaVisibility: { regional: 0.55, d4: 0.6, d3: 0.65, d2: 0.75, d1: 1.0, elite: 1.3 },
   // Poids de base du niveau de centre de formation au départ
-  academyWeights: { regional: 34, d4: 33, d3: 32, d2: 30, d1: 24, elite: 12 },
+  // Rég. bas : seul échelon des micro-pays (le poids n'y joue pas), il reste une option
+  // parmi d'autres dans les grands championnats (environ un départ sur trois).
+  academyWeights: { regional: 10, d4: 33, d3: 32, d2: 30, d1: 24, elite: 12 },
   academySurpriseChance: 0.05, // un grand centre mise sur un profil modeste
   academyAbroadChance: 0.35, // un centre étranger (même continent) se manifeste
   microChance: 0.6, // proba d'au moins une brève de saison

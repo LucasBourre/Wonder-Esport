@@ -39,6 +39,10 @@ export function academyOffers(profile: AcademyProfile): AcademyOffer[] {
   // domestique (ex. élite au Brésil) est simplement inaccessible.
   const clubsAt = (lvl: string) => CLUBS_BY_LEVEL[lvl as LevelId].filter((c) => c.countryId === homeId);
   for (const k in w) if (!clubsAt(k).length) w[k] = 0;
+  // Un pays à un seul échelon (micro-pays : régional) peut voir son unique niveau annulé
+  // par le profil (« formé au club », « prodige » boudent le régional) : on garde alors
+  // ses niveaux existants, faute de quoi aucun centre ne serait proposé.
+  if (!Object.keys(w).some((k) => w[k] > 0)) for (const k in w) if (clubsAt(k).length) w[k] = 1;
 
   // 3 à 4 offres. Un même niveau peut désormais revenir (deux clubs
   // DIFFÉRENTS) : avant, c'était un club par division au plus, si bien

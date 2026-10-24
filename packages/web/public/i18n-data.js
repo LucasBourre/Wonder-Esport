@@ -4141,5 +4141,7 @@ window.I18N_DATA = { en: {
  "Records : la légende du club qui détient le record de buts n'apprécie pas de vous voir approcher.": "Records: the club legend who holds the scoring record does not like seeing you close in.",
  "Retraite : un dernier défi dans votre pays natal, et un ancien coéquipier devenu entraîneur qui veut vous dans son staff.": "Retirement: one last challenge in your home country, and a former teammate turned coach who wants you on his staff.",
  "Classement du championnat": "League standings",
- "Un club ne peut plus finir premier de son championnat sans être sacré champion : la première place est désormais réservée au titre.": "A club can no longer finish first in its league without being crowned champion: first place is now reserved for the title."
+ "Un club ne peut plus finir premier de son championnat sans être sacré champion : la première place est désormais réservée au titre.": "A club can no longer finish first in its league without being crowned champion: first place is now reserved for the title.",
+ "Clubs régionaux": "Regional clubs",
+ "Un échelon régional (« Rég. ») dans les 13 grands championnats, avec 66 clubs amateurs : votre carrière peut désormais commencer tout en bas de la pyramide.": "A regional tier (\"Reg.\") in the 13 major leagues, with 66 amateur clubs: your career can now start at the very bottom of the pyramid."
 } };
