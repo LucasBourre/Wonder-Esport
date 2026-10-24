@@ -101,7 +101,8 @@ export async function run({ browser, stackUrl, mailpit, report }) {
   const roomText = "(document.querySelector('.acc-overlay.on .lb-box') || { textContent: '' }).textContent";
   const created = await alice.js("(function(){ var b = [...document.querySelectorAll('.acc-overlay.on button')].find(x => /cr[ée]er/i.test(x.textContent)); if (!b) return 'pas de bouton Créer'; b.click(); return 'ok'; })()");
   report.check("salle créée depuis l'interface", created === "ok" && await alice.until(`/créée|inviter|membres?/i.test(${roomText})`), created);
-  const invited = await alice.js("(function(){ var sel = document.querySelector('.acc-overlay.on select'); if (!sel) return 'pas de liste d\\'amis'; var b = [...document.querySelectorAll('.acc-overlay.on button')].find(x => /inviter/i.test(x.textContent)); if (!b) return 'pas de bouton Inviter'; b.click(); return 'ok'; })()");
+  // Le panneau d'invitation s'ouvre de lui-même après la création ; sinon, on l'ouvre.
+  const invited = await alice.js("(async function(){ var o = document.querySelector('.acc-overlay.on .rm-open-invite'); if (!o) return 'pas de place à inviter'; if (!document.querySelector('.acc-overlay.on .rm-invite-panel')) o.click(); for (var i = 0; i < 40 && !document.querySelector('.acc-overlay.on .rm-invite-friend'); i++) await new Promise(r => setTimeout(r, 100)); var b = document.querySelector('.acc-overlay.on .rm-invite-friend'); if (!b) return 'aucun ami à inviter'; b.click(); return 'ok'; })()");
   report.check("ami invité dans la salle", invited === "ok" && await alice.until(`/envoyée/i.test(${roomText})`), invited);
   await bruno.js("document.getElementById('btn-room').click()");
   report.check("Bruno voit l'invitation", await bruno.until(`(${roomText}).includes('${alice.pseudo}')`));

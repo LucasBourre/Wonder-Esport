@@ -236,7 +236,8 @@ test("salle : création, invitation, lancement, saison, vote, signal en direct",
   await b.rpc("friend_accept", { from_id: a.id });
   assert.equal((await a.rpc("room_invite", { p_room_id: roomId, p_friend_id: b.id })).status, 200);
   const mineB = (await b.rpc("rooms_mine")).data;
-  assert.deepEqual(mineB.invitations, [{ roomId, fromPseudo: a.pseudo }]);
+  // L'invitation montre aussi l'avatar de l'hôte (aucun ici) et qui est déjà dans la salle.
+  assert.deepEqual(mineB.invitations, [{ roomId, fromPseudo: a.pseudo, fromAvatar: null, members: [{ pseudo: a.pseudo, avatar: null }] }]);
   assert.equal((await b.rpc("room_join", { p_room_id: roomId })).status, 200);
   const mineA = (await a.rpc("rooms_mine")).data;
   assert.equal(mineA.rooms[0].isCreator, true);
