@@ -10,6 +10,7 @@ import { recheckObjective } from "./season";
 import { continentOf, countryOf } from "./clubs";
 import { ovr, hasTrait } from "./player";
 import type { CareerState, KeyMoment, SeasonReport } from "./types";
+import { playMatch, qualifiersFor } from "./qualifiers";
 import { ARAB_CUP, ARAB_CUP_STAGES, ARAB_NATION_IDS, BALANCE, ENGINE_TEXT, GAMES_STAGES, NATIONALITIES, NATIONAL_CUPS, NATIONS_LEAGUE, NAT_NUMBERS, NL_STAGES, OLYMPIC_STAGES, REGIONAL_GAMES, STORIES, WC_STAGES, WC_STAGES_48, YOUTH_STAGES, YOUTH_TIERS, YOUTH_U17_CUPS } from "@open-eleven/content";
 
 // --- Coupe du Monde -------------------------------------------------------
@@ -54,6 +55,8 @@ export function playWorldCup(s: CareerState) {
     finalPending: finalReached,
     champion: false,
     goldenBall: false,
+    // Les 48 qualifiés : les poules et les adversaires sont tirés parmi eux.
+    field: qualifiersFor(s, "wc", s.year).qualified,
   };
   if (!finalReached) {
     if (stage.id === "semi") {
@@ -187,6 +190,7 @@ export function natRunsOfYear(s: CareerState, year: number) {
     .filter((r) => r.year === year)
     .map((r) => {
       const stage = natStages(r.comp).find((x) => x.id === r.stage);
+      if (r.stage === "dnq") return { comp: r.comp, label: ENGINE_TEXT.natDnqLabel }; // non qualifiés
       const label = r.third === "won" ? ENGINE_TEXT.thirdPlaceLabel : r.third === "lost" ? ENGINE_TEXT.fourthPlaceLabel : stage ? stage.label : "";
       return { comp: r.comp, label };
     })
@@ -216,6 +220,7 @@ export function playContinental(s: CareerState, report: SeasonReport) {
   const cont = {
     year: s.year, continent, cupName: cup.name, cupShort: cup.short, icon: cup.icon,
     stage: stage.id, label: stage.label, text: stage.text, games, goals, champion: stage.id === "champion",
+    field: qualifiersFor(s, "cont", s.year).qualified, // les qualifiés du continent
   };
   if (stage.id === "champion") {
     s.trophies.contInt += 1;
@@ -248,7 +253,70 @@ export function playContinental(s: CareerState, report: SeasonReport) {
 // libres (ni Mondial ni Euro). Trophée secondaire, récompenses moindres qu'un Euro.
 export function isNationsLeagueYear(year: number) { return year % 4 === 1; }
 
+// --- Ligue des Sélections : quatre divisions (A à D) ---------------------------------
+// Une nation européenne commence dans la division de sa force (16 par division, D pour
+// le reste), puis monte ou descend selon son groupe. Seule la Ligue A joue le trophée.
+const NL_LEAGUES = ["A", "B", "C", "D"];
+const euNationsByForce = () => NATIONALITIES.filter((n) => continentOf(n.homeCountryId) === "eu").sort((a, b) => b.weight - a.weight);
+function nlLeagueOf(s: CareerState): string {
+  if (!s.nlLeague) {
+    const idx = euNationsByForce().findIndex((n) => n.id === s.nationality.id);
+    s.nlLeague = NL_LEAGUES[Math.min(3, Math.floor(Math.max(0, idx) / 16))];
+  }
+  return s.nlLeague;
+}
+
+// Ligues B, C, D : un groupe de 4 (aller-retour), pour monter ou ne pas descendre.
+function playLowerNationsLeague(s: CareerState, league: string) {
+  const cup = NATIONS_LEAGUE;
+  const L = NL_LEAGUES.indexOf(league);
+  const all = euNationsByForce();
+  const band = all.slice(L * 16, L === 3 ? all.length : L * 16 + 16).filter((n) => n.id !== s.nationality.id);
+  const pool = band.length >= 3 ? band : all.filter((n) => n.id !== s.nationality.id);
+  const opps: typeof pool = [];
+  while (opps.length < 3 && opps.length < pool.length) {
+    const n = pool[Math.floor(rng() * pool.length)];
+    if (!opps.includes(n)) opps.push(n);
+  }
+  const playerBoost = 0.6 + (ovr(s) / 100) * 0.8 + (hasTrait(s, "clutch") ? 0.15 : 0);
+  const teams = [{ id: s.nationality.id, w: s.nationality.weight * (0.75 + playerBoost * 0.2) }, ...opps.map((n) => ({ id: n.id, w: n.weight }))];
+  const rows = new Map(teams.map((t) => [t.id, { id: t.id, pts: 0, gd: 0 }]));
+  for (const a of teams) for (const b of teams) {
+    if (a === b) continue;
+    const [x, y] = playMatch(a.w, b.w);
+    const ra = rows.get(a.id)!, rb = rows.get(b.id)!;
+    ra.gd += x - y; rb.gd += y - x;
+    if (x > y) ra.pts += 3; else if (y > x) rb.pts += 3; else { ra.pts += 1; rb.pts += 1; }
+  }
+  const table = [...rows.values()].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+  const rank = table.findIndex((r) => r.id === s.nationality.id) + 1;
+  const move = rank === 1 && L > 0 ? "up" : rank === table.length && L < 3 ? "down" : "stay";
+  const next = move === "up" ? NL_LEAGUES[L - 1] : move === "down" ? NL_LEAGUES[L + 1] : league;
+  s.nlLeague = next;
+  const games = 6;
+  s.natTeam.caps += games;
+  const goals = Math.round(games * s.position.goalRate * (0.4 + s.stats.t / 150) * rand(0.5, 1.4));
+  s.natTeam.goals += goals;
+  if (move === "up") {
+    s.rep = clamp(s.rep + 2, 0, 100);
+    s.moral = clamp(s.moral + 5, 5, 100);
+    s.history.push({ age: s.age, text: tx(s, "nlPromoted", { league: next }), impact: 6 });
+  } else if (move === "down") {
+    s.moral = clamp(s.moral - 4, 5, 100);
+    s.history.push({ age: s.age, text: tx(s, "nlRelegated", { league: next }), impact: -4 });
+  }
+  noteNatRun(s, "natl", "group");
+  return {
+    year: s.year, cupName: cup.name, cupShort: cup.short, icon: cup.icon,
+    stage: "group", games, goals, champion: false, league, move, table,
+    label: rank === 1 ? tx(s, "nlLeagueLabelFirst", { league }) : tx(s, "nlLeagueLabel", { league, rank }),
+    text: tx(s, move === "up" ? "nlTextUp" : move === "down" ? "nlTextDown" : "nlTextStay", { league: next, rank }),
+  };
+}
+
 export function playNationsLeague(s: CareerState, report: SeasonReport) {
+  const league = nlLeagueOf(s);
+  if (league !== "A") return playLowerNationsLeague(s, league);
   const cup = NATIONS_LEAGUE;
   const natW = s.nationality.weight;
   const playerBoost = 0.6 + (ovr(s) / 100) * 0.8 + (hasTrait(s, "clutch") ? 0.15 : 0);
@@ -263,7 +331,7 @@ export function playNationsLeague(s: CareerState, report: SeasonReport) {
   s.natTeam.caps += games;
   const goals = Math.round(games * s.position.goalRate * (0.4 + s.stats.t / 150) * rand(0.5, 1.4));
   s.natTeam.goals += goals;
-  const nl = {
+  const nl: { league?: string; move?: string; [key: string]: any } = {
     year: s.year, cupName: cup.name, cupShort: cup.short, icon: cup.icon,
     stage: stage.id, label: stage.label, text: stage.text, games, goals, champion: stage.id === "champion",
   };
@@ -289,7 +357,14 @@ export function playNationsLeague(s: CareerState, report: SeasonReport) {
     s.history.push({ age: s.age, text: tx(s, "nlSemi", { cupOf: cup.of }), impact: 4 });
   } else {
     s.moral = clamp(s.moral - 1, 5, 100);
+    // Sortie dès la phase de ligue : une fois sur quatre, c'est la dernière place, et la descente en B.
+    if (rng() < 0.25) {
+      s.nlLeague = "B";
+      nl.league = "A"; nl.move = "down";
+      s.history.push({ age: s.age, text: tx(s, "nlRelegated", { league: "B" }), impact: -4 });
+    }
   }
+  if (!nl.league) { nl.league = "A"; nl.move = nl.move || "stay"; }
   noteNatRun(s, "natl", nl.stage);
   return nl;
 }

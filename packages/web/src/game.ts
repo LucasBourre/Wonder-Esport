@@ -1068,6 +1068,12 @@ import { Engine } from "@open-eleven/engine";
       const sameCont = pool.filter((n) => (E.countryOf(n.homeCountryId) || {}).continent === myCont);
       if (sameCont.length >= 3) pool = sameCont;
     }
+    // Mondial et coupe continentale : seuls les qualifiés peuvent être en face (cf.
+    // qualifications du moteur, champ « field »).
+    if (info.field && info.field.length) {
+      const qualifies = pool.filter((n) => info.field.includes(n.id));
+      if (qualifies.length >= 3) pool = qualifies;
+    }
     // L'adversaire était tiré UNIFORMÉMENT : le Monténégro sortait aussi souvent
     // que le Brésil en huitièmes de finale. On pondère désormais par la force de
     // la nation, et d'autant plus fort que le tour est avancé — une petite nation
@@ -1117,10 +1123,15 @@ import { Engine } from "@open-eleven/engine";
       // Poule de quatre : TROIS adversaires, affrontés chacun deux fois (aller
       // et retour), comme dans la vraie compétition. Six tirages indépendants
       // pouvaient sortir six nations différentes — ou la même plusieurs fois.
-      const advLigue = [pickNat(POW.ligue), pickNat(POW.ligue), pickNat(POW.ligue)];
+      // Divisions B à D : les adversaires sont ceux du groupe joué par le moteur, et
+      // l'allure des résultats suit la montée, le maintien ou la descente.
+      const lower = info.league && info.league !== "A" && Array.isArray(info.table);
+      const groupe = lower ? info.table.map((r) => NATIONALITIES.find((n) => n.id === r.id)).filter((n) => n && n.id !== G.nationality.id) : [];
+      const advLigue = groupe.length === 3 ? groupe : [pickNat(POW.ligue), pickNat(POW.ligue), pickNat(POW.ligue)];
+      const [pw, pd] = lower ? (info.move === "up" ? [0.6, 0.85] : info.move === "down" ? [0.15, 0.45] : [0.35, 0.7]) : reachedFF ? [0.55, 0.8] : [0.35, 0.65];
       for (let i = 0; i < 6; i++) {
         const p = rng();
-        const r = reachedFF ? (p < 0.55 ? "win" : p < 0.8 ? "draw" : "loss") : (p < 0.35 ? "win" : p < 0.65 ? "draw" : "loss");
+        const r = p < pw ? "win" : p < pd ? "draw" : "loss";
         matches.push(mk("Ligue · J" + (i + 1), r, POW.ligue, advLigue[i % 3]));
       }
       if (stage === "final_four") matches.push(mk(T("Demi-finale (Final Four)"), "loss", POW.semi));
@@ -1249,7 +1260,10 @@ import { Engine } from "@open-eleven/engine";
         const pts = w * 3 + d;
         const ligue = kind === "natl";
         const titre = T(ligue ? "Phase de Ligue" : "Phase de poules");
-        const verdict = step.qualified
+        const division = ligue && info.league && info.league !== "A";
+        const verdict = division
+          ? `<p class="natl-verdict ${info.move === "down" ? "natl-out" : "natl-ok"}">${esc(info.label)}</p>`
+          : step.qualified
           ? `<p class="natl-verdict natl-ok">${ligue ? "✅ Qualifié pour le Final Four" : "✅ Qualifié pour les phases finales"}</p>`
           : `<p class="natl-verdict natl-out">${ligue ? "❌ Éliminé dès la phase de Ligue" : "❌ Éliminé dès la phase de poules"}</p>`;
         const last = i >= steps.length;
@@ -1343,10 +1357,15 @@ import { Engine } from "@open-eleven/engine";
 
   function renderNationsLeague(report) {
     const c = report.natl;
-    const tone = c.champion ? "great" : (c.stage === "final" || c.stage === "final_four") ? "good" : "bad";
+    const division = c.league && c.league !== "A";
+    const tone = c.champion ? "great" : (c.stage === "final" || c.stage === "final_four") ? "good"
+      : division ? (c.move === "up" ? "good" : c.move === "down" ? "bad" : "neutral") : "bad";
+    const intro = division
+      ? T("{nation} dispute la Ligue {league} de la Ligue des Sélections, et vous en êtes.", { nation: E.natForms(G.nationality).The, league: c.league })
+      : T("{nation} dispute la Ligue des Sélections européenne, et vous en êtes.", { nation: E.natForms(G.nationality).The });
     showCard(`
       <div class="card-tag"><span class="card-icon">${c.icon}</span> ${esc(c.cupName)} ${c.year}</div>
-      <p class="event-text">${flagHtml(G.nationality)} ${esc(T("{nation} dispute la Ligue des Sélections européenne, et vous en êtes.", { nation: E.natForms(G.nationality).The }))}</p>
+      <p class="event-text">${flagHtml(G.nationality)} ${esc(intro)}</p>
       <button class="btn btn-secondary" id="btn-natl">Vivre la campagne</button>
     `);
     $("btn-natl").addEventListener("click", () => runTournament(report, "natl", () => {

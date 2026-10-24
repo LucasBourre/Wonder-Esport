@@ -19,6 +19,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "10.87",
+    date: "2026-10-24",
+    title: "Qualifications des sélections",
+    items: [
+      { kind: "new", text: "Qualifications comme dans la réalité : toutes les nations jouent leurs éliminatoires, et seules les qualifiées disputent la Coupe du Monde (48), l'Euro, la CAN, la Coupe d'Asie (24), la Copa América (16) et la Coupe d'Océanie (8)." },
+      { kind: "new", text: "Barrages de qualification joués en moment décisif, pour l'Euro, le Mondial et le barrage intercontinental." },
+      { kind: "new", text: "Ligue des Sélections en quatre divisions (A à D), avec montées et descentes ; seule la Ligue A joue le trophée." },
+      { kind: "balance", text: "Les tournois opposent désormais les vrais qualifiés : fini les petites nations en quart de Mondial par hasard. Pays hôtes réels jusqu'en 2034." },
+    ],
+  },
+  {
     version: "10.86",
     date: "2026-10-24",
     title: "Clubs régionaux et salles repensées",

@@ -6,7 +6,7 @@ import { tx } from "./text";
 import { applyFx } from "./effects";
 import { foreignLangFor, netImpact } from "./events";
 import { keyMomentFor, playKeyMoment } from "./moments";
-import { isWorldCupYear, playWorldCup, isContinentalYear, noteCompScorer, updateNatNumber, playContinental, isNationsLeagueYear, playNationsLeague, isOlympicYear, playOlympics, isArabCupYear, isArabNation, playArabCup, regionalGamesOf, playRegionalGames, storyWcFinalFor, youthSelections } from "./international";
+import { isWorldCupYear, playWorldCup, isContinentalYear, noteCompScorer, noteNatRun, updateNatNumber, playContinental, isNationsLeagueYear, playNationsLeague, isOlympicYear, playOlympics, isArabCupYear, isArabNation, playArabCup, regionalGamesOf, playRegionalGames, storyWcFinalFor, youthSelections } from "./international";
 import { reviewRole, playingTimeFactor } from "./role";
 import { setSeasonObjective, objectiveMet } from "./objectives";
 import { headlineFor } from "./press";
@@ -17,8 +17,9 @@ import { marketValue } from "./transfers";
 import { continentOf, countryOf, divShort, isTopFlightOf, lvlOf, visibilityOf } from "./clubs";
 import { ovr, hasTrait } from "./player";
 import { roomClubSeason, type RoomClubOutcome } from "./rooms";
+import { isQualified, qualifiersFor, settleNatPlayoff } from "./qualifiers";
 import type { CareerState, LevelId, SeasonMomentEntry, SeasonReport } from "./types";
-import { BALANCE, COMPETITIONS, CONTINENTAL_CUPS, CONTINENTAL_CUPS2, CONTINENTAL_CUPS3, EVENTS, LEVEL_ORDER, MICRO_EVENTS } from "@open-eleven/content";
+import { BALANCE, COMPETITIONS, CONTINENTAL_CUPS, CONTINENTAL_CUPS2, CONTINENTAL_CUPS3, ENGINE_TEXT, EVENTS, LEVEL_ORDER, MICRO_EVENTS } from "@open-eleven/content";
 
 // --- Simulation d'une saison ----------------------------------------------
 export function playSeason(s: CareerState) {
@@ -345,6 +346,12 @@ export function playSeason(s: CareerState) {
   // année-là (le maître ne rate pas SON dernier Mondial).
   if (storyWcFinalFor(s) && !s.careerEnded) { s.natTeam.active = true; s.natTeam.retired = false; }
 
+  // Saison de qualifications : le monde joue ses éliminatoires pour le tournoi de l'an
+  // prochain (cf. qualifiers.ts), que le joueur soit appelé ou non ; il ne les vit que
+  // s'il est international (récit, barrage joué).
+  const qualFor = isWorldCupYear(s.year + 1) ? "wc" : isContinentalYear(s.year + 1) ? "cont" : null;
+  if (qualFor && !s.careerEnded) narrateQualifiers(s, report, qualFor, s.year + 1);
+
   // Sélection nationale
   if (s.natTeam.active) {
     // caps encore à 0 → c'est la toute première convocation en A (robuste au
@@ -377,9 +384,16 @@ export function playSeason(s: CareerState) {
     const euNation = continentOf(s.nationality.homeCountryId) === "eu";
     const nlYear = isNationsLeagueYear(s.year) && euNation; // Ligue des Sélections : Europe uniquement
     const arabYear = isArabCupYear(s.year) && isArabNation(s); // Coupe arabe : même année, nations arabes
-    if (heavyInjury && (isWorldCupYear(s.year) || isContinentalYear(s.year) || nlYear || arabYear)) report.tournamentMissed = true;
-    else if (isWorldCupYear(s.year)) { report.wc = playWorldCup(s); report.caps += report.wc.games; report.natGoals += report.wc.goals; noteCompScorer(s, report, "wc", report.wc.goals); }
-    else if (isContinentalYear(s.year)) { report.cont = playContinental(s, report); report.caps += report.cont.games; report.natGoals += report.cont.goals; noteCompScorer(s, report, "cont", report.cont.goals); }
+    // Seuls les qualifiés disputent le Mondial et la coupe continentale. Une finale de
+    // Mondial scénarisée (mode Histoire) vaut qualification.
+    const wcYear = isWorldCupYear(s.year), contYear = isContinentalYear(s.year);
+    const wcOn = wcYear && (!!storyWcFinalFor(s) || isQualified(s, "wc", s.year));
+    const contOn = contYear && isQualified(s, "cont", s.year);
+    if (heavyInjury && (wcOn || contOn || nlYear || arabYear)) report.tournamentMissed = true;
+    else if (wcYear && !wcOn) noteNotQualified(s, report, "wc");
+    else if (contYear && !contOn) noteNotQualified(s, report, "cont");
+    else if (wcOn) { report.wc = playWorldCup(s); report.caps += report.wc.games; report.natGoals += report.wc.goals; noteCompScorer(s, report, "wc", report.wc.goals); }
+    else if (contOn) { report.cont = playContinental(s, report); report.caps += report.cont.games; report.natGoals += report.cont.goals; noteCompScorer(s, report, "cont", report.cont.goals); }
     else if (nlYear) { report.natl = playNationsLeague(s, report); report.caps += report.natl.games; report.natGoals += report.natl.goals; noteCompScorer(s, report, "natl", report.natl.goals); }
     else if (arabYear) { report.arab = playArabCup(s, report); report.caps += report.arab.games; report.natGoals += report.arab.goals; noteCompScorer(s, report, "arab", report.arab.goals); }
     // Passes décisives en sélection, pour l'historique : déduites des matchs et du
@@ -540,6 +554,40 @@ export function playSeason(s: CareerState) {
 // le tirage solo de playSeason. Les finales et barrages restent des moments joués par
 // chacun : leur issue est fixée d'avance (sharedWin), le choix ne pèse que sur la
 // performance personnelle du joueur (cf. playKeyMoment).
+// --- Qualifications des sélections : le récit pour le joueur -----------------------
+export function qualCompName(s: CareerState, comp: string) {
+  if (comp === "wc") return ENGINE_TEXT.natCompWc;
+  const cont = continentOf(s.nationality.homeCountryId) || "eu";
+  return ENGINE_TEXT[{ eu: "natCompEu", am: "natCompAm", af: "natCompAf", as: "natCompAs", oc: "natCompOc" }[cont] || "natCompEu"];
+}
+
+function narrateQualifiers(s: CareerState, report: SeasonReport, comp: "wc" | "cont", year: number) {
+  const q = qualifiersFor(s, comp, year);
+  if (!s.natTeam.active) return; // le monde a joué ses qualifications ; le joueur n'y était pas
+  const name = qualCompName(s, comp);
+  const m = q.mine;
+  if (m.stage === "host") report.lines.push({ text: tx(s, "lineQualHost", { comp: name, when: year }), impact: 4 });
+  else if (m.stage === "auto") report.lines.push({ text: tx(s, "lineQualAuto", { comp: name, when: year }), impact: 3 });
+  else if (m.stage === "direct") report.lines.push({ text: m.rank === 1 ? tx(s, "lineQualDirectFirst", { comp: name, when: year }) : tx(s, "lineQualDirect", { comp: name, when: year, rank: m.rank }), impact: 6 });
+  else if (m.stage === "out") report.lines.push({ text: tx(s, "lineQualOut", { comp: name, when: year, rank: m.rank }), impact: -5 });
+  else if (m.stage === "playoff_won" || m.stage === "playoff_lost") {
+    // Barrage : le joueur le vit en moment décisif ; son issue tranche.
+    report.pendingMoments.push({
+      type: "nat_playoff", comp, year,
+      label: tx(s, "momNatPlayoff", { comp: name, when: year }),
+      winLabel: tx(s, "momNatPlayoffWin"), failLabel: tx(s, "momNatPlayoffFail"),
+      moment: keyMomentFor(s, "nat_playoff"),
+    });
+  }
+}
+
+// Nation non qualifiée l'année du tournoi : on le dit, et l'historique le garde.
+function noteNotQualified(s: CareerState, report: SeasonReport, comp: "wc" | "cont") {
+  report.lines.push({ text: tx(s, "lineDnq", { comp: qualCompName(s, comp), when: s.year }), impact: -4 });
+  report.notQualified = comp;
+  noteNatRun(s, comp, "dnq");
+}
+
 function applyRoomClubSeason(s: CareerState, report: SeasonReport, club: RoomClubOutcome, evTrophies: string[], lvl: LevelId, isTopFlight: boolean) {
   if (club.cupFinal && club.cupWin) s.roomCupWonYear = s.year; // ticket C2 de la salle pour N+1
   if (club.title && !evTrophies.includes("league")) {
@@ -674,6 +722,18 @@ export function resolveSeasonMoment(s: CareerState, report: SeasonReport, entry:
       report.leaguePos = Math.max(report.leaguePos, lvlOf(s, s.club) === "d1" ? 17 : 18);
       s.moral = clamp(s.moral - 10, 5, 100);
       s.history.push({ age: s.age, text: tx(s, "stayLoss"), impact: -11 });
+    }
+  } else if (entry.type === "nat_playoff") {
+    // Barrage de qualification d'une sélection : l'issue jouée remplace celle tirée d'avance.
+    settleNatPlayoff(s, entry.comp, entry.year, !!res.success);
+    const comp = qualCompName(s, entry.comp);
+    if (res.success) {
+      s.rep = clamp(s.rep + 4, 0, 100);
+      s.moral = clamp(s.moral + 10, 5, 100);
+      s.history.push({ age: s.age, text: tx(s, "natPlayoffWin", { comp, when: entry.year }), impact: 10 });
+    } else {
+      s.moral = clamp(s.moral - 8, 5, 100);
+      s.history.push({ age: s.age, text: tx(s, "natPlayoffLoss", { comp, when: entry.year }), impact: -8 });
     }
   } else if (entry.type === "cup_final") {
     if (res.success) {

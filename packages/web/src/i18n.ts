@@ -62,6 +62,7 @@ import { TRANSLATABLE_FLATS, TRANSLATABLE_STRUCTURES, hasWords, visitFlat, visit
     "Avatar inconnu.": "Unknown avatar.",
     "Choisis d'abord un pseudo.": "Choose a username first.",
     "Ta progression (carrières, Panthéon, badges) part dans le cloud automatiquement. Tu peux aussi l'envoyer tout de suite, ou récupérer celle d'un autre appareil.": "Your progress (careers, Pantheon, badges) is sent to the cloud automatically. You can also send it right now, or fetch the one from another device.",
+    "{nation} dispute la Ligue {league} de la Ligue des Sélections, et vous en êtes.": "{nation} are playing League {league} of the Nations League, and you are in.",
     // Salle : création, invitations, places et étapes
     "Salle": "Room",
     "Vivez une carrière à plusieurs : jusqu'à 4 amis dans le même club, et les grandes décisions se votent ensemble.": "Play a career together: up to 4 friends at the same club, and the big decisions are voted on together.",

@@ -1014,6 +1014,41 @@ export const KEY_MOMENTS: Dict<Dict<MomentVariant[]>> = {
       failText: "Une sortie de trop, un centre au second poteau : le bloc craque et {club} descend.",
     }],
   },
+  // Barrage de qualification d'une sélection (Euro, Mondial, intercontinental).
+  nat_playoff: {
+    field: [{
+      title: "BARRAGE DE QUALIFICATION",
+      text: "Match retour du barrage, 1-1 au cumul, 88e minute. Le ballon vous arrive à l'entrée de la surface : tout un pays retient son souffle avec {nat}.",
+      options: [
+        { id: "shoot", label: "Frapper tout de suite, sans contrôle", base: 0.48, repWin: 5 },
+        { id: "dribble", label: "Éliminer le dernier défenseur", hint: "Audacieux", base: 0.42, repWin: 8, repFail: -3 },
+        { id: "pass", label: "Servir le coéquipier démarqué", hint: "Collectif", base: 0.56, repWin: 3 },
+      ],
+      winText: "LE BUT DE LA QUALIFICATION ! Le stade explose, le pays descend dans la rue : {nat} ira au grand tournoi, et c'est grâce à vous !",
+      failText: "Le ballon file à côté. Quelques minutes plus tard, l'arbitre siffle la fin : {nat} regardera le tournoi à la télévision.",
+    }, {
+      title: "BARRAGE DE QUALIFICATION",
+      text: "Séance de tirs au but du barrage. Dernier tireur : vous. Marquez, et {nat} décroche son billet.",
+      options: [
+        { id: "corner", label: "Placer en force dans le petit filet", base: 0.54, repWin: 4 },
+        { id: "panenka", label: "Une panenka, au nez du gardien", hint: "Panache", base: 0.4, repWin: 9, repFail: -6, traitWin: "showman" },
+        { id: "wait", label: "Attendre le plongeon du gardien", base: 0.5, repWin: 4 },
+      ],
+      winText: "Le filet tremble : QUALIFIÉS ! Vos coéquipiers vous ensevelissent, tout un pays exulte avec {nat}.",
+      failText: "Le gardien devine. Le silence tombe sur le stade : {nat} ne sera pas du voyage.",
+    }],
+    gk: [{
+      title: "BARRAGE DE QUALIFICATION",
+      text: "Tirs au but du barrage. Le dernier tireur adverse s'avance : arrêtez-le, et {nat} décroche son billet.",
+      options: [
+        { id: "read", label: "Lire ses appuis jusqu'au dernier moment", base: 0.5, repWin: 5 },
+        { id: "early", label: "Choisir un côté et partir tôt", base: 0.42, repWin: 6, repFail: -2 },
+        { id: "mind", label: "Le faire attendre, jouer avec ses nerfs", hint: "Psychologue", base: 0.46, repWin: 7, repFail: -3 },
+      ],
+      winText: "ARRÊT ! Vous repoussez la tentative : {nat} décroche son billet, et le pays scande votre nom.",
+      failText: "Le ballon vous passe sous le bras. {nat} restera à la maison.",
+    }],
+  },
   promo_playoff: {
     field: [{
       title: "BARRAGE DE MONTÉE",

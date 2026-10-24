@@ -58,7 +58,7 @@ test("Coupe arabe et Jeux régionaux : réservés aux bonnes nations, aux bonnes
       if (!s.flags.natSwitched && !def) europeanWithGames++;
       assert.ok(r.year % 4 === 2 || r.year % 4 === 3, "Jeux régionaux hors cycle : " + r.year);
       // Jamais deux grands tournois la même année : les Jeux n'accueillent que les non-retenus.
-      assert.ok(!runs.some((x) => x.year === r.year && (x.comp === "wc" || x.comp === "olympic")), "Jeux et grand tournoi la même année (" + r.year + ")");
+      assert.ok(!runs.some((x) => x.year === r.year && x.stage !== "dnq" && (x.comp === "wc" || x.comp === "olympic")), "Jeux et grand tournoi la même année (" + r.year + ")");
     }
     // Compteurs d'état toujours cohérents avec les médailles.
     const m = s.gamesMedals || { gold: 0, silver: 0, bronze: 0 };
@@ -222,4 +222,31 @@ test("les grands championnats ont un échelon régional, proposé au départ", (
     if (offers.some((o) => o.level === "regional")) reg++;
   }
   assert.ok(reg > 40 && reg < 260, "un départ « Rég. » doit être possible sans être la règle : " + reg + "/400");
+});
+
+test("qualifications : la bonne taille de tournoi, les hôtes qualifiés, et la force qui compte", () => {
+  const sizes = { wc: new Set(), eu: new Set(), af: new Set(), as: new Set(), am: new Set(), oc: new Set() };
+  const wc = {};
+  for (let i = 0; i < 250; i++) {
+    const choices = Array.from({ length: 400 }, (_, k) => ((i * 7 + k * 3 + (k % 5) * i) % 5) - 1);
+    const s = E.replayDuel(31001 + i * 53, choices);
+    for (const [k, q] of Object.entries(s.world || {})) {
+      assert.equal(new Set(q.qualified).size, q.qualified.length, "doublon parmi les qualifiés : " + k);
+      for (const h of q.hosts) assert.ok(q.qualified.includes(h), "hôte non qualifié : " + h + " (" + k + ")");
+      if (k.startsWith("wc:")) {
+        sizes.wc.add(q.qualified.length);
+        if (k === "wc:2026") for (const h of ["us", "ca", "mx"]) assert.ok(q.qualified.includes(h));
+        const me = s.nationality.id;
+        (wc[me] ||= [0, 0])[0]++;
+        if (q.qualified.includes(me)) wc[me][1]++;
+      } else sizes[k.split(":")[1]].add(q.qualified.length);
+    }
+  }
+  assert.deepEqual([...sizes.wc], [48], "Mondial à 48");
+  for (const [cont, n] of [["eu", 24], ["af", 24], ["as", 24], ["am", 16], ["oc", 8]]) {
+    if (sizes[cont].size) assert.deepEqual([...sizes[cont]], [n], "taille de la coupe continentale " + cont);
+  }
+  // Les plus grandes nations se qualifient presque toujours, les plus petites jamais.
+  for (const id of ["fr", "en", "br"]) if (wc[id] && wc[id][0] >= 5) assert.ok(wc[id][1] / wc[id][0] >= 0.8, id + " trop souvent absente du Mondial");
+  for (const id of ["sm", "to"]) if (wc[id]) assert.equal(wc[id][1], 0, id + " qualifiée pour le Mondial");
 });
