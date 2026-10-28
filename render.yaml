@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chatball-wonder-esport
+    runtime: node
+    plan: free
+    rootDir: prototypes/chatball-concept
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true

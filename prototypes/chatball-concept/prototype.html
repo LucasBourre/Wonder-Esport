@@ -1,0 +1,527 @@
+<!-- PROTOTYPE - NOT FOR PRODUCTION -->
+<!-- Question: Can two remote players quickly join and enjoy a real-time dodgeball match? -->
+<!-- Date: 2026-10-28 -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Chatball — Prototype en ligne</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #10131d;
+      color: #f5f3ee;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 26px 18px;
+      background: radial-gradient(ellipse at 50% 0, #263044 0, #10131d 58%);
+    }
+    main { width: min(100%, 1000px); margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    .eyebrow {
+      color: #b7c5ff;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 4px 0 0; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1; }
+    .subtitle { margin: 8px 0 0; color: #b7bdcd; }
+    .status { color: #aeb8cc; font-size: .86rem; text-align: right; }
+    .roomline { display: flex; align-items: center; gap: 8px; justify-content: end; margin-top: 6px; }
+    .roomcode { color: #fff; font-weight: 900; letter-spacing: .12em; }
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 190px;
+      justify-content: center;
+      padding: 10px 18px;
+      border: 1px solid #3c4357;
+      border-radius: 14px;
+      background: #191e2be8;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+    .scoreboard .p1 { color: #73e5ce; }
+    .scoreboard .p2 { color: #ff9a79; }
+    .scoreboard .dash { color: #626b81; font-size: 1rem; }
+    .lobby, .control-card, .tip {
+      padding: 15px;
+      border: 1px solid #30384a;
+      border-radius: 12px;
+      background: #191e2b;
+    }
+    .lobby { margin-bottom: 14px; }
+    .lobby[hidden], .overlay[hidden], .modal[hidden], .roomline[hidden] { display: none; }
+    .lobby-title { margin: 0 0 10px; font-weight: 800; }
+    .lobby-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    input {
+      min-width: 160px;
+      padding: 10px 12px;
+      border: 1px solid #4a5266;
+      border-radius: 8px;
+      background: #111622;
+      color: #fff;
+      font: inherit;
+      text-transform: uppercase;
+    }
+    button {
+      padding: 10px 14px;
+      border: 1px solid #4a5266;
+      border-radius: 9px;
+      background: #242b3a;
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: #30394c; }
+    button:disabled { cursor: wait; opacity: .6; }
+    button.primary { border-color: #73e5ce; background: #205c55; }
+    button.primary:hover { background: #287368; }
+    .error { min-height: 1.2em; margin: 8px 0 0; color: #ff9a79; font-size: .88rem; }
+    .court {
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #566077;
+      border-radius: 18px;
+      background: #202a35;
+      box-shadow: 0 22px 65px #0008;
+    }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 9; }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      gap: 8px;
+      padding: 24px;
+      text-align: center;
+      background: #10131d9e;
+      backdrop-filter: blur(3px);
+    }
+    .overlay strong { font-size: clamp(1.7rem, 5vw, 3rem); }
+    .overlay span { color: #d3d8e6; }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .control-card, .tip { color: #c6cada; font-size: .86rem; line-height: 1.6; }
+    .control-card b { display: block; margin-bottom: 4px; color: #f5f3ee; }
+    .control-card:first-child b { color: #73e5ce; }
+    .control-card:nth-child(2) b { color: #ff9a79; }
+    kbd {
+      padding: 2px 6px;
+      border: 1px solid #50586c;
+      border-radius: 5px;
+      background: #282e3d;
+      color: #fff;
+      font: inherit;
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+    .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+    footer { margin-top: 14px; color: #7f879a; font-size: .75rem; text-align: center; }
+    .modal {
+      position: fixed;
+      z-index: 3;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: #070a10c9;
+    }
+    .modal-card {
+      width: min(100%, 470px);
+      padding: 20px;
+      border: 1px solid #46506a;
+      border-radius: 16px;
+      background: #191e2b;
+      box-shadow: 0 22px 65px #000a;
+    }
+    .modal-card h2 { margin: 0; }
+    .modal-card p { color: #aeb8cc; }
+    .bind-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid #30384a; }
+    .bind-row button { min-width: 88px; }
+    .modal-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; }
+    @media (max-width: 650px) {
+      body { padding: 20px 12px; }
+      header { align-items: start; flex-direction: column; }
+      .status { text-align: left; }
+      .roomline { justify-content: start; }
+      .scoreboard { align-self: stretch; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .tip { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">Prototype multijoueur en ligne · 2 joueurs</div>
+        <h1>🐾 Chatball</h1>
+        <p class="subtitle">Un lancer, une esquive, et la balle repart.</p>
+      </div>
+      <div>
+        <div class="status" id="status">Crée un salon ou rejoins un ami.</div>
+        <div class="scoreboard" role="group" aria-label="Score">
+          <span class="p1" id="score1" aria-label="Score du joueur 1">0</span>
+          <span class="dash" aria-hidden="true">—</span>
+          <span class="p2" id="score2" aria-label="Score du joueur 2">0</span>
+        </div>
+        <div class="roomline" id="roomline" hidden>
+          Salon <span class="roomcode" id="roomcode"></span>
+          <button id="copy-invite" type="button">Copier l’invitation</button>
+        </div>
+      </div>
+    </header>
+    <section class="lobby" id="lobby">
+      <p class="lobby-title">Joue avec un ami</p>
+      <div class="lobby-actions">
+        <button class="primary" id="create-room" type="button">Créer un salon privé</button>
+        <input id="join-code" maxlength="6" autocomplete="off" placeholder="CODE SALON" aria-label="Code du salon">
+        <button id="join-room" type="button">Rejoindre</button>
+      </div>
+      <p class="error" id="error" role="status"></p>
+    </section>
+    <section class="court" aria-label="Arène de dodgeball">
+      <canvas id="game" aria-label="Arène de jeu en vue du dessus"></canvas>
+      <div class="overlay" id="overlay">
+        <strong>En attente d’un salon</strong>
+        <span>Crée un salon et partage le lien d’invitation.</span>
+      </div>
+    </section>
+    <section class="controls" aria-label="Commandes">
+      <div class="control-card">
+        <b id="player-title">Tes commandes</b>
+        <div id="control-summary"></div>
+      </div>
+      <div class="control-card">
+        <b>Configurer le clavier</b>
+        <div>Les touches sont modifiables et mémorisées sur cet appareil.</div>
+      </div>
+      <div class="tip">Déplace-toi pour viser. Attrape la balle avant l’adversaire ou esquive son lancer. Premier à 3 touches gagne.</div>
+    </section>
+    <div class="actions">
+      <button id="configure-keys" type="button">Modifier mes touches</button>
+      <button id="restart" type="button" hidden>Rejouer</button>
+      <button id="leave-room" type="button" hidden>Quitter le salon</button>
+    </div>
+    <footer>Salon temporaire en mémoire serveur. Ce prototype ne teste pas encore la latence Internet.</footer>
+  </main>
+  <div class="modal" id="key-modal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="key-title">
+      <h2 id="key-title">Mes touches</h2>
+      <p>Clique sur une commande, puis appuie sur la touche voulue. Par défaut : ZQSD (AZERTY).</p>
+      <div id="bindings"></div>
+      <p class="error" id="binding-error" role="status"></p>
+      <div class="modal-actions">
+        <button id="reset-keys" type="button">Réglages AZERTY</button>
+        <button id="close-keys" type="button">Terminé</button>
+      </div>
+    </section>
+  </div>
+  <script>
+    // PROTOTYPE - NOT FOR PRODUCTION
+    // Question: Can two remote players quickly join and enjoy a real-time dodgeball match?
+    // Date: 2026-10-28
+    (() => {
+      const $ = (selector) => document.querySelector(selector);
+      const canvas = $("#game"), ctx = canvas.getContext("2d");
+      const overlay = $("#overlay"), roomline = $("#roomline");
+      const defaultKeys = { up: "z", left: "q", down: "s", right: "d", throw: "f", catch: "g" };
+      const labels = { up: "Monter", left: "Aller à gauche", down: "Descendre", right: "Aller à droite", throw: "Lancer", catch: "Attraper" };
+      const keyNames = { arrowup: "↑", arrowleft: "←", arrowdown: "↓", arrowright: "→", enter: "Entrée", shift: "Maj", " ": "Espace", space: "Espace", escape: "Échap" };
+      const keyFromEvent = (event) => event.code === "Space" ? "space" : event.key.toLowerCase();
+      const keyLabel = (key) => keyNames[key] || key.toUpperCase();
+      let bindings = loadBindings(), capturing = null, socket = null, slot = -1, state = null, roomCode = "";
+      const held = new Set();
+      const W = 960, H = 540, EDGE = 34, R = 22, BALL_R = 11;
+      const colors = [{ color: "#73e5ce", dark: "#298f82" }, { color: "#ff9a79", dark: "#c75b50" }];
+
+      function loadBindings() {
+        try {
+          const saved = JSON.parse(localStorage.getItem("chatball.keys") || "null");
+          if (saved && Object.keys(defaultKeys).every((key) => typeof saved[key] === "string")) return saved;
+        } catch (error) {
+          console.warn("Impossible de lire les commandes enregistrées.", error);
+        }
+        return { ...defaultKeys };
+      }
+
+      function saveBindings() {
+        localStorage.setItem("chatball.keys", JSON.stringify(bindings));
+        renderBindings();
+        renderControls();
+      }
+
+      function renderControls() {
+        $("#control-summary").innerHTML =
+          `<kbd>${keyLabel(bindings.up)}</kbd> <kbd>${keyLabel(bindings.left)}</kbd> <kbd>${keyLabel(bindings.down)}</kbd> <kbd>${keyLabel(bindings.right)}</kbd> bouger · ` +
+          `<kbd>${keyLabel(bindings.throw)}</kbd> lancer · <kbd>${keyLabel(bindings.catch)}</kbd> attraper`;
+      }
+
+      function renderBindings() {
+        $("#bindings").innerHTML = Object.entries(labels).map(([action, label]) =>
+          `<div class="bind-row"><span>${label}</span><button type="button" data-bind="${action}">${capturing === action ? "Appuie…" : keyLabel(bindings[action])}</button></div>`
+        ).join("");
+      }
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.width * (H / W) * dpr);
+        ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+        draw();
+      }
+
+      function showError(text) { $("#error").textContent = text; }
+
+      function socketUrl(query) {
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        return `${protocol}//${location.host}/ws${query}`;
+      }
+
+      function connect(query) {
+        if (socket) socket.close();
+        showError("");
+        $("#create-room").disabled = true;
+        $("#join-room").disabled = true;
+        $("#status").textContent = "Connexion au serveur…";
+        socket = new WebSocket(socketUrl(query));
+        socket.addEventListener("message", (event) => {
+          const message = JSON.parse(event.data);
+          if (message.type === "error") {
+            showError(message.message);
+            $("#status").textContent = "Connexion impossible.";
+            $("#create-room").disabled = false;
+            $("#join-room").disabled = false;
+            socket.close();
+          } else if (message.type === "joined") {
+            slot = message.slot;
+            roomCode = message.room;
+            $("#roomcode").textContent = roomCode;
+            $("#player-title").textContent = `Joueur ${slot + 1} · ${slot === 0 ? "Menthe" : "Pêche"} · Tes commandes`;
+            roomline.hidden = false;
+            $("#lobby").hidden = true;
+            $("#leave-room").hidden = false;
+            $("#status").textContent = "Salon créé. En attente de l’adversaire…";
+            if (message.state) updateState(message.state);
+            sendInput();
+          } else if (message.type === "state") updateState(message);
+        });
+        socket.addEventListener("close", () => {
+          if (slot !== -1) {
+            $("#status").textContent = "Connexion interrompue.";
+            $("#overlay strong").textContent = "Connexion interrompue";
+            $("#overlay span").textContent = "Rejoins à nouveau le salon avec son code.";
+            overlay.hidden = false;
+            $("#join-code").value = roomCode;
+            $("#lobby").hidden = false;
+            roomline.hidden = true;
+            $("#leave-room").hidden = true;
+          }
+          socket = null;
+          slot = -1;
+          $("#create-room").disabled = false;
+          $("#join-room").disabled = false;
+        });
+        socket.addEventListener("error", () => showError("Le serveur est injoignable. Vérifie que le prototype est lancé."));
+      }
+
+      function updateState(next) {
+        state = next;
+        if (next.players) {
+          $("#score1").textContent = next.players[0].score;
+          $("#score2").textContent = next.players[1].score;
+        }
+        const ready = next.connected && next.connected.every(Boolean);
+        $("#status").textContent = next.winner != null
+          ? `Joueur ${next.winner + 1} remporte le match !`
+          : ready ? next.notice || "Les deux chats sont prêts. Miaou !" : "Salon créé. En attente de l’adversaire…";
+        $("#overlay").hidden = ready && next.winner == null;
+        if (!ready || next.winner != null) {
+          $("#overlay strong").textContent = next.winner != null ? `Victoire du joueur ${next.winner + 1} ! 🏆` : "En attente d’un adversaire…";
+          $("#overlay span").textContent = next.winner != null ? "Clique sur Rejouer pour lancer une revanche." : "Partage le code du salon pour inviter un ami.";
+        }
+        $("#restart").hidden = next.winner == null;
+        draw();
+      }
+
+      function send(data) {
+        if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(data));
+      }
+
+      function sendInput() {
+        if (slot < 0) return;
+        const input = {};
+        for (const action of ["up", "left", "down", "right"]) input[action] = held.has(bindings[action]);
+        send({ type: "input", input });
+      }
+
+      function doAction(key) {
+        if (key === bindings.throw) send({ type: "action", action: "throw" });
+        if (key === bindings.catch) send({ type: "action", action: "catch" });
+      }
+
+      function createRoom() {
+        slot = -1;
+        connect("?create=1");
+      }
+
+      function joinRoom(code = $("#join-code").value) {
+        const normalized = code.trim().toUpperCase();
+        if (!/^[A-Z0-9]{6}$/.test(normalized)) {
+          showError("Entre un code de salon de 6 caractères.");
+          return;
+        }
+        slot = -1;
+        connect(`?room=${encodeURIComponent(normalized)}`);
+      }
+
+      function resetKeys() {
+        bindings = { ...defaultKeys };
+        saveBindings();
+        $("#binding-error").textContent = "";
+      }
+
+      function drawCat(p, index) {
+        const c = colors[index];
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.fillStyle = "#0003";
+        ctx.beginPath(); ctx.ellipse(0, 19, 23, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = c.dark; ctx.lineWidth = 7; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-16, 5); ctx.quadraticCurveTo(-40, -7, -34, -25); ctx.stroke();
+        ctx.fillStyle = c.color;
+        ctx.beginPath(); ctx.ellipse(0, 0, 23, 19, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-17, -11); ctx.lineTo(-20, -32); ctx.lineTo(-4, -19);
+        ctx.moveTo(4, -19); ctx.lineTo(20, -32); ctx.lineTo(17, -11);
+        ctx.fill();
+        ctx.fillStyle = "#f5b2b1";
+        ctx.beginPath(); ctx.moveTo(-17, -17); ctx.lineTo(-18, -27); ctx.lineTo(-10, -20); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(10, -20); ctx.lineTo(18, -27); ctx.lineTo(17, -17); ctx.fill();
+        ctx.fillStyle = "#142029";
+        ctx.beginPath(); ctx.ellipse(8, -3, 2.5, 4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.arc(9, -4, 1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#142029";
+        ctx.beginPath(); ctx.moveTo(16, 3); ctx.lineTo(20, 5); ctx.lineTo(16, 7); ctx.fill();
+        ctx.strokeStyle = "#31524f"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(6, 8); ctx.lineTo(17, 7); ctx.moveTo(6, 10); ctx.lineTo(15, 13); ctx.stroke();
+        ctx.restore();
+      }
+
+      function draw() {
+        if (!ctx || !canvas.width) return;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#344b45"; ctx.beginPath(); ctx.roundRect(0, 0, W, H, 18); ctx.fill();
+        ctx.fillStyle = "#38554d"; ctx.beginPath(); ctx.roundRect(EDGE, EDGE, W - EDGE * 2, H - EDGE * 2, 12); ctx.fill();
+        ctx.strokeStyle = "#d4e5cf38"; ctx.lineWidth = 3; ctx.setLineDash([12, 12]);
+        ctx.beginPath(); ctx.moveTo(W / 2, EDGE); ctx.lineTo(W / 2, H - EDGE); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = "#d4e5cf55"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(W / 2, H / 2, 70, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = "#d4e5cf66"; ctx.font = "800 14px system-ui"; ctx.textAlign = "center";
+        ctx.fillText("TERRITOIRE MENTHE", 160, 62); ctx.fillText("TERRITOIRE PÊCHE", W - 160, 62);
+        if (state && state.players) state.players.forEach(drawCat);
+        if (state && state.ball) {
+          const b = state.ball;
+          ctx.fillStyle = "#0005"; ctx.beginPath(); ctx.ellipse(b.x + 3, b.y + 7, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#ffcf5c"; ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = "#fff2c7"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(b.x, b.y, 6, -.8, 1.4); ctx.stroke();
+          ctx.beginPath(); ctx.arc(b.x, b.y, 6, 2.3, 4.5); ctx.stroke();
+        }
+        if (state && state.ball && state.ball.owner === slot && state.players && state.players[slot]) {
+          const p = state.players[slot];
+          ctx.fillStyle = "#fff"; ctx.font = "700 13px system-ui"; ctx.textAlign = "center";
+          ctx.fillText("À TOI !", p.x, p.y - 42);
+        }
+      }
+
+      function setBinding(action, key) {
+        if (Object.entries(bindings).some(([other, value]) => other !== action && value === key)) {
+          $("#binding-error").textContent = "Cette touche est déjà attribuée à une autre commande.";
+          return false;
+        }
+        bindings[action] = key;
+        saveBindings();
+        $("#binding-error").textContent = "";
+        return true;
+      }
+
+      $("#create-room").addEventListener("click", createRoom);
+      $("#join-room").addEventListener("click", () => joinRoom());
+      $("#join-code").addEventListener("keydown", (event) => { if (event.key === "Enter") joinRoom(); });
+      $("#copy-invite").addEventListener("click", async () => {
+        const invite = new URL(location.href);
+        invite.search = `?room=${roomCode}`;
+        try { await navigator.clipboard.writeText(invite.toString()); $("#status").textContent = "Lien d’invitation copié !"; }
+        catch (error) { window.prompt("Copie ce lien pour inviter ton ami :", invite.toString()); }
+      });
+      $("#configure-keys").addEventListener("click", () => { $("#key-modal").hidden = false; renderBindings(); });
+      $("#close-keys").addEventListener("click", () => { capturing = null; $("#key-modal").hidden = true; renderBindings(); });
+      $("#reset-keys").addEventListener("click", resetKeys);
+      $("#bindings").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-bind]");
+        if (!button) return;
+        capturing = button.dataset.bind;
+        $("#binding-error").textContent = "Appuie sur la nouvelle touche.";
+        renderBindings();
+      });
+      $("#leave-room").addEventListener("click", () => {
+        if (socket) socket.close();
+        roomCode = ""; state = null; slot = -1;
+        roomline.hidden = true; $("#lobby").hidden = false; $("#leave-room").hidden = true; $("#restart").hidden = true;
+        $("#overlay").hidden = false; $("#overlay strong").textContent = "En attente d’un salon";
+        $("#overlay span").textContent = "Crée un salon et partage le lien d’invitation.";
+        $("#status").textContent = "Crée un salon ou rejoins un ami."; showError(""); draw();
+      });
+      $("#restart").addEventListener("click", () => send({ type: "action", action: "restart" }));
+      window.addEventListener("keydown", (event) => {
+        const key = keyFromEvent(event);
+        if (capturing) {
+          event.preventDefault();
+          if (key === "escape") { capturing = null; $("#binding-error").textContent = ""; renderBindings(); }
+          else if (setBinding(capturing, key)) { capturing = null; renderBindings(); }
+          return;
+        }
+        if (event.target instanceof HTMLInputElement) return;
+        if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "enter"].includes(key)) event.preventDefault();
+        if (held.has(key)) return;
+        held.add(key);
+        doAction(key);
+        sendInput();
+      });
+      window.addEventListener("keyup", (event) => {
+        held.delete(keyFromEvent(event));
+        sendInput();
+      });
+      window.addEventListener("blur", () => { held.clear(); sendInput(); });
+      window.addEventListener("resize", resize);
+      renderControls(); renderBindings(); resize();
+      const inviteCode = new URLSearchParams(location.search).get("room");
+      if (inviteCode) { $("#join-code").value = inviteCode; joinRoom(inviteCode); }
+    })();
+  </script>
+</body>
+</html>
